@@ -1,14 +1,3 @@
----
-title: AgentDebugger-Env 🐛
-emoji: 📈
-colorFrom: yellow
-colorTo: green
-sdk: docker
-app_port: 8000
-pinned: true
-license: mit
----
-
 # AgentDebuggerEnv 🐛
 
 > **Benchmarking Agentic Reasoning through the Iterative Hypothesis-Test-Fix Loop.**
