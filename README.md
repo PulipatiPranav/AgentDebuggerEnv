@@ -468,7 +468,7 @@ ENV_BASE_URL   # Environment server URL
 
 **License:** MIT — see [LICENSE](LICENSE)
 
-**Author:** Shashaank
+**Authors:** Pranav,Shashaank (Team Endurance)
 
 **Submitted to:** Meta + PyTorch + HuggingFace OpenEnv Hackathon
 
