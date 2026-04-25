@@ -413,7 +413,7 @@ config = GRPOConfig(
     lr_scheduler_type="cosine",
     warmup_steps=10 if args.test else 30,
     num_generations=4,                   # P100: halved from 8 to fit in 16GB
-    max_completion_length=256,           # P100: halved from 512 to fit in 16GB
+    max_completion_length=160,           # T4: shorter completions = faster generation (bottleneck)
     temperature=0.9,
     logging_steps=5,
     save_steps=50 if args.test else 50,
