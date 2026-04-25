@@ -18,7 +18,8 @@ dependencies = [
     "python-dotenv==1.0.1",
     "pytest==8.1.0",
     "httpx==0.27.0",
-    "RestrictedPython==7.0"
+    "RestrictedPython==7.0",
+    "torch>=2.11.0",
 ]
 
 [tool.setuptools.packages.find]
