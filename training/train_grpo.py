@@ -44,7 +44,7 @@ if os.environ.get("FORCE_BOOTSTRAP_DEPS") == "1":
     os.system(
         f"{sys.executable} -m pip install -q "
         "wandb==0.18.7 datasets==3.0.2 transformers==4.46.3 "
-        "accelerate==1.0.1 trl==0.12.2 bitsandbytes==0.43.3 peft==0.13.2"
+        "accelerate==1.0.1 trl==0.14.0 bitsandbytes==0.43.3 peft==0.13.2"
     )
 
 # ── GPU/training imports (skipped in --test-local mode) ───────────────────────
