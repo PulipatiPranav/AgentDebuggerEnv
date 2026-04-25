@@ -253,6 +253,40 @@ model = FastLanguageModel.get_peft_model(
 )
 print(f"Trainable params: {model.num_parameters(only_trainable=True):,}")
 
+# ── Runtime device selection ──────────────────────────────────────────────────
+def _select_runtime_device(model) -> str:
+    """
+    Pick the safest generation device without forcing CUDA init on broken drivers.
+    """
+    def _cuda_usable() -> bool:
+        try:
+            if not torch.cuda.is_available():
+                return False
+            # Force lightweight CUDA init probe.
+            _ = torch.zeros(1, device="cuda")
+            return True
+        except Exception as e:
+            print(f"WARNING: CUDA initialization failed ({e}). Falling back to CPU.")
+            return False
+
+    # Prefer model's current device when available.
+    try:
+        model_device = str(next(model.parameters()).device)
+        if model_device.startswith("cuda") and not _cuda_usable():
+            return "cpu"
+        return model_device
+    except Exception:
+        pass
+
+    # Fallback to torch capability checks.
+    if _cuda_usable():
+        return "cuda"
+    return "cpu"
+
+
+RUNTIME_DEVICE = _select_runtime_device(model)
+print(f"Using generation/training runtime device: {RUNTIME_DEVICE}")
+
 # ── Reward function ───────────────────────────────────────────────────────────
 calculator = DebugRewardCalculator()
 
@@ -305,7 +339,7 @@ def run_baseline(n: int = 20) -> dict:
     solved = 0
     for bug in bugs:
         prompt = bug_to_prompt(bug)
-        inputs = tokenizer(prompt, return_tensors="pt").to("cuda")
+        inputs = tokenizer(prompt, return_tensors="pt").to(RUNTIME_DEVICE)
         with torch.no_grad():
             out = model.generate(**inputs, max_new_tokens=400, temperature=0.1, do_sample=False)
         completion = tokenizer.decode(out[0][inputs["input_ids"].shape[1]:], skip_special_tokens=True)
@@ -379,7 +413,7 @@ post_rewards = []
 post_solved = 0
 for bug in bugs:
     prompt = bug_to_prompt(bug)
-    inputs = tokenizer(prompt, return_tensors="pt").to("cuda")
+    inputs = tokenizer(prompt, return_tensors="pt").to(RUNTIME_DEVICE)
     with torch.no_grad():
         out = model.generate(**inputs, max_new_tokens=400, temperature=0.1, do_sample=False)
     completion = tokenizer.decode(out[0][inputs["input_ids"].shape[1]:], skip_special_tokens=True)
