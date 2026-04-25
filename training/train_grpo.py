@@ -2,7 +2,7 @@
 AgentDebuggerEnv — GRPO Training Script
 Model: Qwen2.5-Coder-7B-Instruct (4-bit quantized via bitsandbytes)
 Algorithm: GRPO (Group Relative Policy Optimization) via HuggingFace TRL
-GPU: Kaggle P100 (16GB) — float16 only, no bfloat16
+GPU: auto-detected at runtime (A100/H100 → bfloat16+large batch, T4/V100 → float16+small batch)
 
 Usage:
   # Local reward sanity-check (no GPU, no model loading):
@@ -257,12 +257,49 @@ if args.test_local:
     print("\nLOCAL TEST PASSED")
     sys.exit(0)
 
+# ── Auto-detect GPU and set optimal config ────────────────────────────────────
+_gpu_vram_gb = 0
+_is_ampere_plus = False  # A100/H100 support bfloat16 natively (compute cap >= 8.0)
+if torch.cuda.is_available():
+    _props = torch.cuda.get_device_properties(0)
+    _gpu_vram_gb = _props.total_memory / 1e9
+    _is_ampere_plus = _props.major >= 8
+    print(f"GPU: {_props.name} | VRAM: {_gpu_vram_gb:.1f}GB | "
+          f"Compute cap: {_props.major}.{_props.minor} | "
+          f"bfloat16: {'yes' if _is_ampere_plus else 'no'}")
+
+COMPUTE_DTYPE = torch.bfloat16 if _is_ampere_plus else torch.float16
+
+# Scale batch/generation config to available VRAM
+if _gpu_vram_gb >= 40:          # A100 40GB / A100 80GB
+    _batch       = 2
+    _grad_accum  = 4            # effective batch = 8
+    _num_gen     = 8
+    _max_comp    = 256
+    _lora_r      = 16
+elif _gpu_vram_gb >= 20:        # V100 32GB
+    _batch       = 1
+    _grad_accum  = 8
+    _num_gen     = 6
+    _max_comp    = 220
+    _lora_r      = 12
+else:                           # T4 15GB / anything smaller
+    _batch       = 1
+    _grad_accum  = 8
+    _num_gen     = 4
+    _max_comp    = 160
+    _lora_r      = 8
+
+print(f"Training config: batch={_batch} grad_accum={_grad_accum} "
+      f"num_gen={_num_gen} max_comp={_max_comp} lora_r={_lora_r} "
+      f"dtype={COMPUTE_DTYPE}")
+
 # ── Load model ────────────────────────────────────────────────────────────────
 print(f"Loading {MODEL_NAME}...")
 bnb_config = BitsAndBytesConfig(
     load_in_4bit=True,
     bnb_4bit_quant_type="nf4",
-    bnb_4bit_compute_dtype=torch.float16,   # P100 has no bfloat16 hardware support
+    bnb_4bit_compute_dtype=COMPUTE_DTYPE,
     bnb_4bit_use_double_quant=True,
 )
 tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME, trust_remote_code=True)
@@ -274,13 +311,13 @@ model = AutoModelForCausalLM.from_pretrained(
     quantization_config=bnb_config,
     device_map="auto",
     trust_remote_code=True,
-    torch_dtype=torch.float16,              # P100 has no bfloat16 hardware support
+    torch_dtype=COMPUTE_DTYPE,
 )
 model.config.use_cache = False
 
 lora_config = LoraConfig(
-    r=8,                                    # P100: 16GB VRAM, halved from r=16
-    lora_alpha=16,
+    r=_lora_r,
+    lora_alpha=_lora_r * 2,
     target_modules=["q_proj", "k_proj", "v_proj", "o_proj",
                     "gate_proj", "up_proj", "down_proj"],
     lora_dropout=0.0,
@@ -407,16 +444,16 @@ def make_dataset(step: int) -> Dataset:
 config = GRPOConfig(
     output_dir=CHECKPOINT_DIR,
     max_steps=MAX_STEPS,
-    per_device_train_batch_size=1,       # P100 16GB: must be 1
-    gradient_accumulation_steps=8,       # effective batch = 8 (compensates for batch=1)
+    per_device_train_batch_size=_batch,
+    gradient_accumulation_steps=_grad_accum,
     learning_rate=2e-5,
     lr_scheduler_type="cosine",
     warmup_steps=10 if args.test else 30,
-    num_generations=4,                   # P100: halved from 8 to fit in 16GB
-    max_completion_length=160,           # T4: shorter completions = faster generation (bottleneck)
+    num_generations=_num_gen,
+    max_completion_length=_max_comp,
     temperature=0.9,
     logging_steps=5,
-    save_steps=50 if args.test else 50,
+    save_steps=50,
     report_to="wandb" if WANDB_API_KEY else "none",
 )
 
