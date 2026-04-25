@@ -5,7 +5,10 @@ Algorithm: GRPO (Group Relative Policy Optimization) via HuggingFace TRL
 GPU: HuggingFace ZeroGPU H200 (free) or paid HF Spaces A10G
 
 Usage:
-  # Test run (no GPU needed, 10 steps):
+  # Local reward sanity-check (no GPU, no model loading):
+  python training/train_grpo.py --test-local
+
+  # Test run (Colab/GPU, 10 steps):
   python training/train_grpo.py --test
 
   # Full training run:
@@ -22,11 +25,13 @@ import argparse
 import random
 import subprocess
 import tempfile
-import torch
+import shutil
 
 # ── Parse args ────────────────────────────────────────────────────────────────
 parser = argparse.ArgumentParser()
-parser.add_argument("--test", action="store_true", help="Run 10 steps for testing")
+parser.add_argument("--test", action="store_true", help="Run 10 steps for testing (Colab/GPU)")
+parser.add_argument("--test-local", action="store_true", dest="test_local",
+                    help="Sanity-check reward function locally without any model or GPU")
 parser.add_argument("--resume", type=str, default=None, help="Path to checkpoint")
 parser.add_argument("--max_steps", type=int, default=1000)
 args = parser.parse_args()
@@ -36,12 +41,14 @@ args = parser.parse_args()
 if os.environ.get("COLAB_RELEASE_TAG") or os.environ.get("SPACE_ID"):
     os.system("pip install -q unsloth trl wandb datasets")
 
-# ── Imports ───────────────────────────────────────────────────────────────────
-import wandb
-from datasets import Dataset
-from unsloth import FastLanguageModel
-from trl import GRPOTrainer, GRPOConfig
-from transformers import TrainerCallback
+# ── GPU/training imports (skipped in --test-local mode) ───────────────────────
+if not args.test_local:
+    import torch
+    import wandb
+    from datasets import Dataset
+    from unsloth import FastLanguageModel
+    from trl import GRPOTrainer, GRPOConfig
+    from transformers import TrainerCallback
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from server.reward_calculator import DebugRewardCalculator
@@ -54,7 +61,7 @@ MAX_STEPS = 10 if args.test else args.max_steps
 CHECKPOINT_DIR = "./checkpoints"
 
 # W&B — optional but strongly recommended for judging
-WANDB_API_KEY = os.environ.get("WANDB_API_KEY", "")
+WANDB_API_KEY = os.environ.get("WANDB_API_KEY", "") if not args.test_local else ""
 if WANDB_API_KEY:
     wandb.init(
         project="AgentDebuggerEnv",
@@ -113,6 +120,118 @@ def bug_to_prompt(bug: dict) -> str:
         f"<|im_end|>\n"
         f"<|im_start|>assistant\n"
     )
+
+def _run_fix(proposed_code: str, bug: dict) -> dict:
+    """Safely run proposed fix with subprocess timeout."""
+    test_cases = bug.get("test_cases", [])
+    func_name = bug.get("function_name", "")
+    if not proposed_code or not test_cases or not func_name:
+        return {"passed": 0, "failed": 0, "total": len(test_cases), "newly_broken": 0}
+
+    passed = 0
+    for test in test_cases:
+        inp = test["input"]
+        args_str = ", ".join(repr(x) for x in inp) if isinstance(inp, (list, tuple)) else repr(inp)
+        script = (
+            f"{proposed_code}\n"
+            f"try:\n"
+            f"    r={func_name}({args_str})\n"
+            f"    print('PASS' if r=={repr(test['expected_output'])} else 'FAIL')\n"
+            f"except Exception as e:\n"
+            f"    print(f'ERROR: {{e}}')\n"
+        )
+        try:
+            with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False) as f:
+                f.write(script)
+                fname = f.name
+            python = shutil.which("python3") or shutil.which("python") or sys.executable
+            r = subprocess.run([python, fname], capture_output=True, text=True, timeout=5)
+            os.unlink(fname)
+            if "PASS" in r.stdout:
+                passed += 1
+        except Exception:
+            pass
+
+    return {"passed": passed, "failed": len(test_cases) - passed, "total": len(test_cases), "newly_broken": 0}
+
+# ── Mock completions for --test-local ─────────────────────────────────────────
+MOCK_GOOD = """
+OBSERVATION: The loop condition on line 4 uses <= instead of 
+HYPOTHESIS: This causes an off-by-one error because Python lists are 
+0-indexed, so the last valid index is len(arr)-1 not len(arr)
+CONFIDENCE: high
+ACTION: propose_fix
+DETAIL: def binary_search(arr, target):
+    left, right = 0, len(arr) - 1
+    while left < right:
+        mid = (left + right) // 2
+        if arr[mid] == target:
+            return mid
+        elif arr[mid] < target:
+            left = mid + 1
+        else:
+            right = mid - 1
+    return -1
+"""
+
+MOCK_BAD = """
+I think there might be a bug somewhere in the code.
+Let me try fixing it.
+"""
+
+# ── --test-local: reward sanity-check without any model ───────────────────────
+if args.test_local:
+    print("=" * 60)
+    print("LOCAL TEST MODE — no model loaded, testing reward function only")
+    print("=" * 60)
+
+    bugs = load_bugs(1)
+    if not bugs:
+        print("ERROR: No bugs found in data/bugs_tier1.jsonl. Run data/generate_bugs.py first.")
+        sys.exit(1)
+
+    bug = bugs[0]
+    print(f"\nUsing bug: {bug.get('function_name', '?')} — {bug.get('bug_type', '?')}\n")
+
+    calculator_local = DebugRewardCalculator()
+
+    def _score(label: str, completion: str) -> float:
+        try:
+            agent_output = parse_agent_output(completion)
+            test_results = {"passed": 0, "failed": 0, "total": 0, "newly_broken": 0}
+            if agent_output.action == "propose_fix":
+                test_results = _run_fix(agent_output.detail, bug)
+            breakdown = calculator_local.compute_turn_reward(
+                agent_output=agent_output,
+                ground_truth={
+                    "bug_function": bug.get("bug_location", {}).get("function", ""),
+                    "bug_line": bug.get("bug_location", {}).get("line_start", -1),
+                    "bug_type": bug.get("bug_type", ""),
+                    "canonical_fix_code": bug.get("original_code", ""),
+                },
+                test_results=test_results,
+                turn_number=0,
+            )
+            print(f"--- {label} reward breakdown ---")
+            for field, value in breakdown.__dict__.items():
+                print(f"  {field}: {value}")
+            print(f"  TOTAL: {breakdown.total}\n")
+            return breakdown.total
+        except Exception as e:
+            print(f"Reward error for {label}: {e}")
+            return -0.3
+
+    good_score = _score("MOCK_GOOD", MOCK_GOOD)
+    bad_score = _score("MOCK_BAD", MOCK_BAD)
+
+    print(f"MOCK_GOOD score: {good_score:.4f}")
+    print(f"MOCK_BAD  score: {bad_score:.4f}")
+
+    assert good_score > bad_score, (
+        f"ASSERTION FAILED: MOCK_GOOD ({good_score:.4f}) should be > MOCK_BAD ({bad_score:.4f})"
+    )
+    print("\nLOCAL TEST PASSED")
+    sys.exit(0)
 
 # ── Load model ────────────────────────────────────────────────────────────────
 print(f"Loading {MODEL_NAME}...")
@@ -177,38 +296,6 @@ def reward_fn(completions: list[str], prompts: list[str], **kwargs) -> list[floa
             rewards.append(-0.3)
 
     return rewards
-
-def _run_fix(proposed_code: str, bug: dict) -> dict:
-    """Safely run proposed fix with subprocess timeout."""
-    test_cases = bug.get("test_cases", [])
-    func_name = bug.get("function_name", "")
-    if not proposed_code or not test_cases or not func_name:
-        return {"passed": 0, "failed": 0, "total": len(test_cases), "newly_broken": 0}
-
-    passed = 0
-    for test in test_cases:
-        inp = test["input"]
-        args_str = ", ".join(repr(x) for x in inp) if isinstance(inp, (list, tuple)) else repr(inp)
-        script = (
-            f"{proposed_code}\n"
-            f"try:\n"
-            f"    r={func_name}({args_str})\n"
-            f"    print('PASS' if r=={repr(test['expected_output'])} else 'FAIL')\n"
-            f"except Exception as e:\n"
-            f"    print(f'ERROR: {{e}}')\n"
-        )
-        try:
-            with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False) as f:
-                f.write(script)
-                fname = f.name
-            r = subprocess.run(["python", fname], capture_output=True, text=True, timeout=5)
-            os.unlink(fname)
-            if "PASS" in r.stdout:
-                passed += 1
-        except Exception:
-            pass
-
-    return {"passed": passed, "failed": len(test_cases) - passed, "total": len(test_cases), "newly_broken": 0}
 
 # ── Baseline evaluation (run BEFORE training) ─────────────────────────────────
 def run_baseline(n: int = 20) -> dict:

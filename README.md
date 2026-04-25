@@ -1,10 +1,10 @@
 ---
-title: AgentDebugger-Env 🐛
-emoji: 🐛
-colorFrom: red
-colorTo: yellow
-sdk: docker
-app_port: 8000
+title: AgentDebugger-Training 🧠
+emoji: 🧠
+colorFrom: blue
+colorTo: purple
+sdk: gradio
+app_file: app.py
 pinned: true
 license: mit
 ---

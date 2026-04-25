@@ -2,6 +2,7 @@ import json
 import subprocess
 import tempfile
 import os
+import sys
 
 def test_passes(code, func, inp, expected):
     if isinstance(inp, (list, tuple)):
@@ -23,7 +24,7 @@ except Exception as e:
             f.write(script)
             fname = f.name
         r = subprocess.run(
-            ['python', fname],
+            [sys.executable, fname],
             capture_output=True, text=True, timeout=5
         )
         os.unlink(fname)
