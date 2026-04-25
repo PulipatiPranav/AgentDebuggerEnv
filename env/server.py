@@ -9,7 +9,7 @@ Exposes the environment as REST endpoints:
 """
 
 from fastapi import FastAPI, HTTPException
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, RedirectResponse
 from pydantic import BaseModel
 from typing import Optional
 
@@ -23,6 +23,15 @@ app = FastAPI(
     version="1.0.0",
 )
 
+# ── Mount Gradio demo at /demo ────────────────────────────────────────────────
+try:
+    import gradio as gr
+    from demo.gradio_app import create_demo
+    _gradio_demo = create_demo()
+    app = gr.mount_gradio_app(app, _gradio_demo, path="/demo")
+except ImportError:
+    pass  # gradio not installed — API-only mode
+
 # Single environment instance to manage the debugging lifecycle.
 env = DebuggerEnvironment()
 
@@ -31,7 +40,12 @@ class ResetRequest(BaseModel):
     task_id: Optional[str] = "easy"
 
 
-@app.get("/")
+@app.get("/", include_in_schema=False)
+async def root_redirect():
+    return RedirectResponse(url="/demo")
+
+
+@app.get("/api")
 async def root():
     return {
         "name": "AgentDebuggerEnv",
