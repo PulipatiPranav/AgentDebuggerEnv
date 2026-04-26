@@ -41,8 +41,29 @@ args = parser.parse_args()
 # requirements.txt only has torch (too large to install at runtime).
 # Everything else is installed here, after gradio is already up.
 # NOTE: mergekit intentionally excluded — conflicts with accelerate/peft/trl.
-# NOTE: torch excluded — installed at Docker build time via requirements.txt.
 if not args.test_local:
+    # ── Ensure CUDA-enabled torch is present before anything else imports it ──
+    # The default PyPI torch wheel is CPU-only. We must install from the
+    # PyTorch CUDA index so that torch.cuda.is_available() returns True and
+    # device_map="auto" maps the model to GPU, not RAM.
+    import importlib.util, importlib
+    _needs_cuda_torch = True
+    if importlib.util.find_spec("torch") is not None:
+        import torch as _t
+        if _t.cuda.is_available():
+            _needs_cuda_torch = False
+        del _t
+    if _needs_cuda_torch:
+        print("Installing CUDA-enabled torch (cu121)...", flush=True)
+        _r = os.system(
+            f"{sys.executable} -m pip install -q --no-cache-dir "
+            "torch --index-url https://download.pytorch.org/whl/cu121"
+        )
+        if _r != 0:
+            print("ERROR: CUDA torch install failed.", flush=True)
+            sys.exit(1)
+        print("CUDA torch installed.", flush=True)
+
     _TRAIN_DEPS = [
         "wandb==0.18.7",
         "datasets==3.0.2",
@@ -425,7 +446,7 @@ def run_baseline(n: int = 20) -> dict:
         prompt = bug_to_prompt(bug)
         inputs = tokenizer(prompt, return_tensors="pt").to(RUNTIME_DEVICE)
         with torch.no_grad():
-            out = model.generate(**inputs, max_new_tokens=200, temperature=0.1, do_sample=False)
+            out = model.generate(**inputs, max_new_tokens=200, do_sample=False)
         completion = tokenizer.decode(out[0][inputs["input_ids"].shape[1]:], skip_special_tokens=True)
         r = reward_fn([completion], [prompt], bug_metadata=[bug])
         rewards.append(r[0])
@@ -499,7 +520,7 @@ for bug in bugs:
     prompt = bug_to_prompt(bug)
     inputs = tokenizer(prompt, return_tensors="pt").to(RUNTIME_DEVICE)
     with torch.no_grad():
-        out = model.generate(**inputs, max_new_tokens=200, temperature=0.1, do_sample=False)
+        out = model.generate(**inputs, max_new_tokens=200, do_sample=False)
     completion = tokenizer.decode(out[0][inputs["input_ids"].shape[1]:], skip_special_tokens=True)
     r = reward_fn([completion], [prompt], bug_metadata=[bug])
     post_rewards.append(r[0])
