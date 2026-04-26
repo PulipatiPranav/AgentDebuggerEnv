@@ -50,7 +50,7 @@ if not args.test_local:
         "accelerate==1.0.1",
         "trl==0.15.2",
         "peft==0.13.2",
-        "bitsandbytes==0.45.3",
+        "bitsandbytes==0.45.5",
     ]
     print("Installing training dependencies...", flush=True)
     ret = os.system(
