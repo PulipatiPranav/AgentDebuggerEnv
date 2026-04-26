@@ -1,7 +1,3 @@
-Edited test_readme.md
-Viewed test_readme.md:83-83
-Searched for "Endurance"
-Searched for "Author"
 
 ```markdown
 ---
