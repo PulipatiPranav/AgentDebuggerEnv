@@ -50,7 +50,7 @@ if not args.test_local:
         "accelerate==1.0.1",
         "trl==0.14.0",
         "peft==0.13.2",
-        "bitsandbytes==0.43.3",
+        "bitsandbytes>=0.49.0",
     ]
     print("Installing training dependencies...", flush=True)
     ret = os.system(
@@ -94,7 +94,7 @@ from server.reward_calculator import DebugRewardCalculator
 from server.models import parse_agent_output
 
 # ── Configuration ─────────────────────────────────────────────────────────────
-MODEL_NAME = "Qwen/Qwen2.5-Coder-7B-Instruct"
+MODEL_NAME = "Qwen/Qwen2.5-Coder-3B-Instruct"
 HF_REPO = "shashaank0707/AgentDebugger-trained"
 MAX_STEPS = 10 if args.test else args.max_steps
 CHECKPOINT_DIR = "./checkpoints"
