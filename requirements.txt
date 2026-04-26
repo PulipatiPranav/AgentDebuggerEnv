@@ -1,16 +1,3 @@
-# ── Training dependencies ──────────────────────────────────────────────────────
-# Fully pinned to a pre-validated compatible set.
-# NOTES:
-#   - gradio is injected by HF Spaces automatically — do NOT add it here
-#   - wandb is excluded: it conflicts with gradio over click versioning
-#     (wandb>=0.18 requires click!=8.0.0,>=7.1 but gradio requires click>=8.1)
-#     wandb is initialized at runtime by the training script if available
-
-datasets==3.0.2
-transformers==4.46.3
-accelerate==1.0.1
-trl==0.14.0
-peft==0.13.2
-bitsandbytes==0.43.3
-mergekit==0.1.4
-pydantic==2.10.6
+# Training packages are installed at runtime by training/train_grpo.py
+# This file is intentionally minimal to avoid pip dependency conflicts
+# during HF Spaces Docker builds (gradio's pinned deps conflict with ML stack)
