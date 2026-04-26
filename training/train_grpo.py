@@ -38,8 +38,10 @@ parser.add_argument("--max_steps", type=int, default=500)
 args = parser.parse_args()
 
 # ── Runtime dependency install ─────────────────────────────────────────────────
-# requirements.txt is empty to avoid pip conflicts during HF Spaces Docker build.
-# We install all training deps here, at runtime, after gradio is already up.
+# requirements.txt only has torch (too large to install at runtime).
+# Everything else is installed here, after gradio is already up.
+# NOTE: mergekit intentionally excluded — conflicts with accelerate/peft/trl.
+# NOTE: torch excluded — installed at Docker build time via requirements.txt.
 if not args.test_local:
     _TRAIN_DEPS = [
         "wandb==0.18.7",
@@ -49,15 +51,14 @@ if not args.test_local:
         "trl==0.14.0",
         "peft==0.13.2",
         "bitsandbytes==0.43.3",
-        "mergekit==0.1.4",
-        "pydantic==2.10.6",
     ]
     print("Installing training dependencies...", flush=True)
     ret = os.system(
         f"{sys.executable} -m pip install -q --no-cache-dir " + " ".join(f'"{d}"' for d in _TRAIN_DEPS)
     )
     if ret != 0:
-        print("WARNING: pip install returned non-zero exit. Continuing anyway...", flush=True)
+        print("ERROR: pip install failed. Training cannot continue.", flush=True)
+        sys.exit(1)
     print("Dependencies installed.", flush=True)
 
 # ── GPU/training imports (skipped in --test-local mode) ───────────────────────
