@@ -477,7 +477,7 @@ trainer = GRPOTrainer(
     args=config,
     train_dataset=make_dataset(0),
     reward_funcs=reward_fn,
-    tokenizer=tokenizer,
+    processing_class=tokenizer,
 )
 
 # ── Curriculum callback ───────────────────────────────────────────────────────
