@@ -21,7 +21,7 @@ def _stream_training():
     global training_proc
     script = os.path.join(os.path.dirname(__file__), "training", "train_grpo.py")
     training_proc = subprocess.Popen(
-        [sys.executable, script, "--test"],
+        [sys.executable, script],
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
         text=True,
@@ -88,7 +88,7 @@ with gr.Blocks(title="AgentDebuggerEnv Training Monitor") as demo:
 Training **Qwen2.5-Coder-7B-Instruct** on structured hypothesis-driven debugging.
 - Algorithm: GRPO (same as DeepSeek-R1)
 - Dataset: 90 hand-validated bugs across 3 difficulty tiers
-- Curriculum: Tier 1 (steps 0–300) → Tier 1+2 (300–600) → All tiers (600+)
+- Curriculum: Tier 1 (steps 0–150) → Tier 1+2 (150–350) → All tiers (350–500)
         """
     )
     status_box = gr.Textbox(
