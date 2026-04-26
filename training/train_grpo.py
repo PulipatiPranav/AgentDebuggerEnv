@@ -1,6 +1,6 @@
 """
 AgentDebuggerEnv — GRPO Training Script
-Model: Qwen2.5-Coder-7B-Instruct (4-bit quantized via bitsandbytes)
+Model: Qwen2.5-Coder-7B-Instruct (float16/bfloat16 + LoRA, no quantization)
 Algorithm: GRPO (Group Relative Policy Optimization) via HuggingFace TRL
 GPU: auto-detected at runtime (A100/H100 → bfloat16+large batch, T4/V100 → float16+small batch)
 
@@ -50,7 +50,6 @@ if not args.test_local:
         "accelerate==1.0.1",
         "trl==0.15.2",
         "peft==0.13.2",
-        "bitsandbytes==0.45.5",
     ]
     print("Installing training dependencies...", flush=True)
     ret = os.system(
@@ -67,7 +66,7 @@ if not args.test_local:
     import wandb
     from datasets import Dataset
     from transformers import (
-        AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig, TrainerCallback
+        AutoModelForCausalLM, AutoTokenizer, TrainerCallback
     )
     from peft import get_peft_model, LoraConfig, TaskType
     from trl import GRPOTrainer, GRPOConfig
@@ -86,7 +85,7 @@ if not args.test_local:
         f"trl={_pkg_ver('trl')} "
         f"accelerate={_pkg_ver('accelerate')} "
         f"peft={_pkg_ver('peft')} "
-        f"bitsandbytes={_pkg_ver('bitsandbytes')}"
+        f"dtype={COMPUTE_DTYPE}"
     )
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -291,12 +290,12 @@ if _gpu_vram_gb >= 40:          # A100 40GB / A100 80GB
     _num_gen     = 8
     _max_comp    = 256
     _lora_r      = 16
-elif _gpu_vram_gb >= 20:        # V100 32GB
+elif _gpu_vram_gb >= 20:        # A10G 24GB / V100 32GB — float16 model ~14GB
     _batch       = 1
     _grad_accum  = 8
-    _num_gen     = 6
-    _max_comp    = 220
-    _lora_r      = 12
+    _num_gen     = 4
+    _max_comp    = 192
+    _lora_r      = 8
 else:                           # T4 15GB / anything smaller
     _batch       = 1
     _grad_accum  = 8
@@ -309,20 +308,15 @@ print(f"Training config: batch={_batch} grad_accum={_grad_accum} "
       f"dtype={COMPUTE_DTYPE}")
 
 # ── Load model ────────────────────────────────────────────────────────────────
-print(f"Loading {MODEL_NAME}...")
-bnb_config = BitsAndBytesConfig(
-    load_in_4bit=True,
-    bnb_4bit_quant_type="nf4",
-    bnb_4bit_compute_dtype=COMPUTE_DTYPE,
-    bnb_4bit_use_double_quant=True,
-)
+# Load in native float16/bfloat16 — no bitsandbytes needed.
+# A10G (24GB) fits Qwen2.5-7B in float16 (~14GB) with room for LoRA + activations.
+print(f"Loading {MODEL_NAME} in {COMPUTE_DTYPE}...")
 tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME, trust_remote_code=True)
 tokenizer.pad_token = tokenizer.eos_token
 tokenizer.padding_side = "left"
 
 model = AutoModelForCausalLM.from_pretrained(
     MODEL_NAME,
-    quantization_config=bnb_config,
     device_map="auto",
     trust_remote_code=True,
     torch_dtype=COMPUTE_DTYPE,
