@@ -84,8 +84,7 @@ if not args.test_local:
         f"transformers={_pkg_ver('transformers')} "
         f"trl={_pkg_ver('trl')} "
         f"accelerate={_pkg_ver('accelerate')} "
-        f"peft={_pkg_ver('peft')} "
-        f"dtype={COMPUTE_DTYPE}"
+        f"peft={_pkg_ver('peft')}"
     )
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
