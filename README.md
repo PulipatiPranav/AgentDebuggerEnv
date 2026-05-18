@@ -12,7 +12,7 @@ pinned: false
 
 **Hackathon Links:**
 - 🌌 **[Live Hugging Face Space](https://huggingface.co/spaces/agentDebugger/AgentDebugger-training-v3)** 
-- 📊 **[Model Leaderboard Space](https://huggingface.co/spaces/agentDebugger/AgentDebugger-leaderboard)** *(coming soon)*
+- 📊 **[Model Leaderboard Space](https://huggingface.co/spaces/shashaank0707/AgentDebugger-leaderboard)** *(coming soon)*
 - 📹 **[Watch the 2-Minute Demo](#)** *(Replace with YouTube Link)*
 - 📝 **[Read the Technical Writeup](./Blog.md)**
 
