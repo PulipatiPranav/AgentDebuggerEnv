@@ -34,7 +34,7 @@ parser.add_argument("--test", action="store_true", help="Run 10 steps for testin
 parser.add_argument("--test-local", action="store_true", dest="test_local",
                     help="Sanity-check reward function locally without any model or GPU")
 parser.add_argument("--resume", type=str, default=None, help="Path to checkpoint")
-parser.add_argument("--max_steps", type=int, default=500)
+parser.add_argument("--max_steps", type=int, default=300)
 args = parser.parse_args()
 
 
@@ -165,9 +165,9 @@ def load_bugs(tier: int) -> list[dict]:
 
 def get_bugs_for_step(step: int) -> list[dict]:
     tier1 = load_bugs(1)
-    if step < 150:
+    if step < 100:
         return tier1
-    elif step < 600:
+    elif step < 200:
         return tier1 + load_bugs(2)
     return tier1 + load_bugs(2) + load_bugs(3)
 
@@ -328,7 +328,7 @@ elif _gpu_vram_gb >= 20:        # A10G 24GB / V100 32GB
     _lora_r      = 8
 else:                           # T4 15GB / anything smaller
     _batch       = 2
-    _grad_accum  = 4
+    _grad_accum  = 2            # Reduced from 4 to 2 to double step speed
     _num_gen     = 2            # 2 % 2 == 0
     _max_comp    = 160
     _lora_r      = 8
@@ -509,7 +509,7 @@ trainer = GRPOTrainer(
 class CurriculumCallback(TrainerCallback):
     def on_step_end(self, args, state, control, **kwargs):
         step = state.global_step
-        if step in [150, 350]:
+        if step in [100, 200]:
             trainer.train_dataset = make_dataset(step)
             print(f"\nCurriculum advanced at step {step}!")
             if WANDB_API_KEY:
