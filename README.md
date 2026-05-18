@@ -11,9 +11,10 @@ pinned: false
 # AgentDebuggerEnv
 
 **Hackathon Links:**
-- 🌌 **[Live Hugging Face Space](https://huggingface.co/spaces/shashaank0707/AgentDebugger-training-v3)** 
+- 🌌 **[Live Hugging Face Space](https://huggingface.co/spaces/agentDebugger/AgentDebugger-training-v3)** 
+- 📊 **[Model Leaderboard Space](https://huggingface.co/spaces/agentDebugger/AgentDebugger-leaderboard)** *(coming soon)*
 - 📹 **[Watch the 2-Minute Demo](#)** *(Replace with YouTube Link)*
-- 📝 **[Read the Technical Writeup](#)** *(Replace with HF Blog Link)*
+- 📝 **[Read the Technical Writeup](./Blog.md)**
 
 ### 🚀 One-Line Pitch
 An OpenEnv-backed reinforcement learning environment that trains LLMs to debug code systematically via Group Relative Policy Optimization (GRPO) and secure sandbox execution.

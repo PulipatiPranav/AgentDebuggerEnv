@@ -89,6 +89,7 @@ Training **Qwen2.5-Coder-7B-Instruct** on structured hypothesis-driven debugging
 - Algorithm: GRPO (same as DeepSeek-R1)
 - Dataset: 90 hand-validated bugs across 3 difficulty tiers
 - Curriculum: Tier 1 (steps 0–150) → Tier 1+2 (150–350) → All tiers (350–500)
+- 📊 **[View Model Leaderboard](https://huggingface.co/spaces/agentDebugger/AgentDebugger-leaderboard)**
         """
     )
     status_box = gr.Textbox(

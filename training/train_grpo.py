@@ -489,7 +489,8 @@ config = GRPOConfig(
     max_completion_length=_max_comp,
     temperature=0.9,
     logging_steps=5,
-    save_steps=50,
+    save_steps=25,               # Save to local disk every 25 steps
+    save_strategy="steps",
     report_to="wandb" if WANDB_API_KEY else "none",
 )
 
@@ -512,6 +513,51 @@ class CurriculumCallback(TrainerCallback):
                 wandb.log({"curriculum/step": step})
 
 trainer.add_callback(CurriculumCallback())
+
+# ── HF Hub checkpoint push callback (CRITICAL: survives container restarts) ────
+# Pushes LoRA adapter weights to HF Hub every HUB_PUSH_EVERY steps.
+# This is the fix for the original problem: ephemeral Space storage meant that
+# checkpoints saved to ./checkpoints/ were lost when the Space stopped.
+# Now even if training is interrupted, the latest adapter weights are on HF Hub.
+HUB_PUSH_EVERY = 50  # push every 50 steps — ~15min on T4, ~5min on A100
+
+class CheckpointPushCallback(TrainerCallback):
+    """Push LoRA adapter to HF Hub every HUB_PUSH_EVERY steps."""
+
+    def on_step_end(self, args, state, control, **kwargs):
+        step = state.global_step
+        if not HF_TOKEN or step == 0 or step % HUB_PUSH_EVERY != 0:
+            return
+        try:
+            push_repo = HF_REPO + "-checkpoints"
+            print(f"\n[HubPush] Pushing checkpoint at step {step} to {push_repo}...", flush=True)
+            model.push_to_hub(
+                push_repo,
+                token=HF_TOKEN,
+                private=True,
+                commit_message=f"checkpoint-step-{step}",
+            )
+            tokenizer.push_to_hub(
+                push_repo,
+                token=HF_TOKEN,
+                private=True,
+                commit_message=f"tokenizer checkpoint-step-{step}",
+            )
+            # Write a step marker file so we know the latest pushed step
+            with open("./last_hub_push.txt", "w") as _f:
+                _f.write(str(step))
+            print(f"[HubPush] ✓ Step {step} pushed to HF Hub.", flush=True)
+            if WANDB_API_KEY:
+                wandb.log({"hub/last_pushed_step": step})
+        except Exception as e:
+            # Never crash training because of a push failure
+            print(f"[HubPush] WARNING: push failed at step {step}: {e}", flush=True)
+
+if not args.test:  # Don't push during 10-step test runs
+    trainer.add_callback(CheckpointPushCallback())
+    print(f"HF Hub checkpoint push enabled every {HUB_PUSH_EVERY} steps → {HF_REPO}-checkpoints")
+else:
+    print("[TEST MODE] Hub checkpoint push disabled.")
 
 # ── Train ─────────────────────────────────────────────────────────────────────
 print(f"\nStarting GRPO training. Max steps: {MAX_STEPS}")
