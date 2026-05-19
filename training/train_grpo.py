@@ -33,7 +33,9 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--test", action="store_true", help="Run 10 steps for testing (Colab/GPU)")
 parser.add_argument("--test-local", action="store_true", dest="test_local",
                     help="Sanity-check reward function locally without any model or GPU")
-parser.add_argument("--resume", type=str, default=None, help="Path to checkpoint")
+parser.add_argument("--resume", type=str, default=None, help="Local path to checkpoint")
+parser.add_argument("--hub-resume", type=str, default=None, help="HF repo to resume LoRA from (e.g. shashaank0707/AgentDebugger-trained-checkpoints)")
+parser.add_argument("--step-offset", type=int, default=0, help="Steps already completed if using hub-resume")
 parser.add_argument("--max_steps", type=int, default=500)
 args = parser.parse_args()
 
@@ -116,7 +118,7 @@ from server.models import parse_agent_output
 # ── Configuration ─────────────────────────────────────────────────────────────
 MODEL_NAME = "Qwen/Qwen2.5-Coder-3B-Instruct"
 HF_REPO = "shashaank0707/AgentDebugger-trained"
-MAX_STEPS = 10 if args.test else args.max_steps
+MAX_STEPS = (10 if args.test else args.max_steps) - args.step_offset
 CHECKPOINT_DIR = "./checkpoints"
 
 # W&B and HF Token
@@ -353,16 +355,21 @@ model = AutoModelForCausalLM.from_pretrained(
 )
 model.config.use_cache = False
 
-lora_config = LoraConfig(
-    r=_lora_r,
-    lora_alpha=_lora_r * 2,
-    target_modules=["q_proj", "k_proj", "v_proj", "o_proj",
-                    "gate_proj", "up_proj", "down_proj"],
-    lora_dropout=0.0,
-    bias="none",
-    task_type=TaskType.CAUSAL_LM,
-)
-model = get_peft_model(model, lora_config)
+if args.hub_resume:
+    from peft import PeftModel
+    print(f"\nResuming LoRA adapter from Hub: {args.hub_resume}")
+    model = PeftModel.from_pretrained(model, args.hub_resume, is_trainable=True)
+else:
+    lora_config = LoraConfig(
+        r=_lora_r,
+        lora_alpha=_lora_r * 2,
+        target_modules=["q_proj", "k_proj", "v_proj", "o_proj",
+                        "gate_proj", "up_proj", "down_proj"],
+        lora_dropout=0.0,
+        bias="none",
+        task_type=TaskType.CAUSAL_LM,
+    )
+    model = get_peft_model(model, lora_config)
 model.enable_input_require_grads()
 model.gradient_checkpointing_enable()
 print(f"Trainable params: {model.num_parameters(only_trainable=True):,}")
@@ -507,8 +514,8 @@ trainer = GRPOTrainer(
 
 # ── Curriculum callback ───────────────────────────────────────────────────────
 class CurriculumCallback(TrainerCallback):
-    def on_step_end(self, args, state, control, **kwargs):
-        step = state.global_step
+    def on_step_end(self, callback_args, state, control, **kwargs):
+        step = state.global_step + args.step_offset
         if step in [150, 350]:
             trainer.train_dataset = make_dataset(step)
             print(f"\nCurriculum advanced at step {step}!")
@@ -527,8 +534,8 @@ HUB_PUSH_EVERY = 50  # push every 50 steps — ~15min on T4, ~5min on A100
 class CheckpointPushCallback(TrainerCallback):
     """Push LoRA adapter to HF Hub every HUB_PUSH_EVERY steps."""
 
-    def on_step_end(self, args, state, control, **kwargs):
-        step = state.global_step
+    def on_step_end(self, callback_args, state, control, **kwargs):
+        step = state.global_step + args.step_offset
         if not HF_TOKEN or step == 0 or step % HUB_PUSH_EVERY != 0:
             return
         try:
