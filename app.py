@@ -1,10 +1,3 @@
-"""
-AgentDebuggerEnv — Interactive Research Showcase & Leaderboard
-=============================================================
-Primary entry point for the Hugging Face Space. Provides a premium,
-glassmorphic UI to explore model debugging trajectories, benchmark rankings,
-sandboxed execution, and the technical report.
-"""
 
 import os
 import sys
@@ -14,17 +7,17 @@ import requests
 import gradio as gr
 from dotenv import load_dotenv
 
-# Load environment variables
+
 load_dotenv()
 
-# Insert workspace root to path
+
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-# ── Load Evaluation Results or Use Fallback ───────────────────────────────────
+
 EVAL_RESULTS_PATH = "evaluation_results.json"
 BASE_LEADERBOARD_PATH = "leaderboard/index.html"
 
-# Default fallback benchmarks if evaluation_results.json is not present yet
+
 DEFAULT_STATS = {
     "summary": {
         "overall": {
@@ -64,7 +57,7 @@ def load_evaluation_data():
             print(f"Error loading evaluation results: {e}")
     return {"summary": DEFAULT_STATS["summary"], "results": {}}
 
-# Pre-loaded mock trajectories for fallback visualization
+
 MOCK_TRAJECTORIES = {
     "🔢 Off-by-One: binary_search (Tier 1)": {
         "buggy_code": "def binary_search(arr, target):\n    left, right = 0, len(arr)\n    while left < right:\n        mid = (left + right) // 2\n        if arr[mid] == target:\n            return mid\n        elif arr[mid] < target:\n            left = mid + 1\n        else:\n            right = mid - 1\n    return -1",
@@ -285,7 +278,7 @@ body {
 }
 """
 
-# ── Dynamic Leaderboard Renderer ──────────────────────────────────────────────
+
 def render_leaderboard_html(summary_data):
     overall = summary_data.get("overall", {})
     t1 = summary_data.get("tiers", {}).get("tier1", {})
@@ -376,30 +369,30 @@ def render_leaderboard_html(summary_data):
     """
     return html
 
-# ── Dynamic Trajectory Viewer Callback ────────────────────────────────────────
+
 def get_trajectory_explorer_dropdowns(eval_data):
     options = []
-    # Load from evaluation results if available
+    
     if "results" in eval_data and eval_data["results"]:
         for tier_name, bugs in eval_data["results"].items():
             for bug in bugs:
                 options.append(f"{bug.get('function_name')} ({tier_name.capitalize()})")
     
-    # Fallback/Merge with default mock cases
+    
     for name in MOCK_TRAJECTORIES.keys():
         if name not in options:
             options.append(name)
     return options
 
 def get_bug_details(selected_name, eval_data):
-    # Check mock trajectories first
+    
     if selected_name in MOCK_TRAJECTORIES:
         data = MOCK_TRAJECTORIES[selected_name]
         buggy_code = data["buggy_code"]
         initial_error = data["initial_error"]
         traj = data["trajectory"]
     else:
-        # Resolve from evaluation results
+        
         resolved = None
         for tier_name, bugs in eval_data.get("results", {}).items():
             for bug in bugs:
@@ -425,14 +418,14 @@ def get_bug_details(selected_name, eval_data):
         else:
             return "No code", "No error", "No trajectories available"
 
-    # Format the trajectory beautifully into Markdown
+    
     markdown_out = []
     for step in traj:
         passed = step["test_results"].get("passed", 0)
         total = step["test_results"].get("total", 1)
         tests_bar = "█" * passed + "░" * (total - passed)
         
-        # Color-coded action badge
+        
         action_color = "#8b5cf6" if step["action"] == "propose_fix" else "#3b82f6"
         
         rb = step["reward_breakdown"]
@@ -473,9 +466,9 @@ def get_bug_details(selected_name, eval_data):
         
     return buggy_code, initial_error, "\n\n".join(markdown_out)
 
-# ── Live sandbox execution handler ────────────────────────────────────────────
+
 def run_sandbox_code(user_code, test_suite):
-    # Import execution sandbox dynamically
+    
     try:
         from env.sandbox import execute_code
         output, timed_out, exec_time = execute_code(user_code, test_suite)
@@ -484,7 +477,7 @@ def run_sandbox_code(user_code, test_suite):
     except Exception as e:
         return f"Execution Error: {e}", "❌ Failed"
 
-# ── Technical Report Reader ───────────────────────────────────────────────────
+
 def read_technical_report():
     report_path = "Blog.md"
     if os.path.exists(report_path):
@@ -495,13 +488,13 @@ def read_technical_report():
             pass
     return "Technical report draft `Blog.md` not found."
 
-# ── Gradio App Layout ─────────────────────────────────────────────────────────
+
 eval_data = load_evaluation_data()
 bug_options = get_trajectory_explorer_dropdowns(eval_data)
 
-with gr.Blocks(title="AgentDebuggerEnv Research Hub") as demo:
+with gr.Blocks(title="AgentDebuggerEnv Research Hub", css=CUSTOM_CSS) as demo:
     
-    # ── Header ────────────────────────────────────────────────────────────────
+    
     gr.HTML(
         """
         <div class="glass-header">
@@ -513,7 +506,7 @@ with gr.Blocks(title="AgentDebuggerEnv Research Hub") as demo:
     )
         
     with gr.Tabs():
-        # ── Tab 1: Trajectory Explorer ────────────────────────────────────────
+        
         with gr.TabItem("🕵️ Trajectory Explorer"):
             gr.Markdown(
                 """
@@ -545,7 +538,7 @@ with gr.Blocks(title="AgentDebuggerEnv Research Hub") as demo:
                     gr.Markdown("### 🧠 Model Cognitive Loop Trajectory")
                     trajectory_output = gr.Markdown(value="Loading initial trajectory...")
 
-            # Wire up explorer update
+            
             def update_explorer(name):
                 code, err, traj = get_bug_details(name, eval_data)
                 return code, err, traj
@@ -556,13 +549,13 @@ with gr.Blocks(title="AgentDebuggerEnv Research Hub") as demo:
                 outputs=[bug_code_viewer, error_msg_viewer, trajectory_output]
             )
             
-            # Initial load callback
+            
             demo.load(
                 fn=lambda: update_explorer(bug_options[0]) if bug_options else ("", "", ""),
                 outputs=[bug_code_viewer, error_msg_viewer, trajectory_output]
             )
 
-        # ── Tab 2: Leaderboard & Metrics ──────────────────────────────────────
+        
         with gr.TabItem("📊 Benchmark Leaderboard"):
             gr.Markdown(
                 """
@@ -585,11 +578,11 @@ with gr.Blocks(title="AgentDebuggerEnv Research Hub") as demo:
                         """
                     )
                 with gr.Column():
-                    # Display metrics images from repo
+                    
                     gr.Image("images/total.png", label="GRPO Total Reward Curve")
                     gr.Image("images/format_compliance.png", label="Format Compliance Curve")
 
-        # ── Tab 3: Sandbox Playground ─────────────────────────────────────────
+        
         with gr.TabItem("🛡️ Sandbox Playground"):
             gr.Markdown(
                 """
@@ -629,7 +622,7 @@ with gr.Blocks(title="AgentDebuggerEnv Research Hub") as demo:
                 outputs=[sandbox_stdout, sandbox_status]
             )
 
-        # ── Tab 4: Technical Report ───────────────────────────────────────────
+        
         with gr.TabItem("📝 Technical Report"):
             gr.Markdown(
                 """
@@ -651,4 +644,4 @@ with gr.Blocks(title="AgentDebuggerEnv Research Hub") as demo:
     )
 
 if __name__ == "__main__":
-    demo.launch(server_name="0.0.0.0", server_port=7860, css=CUSTOM_CSS)
+    demo.launch(server_name="0.0.0.0", server_port=7860)
