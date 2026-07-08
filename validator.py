@@ -1,14 +1,4 @@
-#!/usr/bin/env python3
-"""
-AgentDebuggerEnv — Pre-Submission Validator
-============================================
-Checks for all hard requirements of the Meta + HF Hackathon:
-- Mandatory Environment Variables
-- OpenEnv Spec Compliance (health, reset, step, state)
-- Inference Script Format & Logging
-- Dockerfile Correctness
-- openenv.yaml Presence
-"""
+
 
 import os
 import sys
@@ -17,7 +7,7 @@ import requests
 import yaml
 import re
 
-# ── Configuration ────────────────────────────────────────────────────────────
+
 ENV_BASE_URL = os.environ.get("ENV_BASE_URL", "http://localhost:8000")
 API_BASE_URL = os.environ.get("API_BASE_URL")
 MODEL_NAME = os.environ.get("MODEL_NAME")
@@ -74,7 +64,7 @@ def check_yaml():
 def check_endpoints():
     log_info(f"Checking Endpoints at {ENV_BASE_URL}...")
     
-    # 1. Health
+    
     try:
         resp = requests.get(f"{ENV_BASE_URL}/health", timeout=5)
         if resp.status_code == 200:
@@ -86,7 +76,7 @@ def check_endpoints():
         log_fail(f"Could not connect to /health: {e}")
         return False
     
-    # 2. Reset
+    
     try:
         resp = requests.post(f"{ENV_BASE_URL}/reset", json={"task_id": "easy"}, timeout=5)
         if resp.status_code == 200:
@@ -109,7 +99,7 @@ def check_inference_script():
     with open("inference.py", 'r') as f:
         content = f.read()
     
-    # Check for [START], [STEP], [END]
+    
     patterns = {
         "[START]": r"\[START\] task=",
         "[STEP]": r"\[STEP .+\] Action:",
@@ -137,7 +127,7 @@ def main():
     success &= check_yaml()
     success &= check_inference_script()
     
-    # Endpoints check is optional if server isn't running locally
+    
     try:
         if not check_endpoints():
             log_info("Skipping further endpoint checks as server is unreachable.")

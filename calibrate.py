@@ -15,9 +15,9 @@ def test_passes(code, func, inp, expected):
 try:
     r = {func}({args})
     expected = {repr(expected)}
-    print("PASS" if r == expected else f"FAIL: got {{r}}")
+    print("PASS" if r == expected else f"FAIL: got { r} ")
 except Exception as e:
-    print(f"ERROR: {{e}}")
+    print(f"ERROR: { e} ")
 """
     try:
         with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False) as f:

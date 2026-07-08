@@ -1,5 +1,5 @@
 t2_bugs = [
-    # 7 bugs: wrong loop termination
+    
     {
         "id": "t2_004", "difficulty": 2, "bug_type": "wrong_loop_termination", "function_name": "find_first_positive",
         "buggy_code": "def find_first_positive(nums):\n    i = 0\n    while i < len(nums) - 1:\n        if nums[i] > 0:\n            return nums[i]\n        i += 1\n    return -1",
@@ -49,7 +49,7 @@ t2_bugs = [
         "initial_error": "AssertionError: expected [[1,2],[3]], got [[1,2]]", "bug_location": {"function": "get_chunks", "line_start": 4},
         "test_cases": [{"input": [[1, 2, 3], 2], "expected_output": [[1, 2], [3]]}, {"input": [[1, 2], 2], "expected_output": [[1, 2]]}, {"input": [[1, 2, 3, 4], 2], "expected_output": [[1, 2], [3, 4]]}, {"input": [[], 2], "expected_output": []}]
     },
-    # 7 bugs: incorrect accumulation
+    
     {
         "id": "t2_011", "difficulty": 2, "bug_type": "incorrect_accumulation", "function_name": "sum_even_numbers",
         "buggy_code": "def sum_even_numbers(nums):\n    total = 1\n    for n in nums:\n        if n % 2 == 0:\n            total += n\n    return total",
@@ -99,7 +99,7 @@ t2_bugs = [
         "initial_error": "AssertionError: expected 2, got 1", "bug_location": {"function": "count_negatives", "line_start": 2},
         "test_cases": [{"input": [[1, -1, 2, -2]], "expected_output": 2}, {"input": [[1, 2, 3]], "expected_output": 0}, {"input": [[-1, -2, -3]], "expected_output": 3}, {"input": [[]], "expected_output": 0}]
     },
-    # 7 bugs: wrong conditional branch
+    
     {
         "id": "t2_018", "difficulty": 2, "bug_type": "wrong_conditional_branch", "function_name": "classify_number",
         "buggy_code": "def classify_number(n):\n    if n > 0:\n        return 'positive'\n    elif n < 0:\n        return 'negative'\n    elif n == 0:\n        return 'negative'",
@@ -149,7 +149,7 @@ t2_bugs = [
         "initial_error": "AssertionError: expected 4, got 3", "bug_location": {"function": "get_quadrant", "line_start": 6},
         "test_cases": [{"input": [1, 1], "expected_output": 1}, {"input": [-1, 1], "expected_output": 2}, {"input": [-1, -1], "expected_output": 3}, {"input": [1, -1], "expected_output": 4}]
     },
-    # 6 bugs: wrong variable used in final step
+    
     {
         "id": "t2_025", "difficulty": 2, "bug_type": "wrong_variable", "function_name": "merge_arrays",
         "buggy_code": "def merge_arrays(a, b):\n    res = a + b\n    res.sort()\n    return a",

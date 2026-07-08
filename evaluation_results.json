@@ -41,9 +41,12 @@
         },
         "reward": 1.0,
         "reward_breakdown": {
-          "format_match": 0.2,
-          "syntax_correctness": 0.2,
-          "functionality_reward": 0.6
+          "format_compliance": 0.2,
+          "hypothesis_quality": 0.2,
+          "localization": 0.2,
+          "fix_quality": 0.3,
+          "semantic_similarity": 0.1,
+          "efficiency_potential": 0.0
         },
         "test_results": {
           "passed": 4,
@@ -65,9 +68,12 @@
         },
         "reward": 1.0,
         "reward_breakdown": {
-          "format_match": 0.2,
-          "syntax_correctness": 0.2,
-          "functionality_reward": 0.6
+          "format_compliance": 0.2,
+          "hypothesis_quality": 0.2,
+          "localization": 0.2,
+          "fix_quality": 0.3,
+          "semantic_similarity": 0.1,
+          "efficiency_potential": 0.0
         },
         "test_results": {
           "passed": 4,
@@ -89,9 +95,12 @@
         },
         "reward": 1.0,
         "reward_breakdown": {
-          "format_match": 0.2,
-          "syntax_correctness": 0.2,
-          "functionality_reward": 0.6
+          "format_compliance": 0.2,
+          "hypothesis_quality": 0.2,
+          "localization": 0.2,
+          "fix_quality": 0.3,
+          "semantic_similarity": 0.1,
+          "efficiency_potential": 0.0
         },
         "test_results": {
           "passed": 4,
@@ -113,9 +122,12 @@
         },
         "reward": 1.0,
         "reward_breakdown": {
-          "format_match": 0.2,
-          "syntax_correctness": 0.2,
-          "functionality_reward": 0.6
+          "format_compliance": 0.2,
+          "hypothesis_quality": 0.2,
+          "localization": 0.2,
+          "fix_quality": 0.3,
+          "semantic_similarity": 0.1,
+          "efficiency_potential": 0.0
         },
         "test_results": {
           "passed": 4,
@@ -137,9 +149,12 @@
         },
         "reward": 1.0,
         "reward_breakdown": {
-          "format_match": 0.2,
-          "syntax_correctness": 0.2,
-          "functionality_reward": 0.6
+          "format_compliance": 0.2,
+          "hypothesis_quality": 0.2,
+          "localization": 0.2,
+          "fix_quality": 0.3,
+          "semantic_similarity": 0.1,
+          "efficiency_potential": 0.0
         },
         "test_results": {
           "passed": 4,
@@ -161,9 +176,12 @@
         },
         "reward": 1.0,
         "reward_breakdown": {
-          "format_match": 0.2,
-          "syntax_correctness": 0.2,
-          "functionality_reward": 0.6
+          "format_compliance": 0.2,
+          "hypothesis_quality": 0.2,
+          "localization": 0.2,
+          "fix_quality": 0.3,
+          "semantic_similarity": 0.1,
+          "efficiency_potential": 0.0
         },
         "test_results": {
           "passed": 4,
@@ -185,9 +203,12 @@
         },
         "reward": 1.0,
         "reward_breakdown": {
-          "format_match": 0.2,
-          "syntax_correctness": 0.2,
-          "functionality_reward": 0.6
+          "format_compliance": 0.2,
+          "hypothesis_quality": 0.2,
+          "localization": 0.2,
+          "fix_quality": 0.3,
+          "semantic_similarity": 0.1,
+          "efficiency_potential": 0.0
         },
         "test_results": {
           "passed": 4,
@@ -209,9 +230,12 @@
         },
         "reward": 1.0,
         "reward_breakdown": {
-          "format_match": 0.2,
-          "syntax_correctness": 0.2,
-          "functionality_reward": 0.6
+          "format_compliance": 0.2,
+          "hypothesis_quality": 0.2,
+          "localization": 0.2,
+          "fix_quality": 0.3,
+          "semantic_similarity": 0.1,
+          "efficiency_potential": 0.0
         },
         "test_results": {
           "passed": 4,
@@ -233,9 +257,12 @@
         },
         "reward": 1.0,
         "reward_breakdown": {
-          "format_match": 0.2,
-          "syntax_correctness": 0.2,
-          "functionality_reward": 0.6
+          "format_compliance": 0.2,
+          "hypothesis_quality": 0.2,
+          "localization": 0.2,
+          "fix_quality": 0.3,
+          "semantic_similarity": 0.1,
+          "efficiency_potential": 0.0
         },
         "test_results": {
           "passed": 4,
@@ -257,9 +284,12 @@
         },
         "reward": 1.0,
         "reward_breakdown": {
-          "format_match": 0.2,
-          "syntax_correctness": 0.2,
-          "functionality_reward": 0.6
+          "format_compliance": 0.2,
+          "hypothesis_quality": 0.2,
+          "localization": 0.2,
+          "fix_quality": 0.3,
+          "semantic_similarity": 0.1,
+          "efficiency_potential": 0.0
         },
         "test_results": {
           "passed": 4,
@@ -281,9 +311,12 @@
         },
         "reward": 1.0,
         "reward_breakdown": {
-          "format_match": 0.2,
-          "syntax_correctness": 0.2,
-          "functionality_reward": 0.6
+          "format_compliance": 0.2,
+          "hypothesis_quality": 0.2,
+          "localization": 0.2,
+          "fix_quality": 0.3,
+          "semantic_similarity": 0.1,
+          "efficiency_potential": 0.0
         },
         "test_results": {
           "passed": 4,
@@ -305,9 +338,12 @@
         },
         "reward": 1.0,
         "reward_breakdown": {
-          "format_match": 0.2,
-          "syntax_correctness": 0.2,
-          "functionality_reward": 0.6
+          "format_compliance": 0.2,
+          "hypothesis_quality": 0.2,
+          "localization": 0.2,
+          "fix_quality": 0.3,
+          "semantic_similarity": 0.1,
+          "efficiency_potential": 0.0
         },
         "test_results": {
           "passed": 4,
@@ -329,9 +365,12 @@
         },
         "reward": 1.0,
         "reward_breakdown": {
-          "format_match": 0.2,
-          "syntax_correctness": 0.2,
-          "functionality_reward": 0.6
+          "format_compliance": 0.2,
+          "hypothesis_quality": 0.2,
+          "localization": 0.2,
+          "fix_quality": 0.3,
+          "semantic_similarity": 0.1,
+          "efficiency_potential": 0.0
         },
         "test_results": {
           "passed": 4,
@@ -353,9 +392,12 @@
         },
         "reward": 1.0,
         "reward_breakdown": {
-          "format_match": 0.2,
-          "syntax_correctness": 0.2,
-          "functionality_reward": 0.6
+          "format_compliance": 0.2,
+          "hypothesis_quality": 0.2,
+          "localization": 0.2,
+          "fix_quality": 0.3,
+          "semantic_similarity": 0.1,
+          "efficiency_potential": 0.0
         },
         "test_results": {
           "passed": 4,
@@ -377,9 +419,12 @@
         },
         "reward": 1.0,
         "reward_breakdown": {
-          "format_match": 0.2,
-          "syntax_correctness": 0.2,
-          "functionality_reward": 0.6
+          "format_compliance": 0.2,
+          "hypothesis_quality": 0.2,
+          "localization": 0.2,
+          "fix_quality": 0.3,
+          "semantic_similarity": 0.1,
+          "efficiency_potential": 0.0
         },
         "test_results": {
           "passed": 4,
@@ -401,9 +446,12 @@
         },
         "reward": 1.0,
         "reward_breakdown": {
-          "format_match": 0.2,
-          "syntax_correctness": 0.2,
-          "functionality_reward": 0.6
+          "format_compliance": 0.2,
+          "hypothesis_quality": 0.2,
+          "localization": 0.2,
+          "fix_quality": 0.3,
+          "semantic_similarity": 0.1,
+          "efficiency_potential": 0.0
         },
         "test_results": {
           "passed": 4,
@@ -425,9 +473,12 @@
         },
         "reward": 1.0,
         "reward_breakdown": {
-          "format_match": 0.2,
-          "syntax_correctness": 0.2,
-          "functionality_reward": 0.6
+          "format_compliance": 0.2,
+          "hypothesis_quality": 0.2,
+          "localization": 0.2,
+          "fix_quality": 0.3,
+          "semantic_similarity": 0.1,
+          "efficiency_potential": 0.0
         },
         "test_results": {
           "passed": 4,
@@ -449,9 +500,12 @@
         },
         "reward": 1.0,
         "reward_breakdown": {
-          "format_match": 0.2,
-          "syntax_correctness": 0.2,
-          "functionality_reward": 0.6
+          "format_compliance": 0.2,
+          "hypothesis_quality": 0.2,
+          "localization": 0.2,
+          "fix_quality": 0.3,
+          "semantic_similarity": 0.1,
+          "efficiency_potential": 0.0
         },
         "test_results": {
           "passed": 4,
@@ -473,9 +527,12 @@
         },
         "reward": 1.0,
         "reward_breakdown": {
-          "format_match": 0.2,
-          "syntax_correctness": 0.2,
-          "functionality_reward": 0.6
+          "format_compliance": 0.2,
+          "hypothesis_quality": 0.2,
+          "localization": 0.2,
+          "fix_quality": 0.3,
+          "semantic_similarity": 0.1,
+          "efficiency_potential": 0.0
         },
         "test_results": {
           "passed": 4,
@@ -497,9 +554,12 @@
         },
         "reward": 1.0,
         "reward_breakdown": {
-          "format_match": 0.2,
-          "syntax_correctness": 0.2,
-          "functionality_reward": 0.6
+          "format_compliance": 0.2,
+          "hypothesis_quality": 0.2,
+          "localization": 0.2,
+          "fix_quality": 0.3,
+          "semantic_similarity": 0.1,
+          "efficiency_potential": 0.0
         },
         "test_results": {
           "passed": 4,
@@ -521,9 +581,12 @@
         },
         "reward": 1.0,
         "reward_breakdown": {
-          "format_match": 0.2,
-          "syntax_correctness": 0.2,
-          "functionality_reward": 0.6
+          "format_compliance": 0.2,
+          "hypothesis_quality": 0.2,
+          "localization": 0.2,
+          "fix_quality": 0.3,
+          "semantic_similarity": 0.1,
+          "efficiency_potential": 0.0
         },
         "test_results": {
           "passed": 4,
@@ -545,9 +608,12 @@
         },
         "reward": 1.0,
         "reward_breakdown": {
-          "format_match": 0.2,
-          "syntax_correctness": 0.2,
-          "functionality_reward": 0.6
+          "format_compliance": 0.2,
+          "hypothesis_quality": 0.2,
+          "localization": 0.2,
+          "fix_quality": 0.3,
+          "semantic_similarity": 0.1,
+          "efficiency_potential": 0.0
         },
         "test_results": {
           "passed": 4,
@@ -569,9 +635,12 @@
         },
         "reward": 1.0,
         "reward_breakdown": {
-          "format_match": 0.2,
-          "syntax_correctness": 0.2,
-          "functionality_reward": 0.6
+          "format_compliance": 0.2,
+          "hypothesis_quality": 0.2,
+          "localization": 0.2,
+          "fix_quality": 0.3,
+          "semantic_similarity": 0.1,
+          "efficiency_potential": 0.0
         },
         "test_results": {
           "passed": 4,
@@ -593,9 +662,12 @@
         },
         "reward": 1.0,
         "reward_breakdown": {
-          "format_match": 0.2,
-          "syntax_correctness": 0.2,
-          "functionality_reward": 0.6
+          "format_compliance": 0.2,
+          "hypothesis_quality": 0.2,
+          "localization": 0.2,
+          "fix_quality": 0.3,
+          "semantic_similarity": 0.1,
+          "efficiency_potential": 0.0
         },
         "test_results": {
           "passed": 4,
@@ -617,9 +689,12 @@
         },
         "reward": 1.0,
         "reward_breakdown": {
-          "format_match": 0.2,
-          "syntax_correctness": 0.2,
-          "functionality_reward": 0.6
+          "format_compliance": 0.2,
+          "hypothesis_quality": 0.2,
+          "localization": 0.2,
+          "fix_quality": 0.3,
+          "semantic_similarity": 0.1,
+          "efficiency_potential": 0.0
         },
         "test_results": {
           "passed": 4,
@@ -641,9 +716,12 @@
         },
         "reward": 1.0,
         "reward_breakdown": {
-          "format_match": 0.2,
-          "syntax_correctness": 0.2,
-          "functionality_reward": 0.6
+          "format_compliance": 0.2,
+          "hypothesis_quality": 0.2,
+          "localization": 0.2,
+          "fix_quality": 0.3,
+          "semantic_similarity": 0.1,
+          "efficiency_potential": 0.0
         },
         "test_results": {
           "passed": 4,
@@ -665,9 +743,12 @@
         },
         "reward": 1.0,
         "reward_breakdown": {
-          "format_match": 0.2,
-          "syntax_correctness": 0.2,
-          "functionality_reward": 0.6
+          "format_compliance": 0.2,
+          "hypothesis_quality": 0.2,
+          "localization": 0.2,
+          "fix_quality": 0.3,
+          "semantic_similarity": 0.1,
+          "efficiency_potential": 0.0
         },
         "test_results": {
           "passed": 4,
@@ -689,9 +770,12 @@
         },
         "reward": 1.0,
         "reward_breakdown": {
-          "format_match": 0.2,
-          "syntax_correctness": 0.2,
-          "functionality_reward": 0.6
+          "format_compliance": 0.2,
+          "hypothesis_quality": 0.2,
+          "localization": 0.2,
+          "fix_quality": 0.3,
+          "semantic_similarity": 0.1,
+          "efficiency_potential": 0.0
         },
         "test_results": {
           "passed": 4,
@@ -713,9 +797,12 @@
         },
         "reward": 1.0,
         "reward_breakdown": {
-          "format_match": 0.2,
-          "syntax_correctness": 0.2,
-          "functionality_reward": 0.6
+          "format_compliance": 0.2,
+          "hypothesis_quality": 0.2,
+          "localization": 0.2,
+          "fix_quality": 0.3,
+          "semantic_similarity": 0.1,
+          "efficiency_potential": 0.0
         },
         "test_results": {
           "passed": 4,
@@ -737,9 +824,12 @@
         },
         "reward": 1.0,
         "reward_breakdown": {
-          "format_match": 0.2,
-          "syntax_correctness": 0.2,
-          "functionality_reward": 0.6
+          "format_compliance": 0.2,
+          "hypothesis_quality": 0.2,
+          "localization": 0.2,
+          "fix_quality": 0.3,
+          "semantic_similarity": 0.1,
+          "efficiency_potential": 0.0
         },
         "test_results": {
           "passed": 4,
@@ -761,9 +851,12 @@
         },
         "reward": 1.0,
         "reward_breakdown": {
-          "format_match": 0.2,
-          "syntax_correctness": 0.2,
-          "functionality_reward": 0.6
+          "format_compliance": 0.2,
+          "hypothesis_quality": 0.2,
+          "localization": 0.2,
+          "fix_quality": 0.3,
+          "semantic_similarity": 0.1,
+          "efficiency_potential": 0.0
         },
         "test_results": {
           "passed": 4,
@@ -785,9 +878,12 @@
         },
         "reward": 1.0,
         "reward_breakdown": {
-          "format_match": 0.2,
-          "syntax_correctness": 0.2,
-          "functionality_reward": 0.6
+          "format_compliance": 0.2,
+          "hypothesis_quality": 0.2,
+          "localization": 0.2,
+          "fix_quality": 0.3,
+          "semantic_similarity": 0.1,
+          "efficiency_potential": 0.0
         },
         "test_results": {
           "passed": 4,
@@ -809,9 +905,12 @@
         },
         "reward": 1.0,
         "reward_breakdown": {
-          "format_match": 0.2,
-          "syntax_correctness": 0.2,
-          "functionality_reward": 0.6
+          "format_compliance": 0.2,
+          "hypothesis_quality": 0.2,
+          "localization": 0.2,
+          "fix_quality": 0.3,
+          "semantic_similarity": 0.1,
+          "efficiency_potential": 0.0
         },
         "test_results": {
           "passed": 4,
@@ -833,9 +932,12 @@
         },
         "reward": 1.0,
         "reward_breakdown": {
-          "format_match": 0.2,
-          "syntax_correctness": 0.2,
-          "functionality_reward": 0.6
+          "format_compliance": 0.2,
+          "hypothesis_quality": 0.2,
+          "localization": 0.2,
+          "fix_quality": 0.3,
+          "semantic_similarity": 0.1,
+          "efficiency_potential": 0.0
         },
         "test_results": {
           "passed": 4,
@@ -857,9 +959,12 @@
         },
         "reward": 1.0,
         "reward_breakdown": {
-          "format_match": 0.2,
-          "syntax_correctness": 0.2,
-          "functionality_reward": 0.6
+          "format_compliance": 0.2,
+          "hypothesis_quality": 0.2,
+          "localization": 0.2,
+          "fix_quality": 0.3,
+          "semantic_similarity": 0.1,
+          "efficiency_potential": 0.0
         },
         "test_results": {
           "passed": 4,
@@ -881,9 +986,12 @@
         },
         "reward": 1.0,
         "reward_breakdown": {
-          "format_match": 0.2,
-          "syntax_correctness": 0.2,
-          "functionality_reward": 0.6
+          "format_compliance": 0.2,
+          "hypothesis_quality": 0.2,
+          "localization": 0.2,
+          "fix_quality": 0.3,
+          "semantic_similarity": 0.1,
+          "efficiency_potential": 0.0
         },
         "test_results": {
           "passed": 4,
@@ -905,9 +1013,12 @@
         },
         "reward": 1.0,
         "reward_breakdown": {
-          "format_match": 0.2,
-          "syntax_correctness": 0.2,
-          "functionality_reward": 0.6
+          "format_compliance": 0.2,
+          "hypothesis_quality": 0.2,
+          "localization": 0.2,
+          "fix_quality": 0.3,
+          "semantic_similarity": 0.1,
+          "efficiency_potential": 0.0
         },
         "test_results": {
           "passed": 4,
@@ -929,9 +1040,12 @@
         },
         "reward": 1.0,
         "reward_breakdown": {
-          "format_match": 0.2,
-          "syntax_correctness": 0.2,
-          "functionality_reward": 0.6
+          "format_compliance": 0.2,
+          "hypothesis_quality": 0.2,
+          "localization": 0.2,
+          "fix_quality": 0.3,
+          "semantic_similarity": 0.1,
+          "efficiency_potential": 0.0
         },
         "test_results": {
           "passed": 4,
@@ -953,9 +1067,12 @@
         },
         "reward": 1.0,
         "reward_breakdown": {
-          "format_match": 0.2,
-          "syntax_correctness": 0.2,
-          "functionality_reward": 0.6
+          "format_compliance": 0.2,
+          "hypothesis_quality": 0.2,
+          "localization": 0.2,
+          "fix_quality": 0.3,
+          "semantic_similarity": 0.1,
+          "efficiency_potential": 0.0
         },
         "test_results": {
           "passed": 4,
@@ -977,9 +1094,12 @@
         },
         "reward": 1.0,
         "reward_breakdown": {
-          "format_match": 0.2,
-          "syntax_correctness": 0.2,
-          "functionality_reward": 0.6
+          "format_compliance": 0.2,
+          "hypothesis_quality": 0.2,
+          "localization": 0.2,
+          "fix_quality": 0.3,
+          "semantic_similarity": 0.1,
+          "efficiency_potential": 0.0
         },
         "test_results": {
           "passed": 4,
@@ -1003,9 +1123,12 @@
         },
         "reward": 1.0,
         "reward_breakdown": {
-          "format_match": 0.2,
-          "syntax_correctness": 0.2,
-          "functionality_reward": 0.6
+          "format_compliance": 0.2,
+          "hypothesis_quality": 0.2,
+          "localization": 0.2,
+          "fix_quality": 0.3,
+          "semantic_similarity": 0.1,
+          "efficiency_potential": 0.0
         },
         "test_results": {
           "passed": 3,
@@ -1027,9 +1150,12 @@
         },
         "reward": 1.0,
         "reward_breakdown": {
-          "format_match": 0.2,
-          "syntax_correctness": 0.2,
-          "functionality_reward": 0.6
+          "format_compliance": 0.2,
+          "hypothesis_quality": 0.2,
+          "localization": 0.2,
+          "fix_quality": 0.3,
+          "semantic_similarity": 0.1,
+          "efficiency_potential": 0.0
         },
         "test_results": {
           "passed": 4,
@@ -1051,9 +1177,12 @@
         },
         "reward": -0.5,
         "reward_breakdown": {
-          "format_match": 0.2,
-          "syntax_correctness": 0.0,
-          "functionality_reward": -0.7
+          "format_compliance": 0.2,
+          "hypothesis_quality": 0.0,
+          "localization": 0.0,
+          "fix_quality": 0.0,
+          "semantic_similarity": 0.0,
+          "efficiency_potential": 0.0
         },
         "test_results": {
           "passed": 0,
@@ -1075,9 +1204,12 @@
         },
         "reward": 1.0,
         "reward_breakdown": {
-          "format_match": 0.2,
-          "syntax_correctness": 0.2,
-          "functionality_reward": 0.6
+          "format_compliance": 0.2,
+          "hypothesis_quality": 0.2,
+          "localization": 0.2,
+          "fix_quality": 0.3,
+          "semantic_similarity": 0.1,
+          "efficiency_potential": 0.0
         },
         "test_results": {
           "passed": 4,
@@ -1099,9 +1231,12 @@
         },
         "reward": 1.0,
         "reward_breakdown": {
-          "format_match": 0.2,
-          "syntax_correctness": 0.2,
-          "functionality_reward": 0.6
+          "format_compliance": 0.2,
+          "hypothesis_quality": 0.2,
+          "localization": 0.2,
+          "fix_quality": 0.3,
+          "semantic_similarity": 0.1,
+          "efficiency_potential": 0.0
         },
         "test_results": {
           "passed": 4,
@@ -1123,9 +1258,12 @@
         },
         "reward": 1.0,
         "reward_breakdown": {
-          "format_match": 0.2,
-          "syntax_correctness": 0.2,
-          "functionality_reward": 0.6
+          "format_compliance": 0.2,
+          "hypothesis_quality": 0.2,
+          "localization": 0.2,
+          "fix_quality": 0.3,
+          "semantic_similarity": 0.1,
+          "efficiency_potential": 0.0
         },
         "test_results": {
           "passed": 4,
@@ -1147,9 +1285,12 @@
         },
         "reward": 1.0,
         "reward_breakdown": {
-          "format_match": 0.2,
-          "syntax_correctness": 0.2,
-          "functionality_reward": 0.6
+          "format_compliance": 0.2,
+          "hypothesis_quality": 0.2,
+          "localization": 0.2,
+          "fix_quality": 0.3,
+          "semantic_similarity": 0.1,
+          "efficiency_potential": 0.0
         },
         "test_results": {
           "passed": 4,
@@ -1171,9 +1312,12 @@
         },
         "reward": -0.5,
         "reward_breakdown": {
-          "format_match": 0.2,
-          "syntax_correctness": 0.0,
-          "functionality_reward": -0.7
+          "format_compliance": 0.2,
+          "hypothesis_quality": 0.0,
+          "localization": 0.0,
+          "fix_quality": 0.0,
+          "semantic_similarity": 0.0,
+          "efficiency_potential": 0.0
         },
         "test_results": {
           "passed": 0,
@@ -1195,9 +1339,12 @@
         },
         "reward": 1.0,
         "reward_breakdown": {
-          "format_match": 0.2,
-          "syntax_correctness": 0.2,
-          "functionality_reward": 0.6
+          "format_compliance": 0.2,
+          "hypothesis_quality": 0.2,
+          "localization": 0.2,
+          "fix_quality": 0.3,
+          "semantic_similarity": 0.1,
+          "efficiency_potential": 0.0
         },
         "test_results": {
           "passed": 4,
@@ -1219,9 +1366,12 @@
         },
         "reward": 1.0,
         "reward_breakdown": {
-          "format_match": 0.2,
-          "syntax_correctness": 0.2,
-          "functionality_reward": 0.6
+          "format_compliance": 0.2,
+          "hypothesis_quality": 0.2,
+          "localization": 0.2,
+          "fix_quality": 0.3,
+          "semantic_similarity": 0.1,
+          "efficiency_potential": 0.0
         },
         "test_results": {
           "passed": 4,
@@ -1243,9 +1393,12 @@
         },
         "reward": 1.0,
         "reward_breakdown": {
-          "format_match": 0.2,
-          "syntax_correctness": 0.2,
-          "functionality_reward": 0.6
+          "format_compliance": 0.2,
+          "hypothesis_quality": 0.2,
+          "localization": 0.2,
+          "fix_quality": 0.3,
+          "semantic_similarity": 0.1,
+          "efficiency_potential": 0.0
         },
         "test_results": {
           "passed": 4,
@@ -1267,9 +1420,12 @@
         },
         "reward": 1.0,
         "reward_breakdown": {
-          "format_match": 0.2,
-          "syntax_correctness": 0.2,
-          "functionality_reward": 0.6
+          "format_compliance": 0.2,
+          "hypothesis_quality": 0.2,
+          "localization": 0.2,
+          "fix_quality": 0.3,
+          "semantic_similarity": 0.1,
+          "efficiency_potential": 0.0
         },
         "test_results": {
           "passed": 4,
@@ -1291,9 +1447,12 @@
         },
         "reward": -0.5,
         "reward_breakdown": {
-          "format_match": 0.2,
-          "syntax_correctness": 0.0,
-          "functionality_reward": -0.7
+          "format_compliance": 0.2,
+          "hypothesis_quality": 0.0,
+          "localization": 0.0,
+          "fix_quality": 0.0,
+          "semantic_similarity": 0.0,
+          "efficiency_potential": 0.0
         },
         "test_results": {
           "passed": 0,
@@ -1315,9 +1474,12 @@
         },
         "reward": 1.0,
         "reward_breakdown": {
-          "format_match": 0.2,
-          "syntax_correctness": 0.2,
-          "functionality_reward": 0.6
+          "format_compliance": 0.2,
+          "hypothesis_quality": 0.2,
+          "localization": 0.2,
+          "fix_quality": 0.3,
+          "semantic_similarity": 0.1,
+          "efficiency_potential": 0.0
         },
         "test_results": {
           "passed": 4,
@@ -1339,9 +1501,12 @@
         },
         "reward": 1.0,
         "reward_breakdown": {
-          "format_match": 0.2,
-          "syntax_correctness": 0.2,
-          "functionality_reward": 0.6
+          "format_compliance": 0.2,
+          "hypothesis_quality": 0.2,
+          "localization": 0.2,
+          "fix_quality": 0.3,
+          "semantic_similarity": 0.1,
+          "efficiency_potential": 0.0
         },
         "test_results": {
           "passed": 4,
@@ -1363,9 +1528,12 @@
         },
         "reward": 1.0,
         "reward_breakdown": {
-          "format_match": 0.2,
-          "syntax_correctness": 0.2,
-          "functionality_reward": 0.6
+          "format_compliance": 0.2,
+          "hypothesis_quality": 0.2,
+          "localization": 0.2,
+          "fix_quality": 0.3,
+          "semantic_similarity": 0.1,
+          "efficiency_potential": 0.0
         },
         "test_results": {
           "passed": 4,
@@ -1387,9 +1555,12 @@
         },
         "reward": 1.0,
         "reward_breakdown": {
-          "format_match": 0.2,
-          "syntax_correctness": 0.2,
-          "functionality_reward": 0.6
+          "format_compliance": 0.2,
+          "hypothesis_quality": 0.2,
+          "localization": 0.2,
+          "fix_quality": 0.3,
+          "semantic_similarity": 0.1,
+          "efficiency_potential": 0.0
         },
         "test_results": {
           "passed": 4,
@@ -1411,9 +1582,12 @@
         },
         "reward": -0.5,
         "reward_breakdown": {
-          "format_match": 0.2,
-          "syntax_correctness": 0.0,
-          "functionality_reward": -0.7
+          "format_compliance": 0.2,
+          "hypothesis_quality": 0.0,
+          "localization": 0.0,
+          "fix_quality": 0.0,
+          "semantic_similarity": 0.0,
+          "efficiency_potential": 0.0
         },
         "test_results": {
           "passed": 0,
@@ -1435,9 +1609,12 @@
         },
         "reward": 1.0,
         "reward_breakdown": {
-          "format_match": 0.2,
-          "syntax_correctness": 0.2,
-          "functionality_reward": 0.6
+          "format_compliance": 0.2,
+          "hypothesis_quality": 0.2,
+          "localization": 0.2,
+          "fix_quality": 0.3,
+          "semantic_similarity": 0.1,
+          "efficiency_potential": 0.0
         },
         "test_results": {
           "passed": 4,
@@ -1459,9 +1636,12 @@
         },
         "reward": 1.0,
         "reward_breakdown": {
-          "format_match": 0.2,
-          "syntax_correctness": 0.2,
-          "functionality_reward": 0.6
+          "format_compliance": 0.2,
+          "hypothesis_quality": 0.2,
+          "localization": 0.2,
+          "fix_quality": 0.3,
+          "semantic_similarity": 0.1,
+          "efficiency_potential": 0.0
         },
         "test_results": {
           "passed": 4,
@@ -1483,9 +1663,12 @@
         },
         "reward": 1.0,
         "reward_breakdown": {
-          "format_match": 0.2,
-          "syntax_correctness": 0.2,
-          "functionality_reward": 0.6
+          "format_compliance": 0.2,
+          "hypothesis_quality": 0.2,
+          "localization": 0.2,
+          "fix_quality": 0.3,
+          "semantic_similarity": 0.1,
+          "efficiency_potential": 0.0
         },
         "test_results": {
           "passed": 4,
@@ -1507,9 +1690,12 @@
         },
         "reward": 1.0,
         "reward_breakdown": {
-          "format_match": 0.2,
-          "syntax_correctness": 0.2,
-          "functionality_reward": 0.6
+          "format_compliance": 0.2,
+          "hypothesis_quality": 0.2,
+          "localization": 0.2,
+          "fix_quality": 0.3,
+          "semantic_similarity": 0.1,
+          "efficiency_potential": 0.0
         },
         "test_results": {
           "passed": 4,
@@ -1531,9 +1717,12 @@
         },
         "reward": -0.5,
         "reward_breakdown": {
-          "format_match": 0.2,
-          "syntax_correctness": 0.0,
-          "functionality_reward": -0.7
+          "format_compliance": 0.2,
+          "hypothesis_quality": 0.0,
+          "localization": 0.0,
+          "fix_quality": 0.0,
+          "semantic_similarity": 0.0,
+          "efficiency_potential": 0.0
         },
         "test_results": {
           "passed": 0,
@@ -1555,9 +1744,12 @@
         },
         "reward": 1.0,
         "reward_breakdown": {
-          "format_match": 0.2,
-          "syntax_correctness": 0.2,
-          "functionality_reward": 0.6
+          "format_compliance": 0.2,
+          "hypothesis_quality": 0.2,
+          "localization": 0.2,
+          "fix_quality": 0.3,
+          "semantic_similarity": 0.1,
+          "efficiency_potential": 0.0
         },
         "test_results": {
           "passed": 4,
@@ -1579,9 +1771,12 @@
         },
         "reward": 1.0,
         "reward_breakdown": {
-          "format_match": 0.2,
-          "syntax_correctness": 0.2,
-          "functionality_reward": 0.6
+          "format_compliance": 0.2,
+          "hypothesis_quality": 0.2,
+          "localization": 0.2,
+          "fix_quality": 0.3,
+          "semantic_similarity": 0.1,
+          "efficiency_potential": 0.0
         },
         "test_results": {
           "passed": 4,
@@ -1603,9 +1798,12 @@
         },
         "reward": 1.0,
         "reward_breakdown": {
-          "format_match": 0.2,
-          "syntax_correctness": 0.2,
-          "functionality_reward": 0.6
+          "format_compliance": 0.2,
+          "hypothesis_quality": 0.2,
+          "localization": 0.2,
+          "fix_quality": 0.3,
+          "semantic_similarity": 0.1,
+          "efficiency_potential": 0.0
         },
         "test_results": {
           "passed": 4,
@@ -1627,9 +1825,12 @@
         },
         "reward": 1.0,
         "reward_breakdown": {
-          "format_match": 0.2,
-          "syntax_correctness": 0.2,
-          "functionality_reward": 0.6
+          "format_compliance": 0.2,
+          "hypothesis_quality": 0.2,
+          "localization": 0.2,
+          "fix_quality": 0.3,
+          "semantic_similarity": 0.1,
+          "efficiency_potential": 0.0
         },
         "test_results": {
           "passed": 4,
@@ -1651,9 +1852,12 @@
         },
         "reward": -0.5,
         "reward_breakdown": {
-          "format_match": 0.2,
-          "syntax_correctness": 0.0,
-          "functionality_reward": -0.7
+          "format_compliance": 0.2,
+          "hypothesis_quality": 0.0,
+          "localization": 0.0,
+          "fix_quality": 0.0,
+          "semantic_similarity": 0.0,
+          "efficiency_potential": 0.0
         },
         "test_results": {
           "passed": 0,
@@ -1675,9 +1879,12 @@
         },
         "reward": 1.0,
         "reward_breakdown": {
-          "format_match": 0.2,
-          "syntax_correctness": 0.2,
-          "functionality_reward": 0.6
+          "format_compliance": 0.2,
+          "hypothesis_quality": 0.2,
+          "localization": 0.2,
+          "fix_quality": 0.3,
+          "semantic_similarity": 0.1,
+          "efficiency_potential": 0.0
         },
         "test_results": {
           "passed": 4,
@@ -1699,9 +1906,12 @@
         },
         "reward": -0.5,
         "reward_breakdown": {
-          "format_match": 0.2,
-          "syntax_correctness": 0.0,
-          "functionality_reward": -0.7
+          "format_compliance": 0.2,
+          "hypothesis_quality": 0.0,
+          "localization": 0.0,
+          "fix_quality": 0.0,
+          "semantic_similarity": 0.0,
+          "efficiency_potential": 0.0
         },
         "test_results": {
           "passed": 0,
@@ -1725,9 +1935,12 @@
         },
         "reward": 1.0,
         "reward_breakdown": {
-          "format_match": 0.2,
-          "syntax_correctness": 0.2,
-          "functionality_reward": 0.6
+          "format_compliance": 0.2,
+          "hypothesis_quality": 0.2,
+          "localization": 0.2,
+          "fix_quality": 0.3,
+          "semantic_similarity": 0.1,
+          "efficiency_potential": 0.0
         },
         "test_results": {
           "passed": 4,
@@ -1749,9 +1962,12 @@
         },
         "reward": -0.5,
         "reward_breakdown": {
-          "format_match": 0.2,
-          "syntax_correctness": 0.0,
-          "functionality_reward": -0.7
+          "format_compliance": 0.2,
+          "hypothesis_quality": 0.0,
+          "localization": 0.0,
+          "fix_quality": 0.0,
+          "semantic_similarity": 0.0,
+          "efficiency_potential": 0.0
         },
         "test_results": {
           "passed": 0,
@@ -1773,9 +1989,12 @@
         },
         "reward": 1.0,
         "reward_breakdown": {
-          "format_match": 0.2,
-          "syntax_correctness": 0.2,
-          "functionality_reward": 0.6
+          "format_compliance": 0.2,
+          "hypothesis_quality": 0.2,
+          "localization": 0.2,
+          "fix_quality": 0.3,
+          "semantic_similarity": 0.1,
+          "efficiency_potential": 0.0
         },
         "test_results": {
           "passed": 4,
@@ -1797,9 +2016,12 @@
         },
         "reward": -0.5,
         "reward_breakdown": {
-          "format_match": 0.2,
-          "syntax_correctness": 0.0,
-          "functionality_reward": -0.7
+          "format_compliance": 0.2,
+          "hypothesis_quality": 0.0,
+          "localization": 0.0,
+          "fix_quality": 0.0,
+          "semantic_similarity": 0.0,
+          "efficiency_potential": 0.0
         },
         "test_results": {
           "passed": 0,
@@ -1821,9 +2043,12 @@
         },
         "reward": 1.0,
         "reward_breakdown": {
-          "format_match": 0.2,
-          "syntax_correctness": 0.2,
-          "functionality_reward": 0.6
+          "format_compliance": 0.2,
+          "hypothesis_quality": 0.2,
+          "localization": 0.2,
+          "fix_quality": 0.3,
+          "semantic_similarity": 0.1,
+          "efficiency_potential": 0.0
         },
         "test_results": {
           "passed": 4,
@@ -1845,9 +2070,12 @@
         },
         "reward": -0.5,
         "reward_breakdown": {
-          "format_match": 0.2,
-          "syntax_correctness": 0.0,
-          "functionality_reward": -0.7
+          "format_compliance": 0.2,
+          "hypothesis_quality": 0.0,
+          "localization": 0.0,
+          "fix_quality": 0.0,
+          "semantic_similarity": 0.0,
+          "efficiency_potential": 0.0
         },
         "test_results": {
           "passed": 0,
@@ -1869,9 +2097,12 @@
         },
         "reward": 1.0,
         "reward_breakdown": {
-          "format_match": 0.2,
-          "syntax_correctness": 0.2,
-          "functionality_reward": 0.6
+          "format_compliance": 0.2,
+          "hypothesis_quality": 0.2,
+          "localization": 0.2,
+          "fix_quality": 0.3,
+          "semantic_similarity": 0.1,
+          "efficiency_potential": 0.0
         },
         "test_results": {
           "passed": 4,
@@ -1893,9 +2124,12 @@
         },
         "reward": -0.5,
         "reward_breakdown": {
-          "format_match": 0.2,
-          "syntax_correctness": 0.0,
-          "functionality_reward": -0.7
+          "format_compliance": 0.2,
+          "hypothesis_quality": 0.0,
+          "localization": 0.0,
+          "fix_quality": 0.0,
+          "semantic_similarity": 0.0,
+          "efficiency_potential": 0.0
         },
         "test_results": {
           "passed": 0,
@@ -1917,9 +2151,12 @@
         },
         "reward": 1.0,
         "reward_breakdown": {
-          "format_match": 0.2,
-          "syntax_correctness": 0.2,
-          "functionality_reward": 0.6
+          "format_compliance": 0.2,
+          "hypothesis_quality": 0.2,
+          "localization": 0.2,
+          "fix_quality": 0.3,
+          "semantic_similarity": 0.1,
+          "efficiency_potential": 0.0
         },
         "test_results": {
           "passed": 4,
@@ -1941,9 +2178,12 @@
         },
         "reward": -0.5,
         "reward_breakdown": {
-          "format_match": 0.2,
-          "syntax_correctness": 0.0,
-          "functionality_reward": -0.7
+          "format_compliance": 0.2,
+          "hypothesis_quality": 0.0,
+          "localization": 0.0,
+          "fix_quality": 0.0,
+          "semantic_similarity": 0.0,
+          "efficiency_potential": 0.0
         },
         "test_results": {
           "passed": 0,
@@ -1965,9 +2205,12 @@
         },
         "reward": -0.5,
         "reward_breakdown": {
-          "format_match": 0.2,
-          "syntax_correctness": 0.0,
-          "functionality_reward": -0.7
+          "format_compliance": 0.2,
+          "hypothesis_quality": 0.0,
+          "localization": 0.0,
+          "fix_quality": 0.0,
+          "semantic_similarity": 0.0,
+          "efficiency_potential": 0.0
         },
         "test_results": {
           "passed": 0,
@@ -1989,9 +2232,12 @@
         },
         "reward": -0.5,
         "reward_breakdown": {
-          "format_match": 0.2,
-          "syntax_correctness": 0.0,
-          "functionality_reward": -0.7
+          "format_compliance": 0.2,
+          "hypothesis_quality": 0.0,
+          "localization": 0.0,
+          "fix_quality": 0.0,
+          "semantic_similarity": 0.0,
+          "efficiency_potential": 0.0
         },
         "test_results": {
           "passed": 0,
@@ -2013,9 +2259,12 @@
         },
         "reward": 1.0,
         "reward_breakdown": {
-          "format_match": 0.2,
-          "syntax_correctness": 0.2,
-          "functionality_reward": 0.6
+          "format_compliance": 0.2,
+          "hypothesis_quality": 0.2,
+          "localization": 0.2,
+          "fix_quality": 0.3,
+          "semantic_similarity": 0.1,
+          "efficiency_potential": 0.0
         },
         "test_results": {
           "passed": 4,
@@ -2037,9 +2286,12 @@
         },
         "reward": -0.5,
         "reward_breakdown": {
-          "format_match": 0.2,
-          "syntax_correctness": 0.0,
-          "functionality_reward": -0.7
+          "format_compliance": 0.2,
+          "hypothesis_quality": 0.0,
+          "localization": 0.0,
+          "fix_quality": 0.0,
+          "semantic_similarity": 0.0,
+          "efficiency_potential": 0.0
         },
         "test_results": {
           "passed": 0,
@@ -2061,9 +2313,12 @@
         },
         "reward": 1.0,
         "reward_breakdown": {
-          "format_match": 0.2,
-          "syntax_correctness": 0.2,
-          "functionality_reward": 0.6
+          "format_compliance": 0.2,
+          "hypothesis_quality": 0.2,
+          "localization": 0.2,
+          "fix_quality": 0.3,
+          "semantic_similarity": 0.1,
+          "efficiency_potential": 0.0
         },
         "test_results": {
           "passed": 4,
@@ -2085,9 +2340,12 @@
         },
         "reward": -0.5,
         "reward_breakdown": {
-          "format_match": 0.2,
-          "syntax_correctness": 0.0,
-          "functionality_reward": -0.7
+          "format_compliance": 0.2,
+          "hypothesis_quality": 0.0,
+          "localization": 0.0,
+          "fix_quality": 0.0,
+          "semantic_similarity": 0.0,
+          "efficiency_potential": 0.0
         },
         "test_results": {
           "passed": 0,
@@ -2109,9 +2367,12 @@
         },
         "reward": 1.0,
         "reward_breakdown": {
-          "format_match": 0.2,
-          "syntax_correctness": 0.2,
-          "functionality_reward": 0.6
+          "format_compliance": 0.2,
+          "hypothesis_quality": 0.2,
+          "localization": 0.2,
+          "fix_quality": 0.3,
+          "semantic_similarity": 0.1,
+          "efficiency_potential": 0.0
         },
         "test_results": {
           "passed": 4,
@@ -2133,9 +2394,12 @@
         },
         "reward": -0.5,
         "reward_breakdown": {
-          "format_match": 0.2,
-          "syntax_correctness": 0.0,
-          "functionality_reward": -0.7
+          "format_compliance": 0.2,
+          "hypothesis_quality": 0.0,
+          "localization": 0.0,
+          "fix_quality": 0.0,
+          "semantic_similarity": 0.0,
+          "efficiency_potential": 0.0
         },
         "test_results": {
           "passed": 0,
@@ -2157,9 +2421,12 @@
         },
         "reward": 1.0,
         "reward_breakdown": {
-          "format_match": 0.2,
-          "syntax_correctness": 0.2,
-          "functionality_reward": 0.6
+          "format_compliance": 0.2,
+          "hypothesis_quality": 0.2,
+          "localization": 0.2,
+          "fix_quality": 0.3,
+          "semantic_similarity": 0.1,
+          "efficiency_potential": 0.0
         },
         "test_results": {
           "passed": 4,
@@ -2181,9 +2448,12 @@
         },
         "reward": -0.5,
         "reward_breakdown": {
-          "format_match": 0.2,
-          "syntax_correctness": 0.0,
-          "functionality_reward": -0.7
+          "format_compliance": 0.2,
+          "hypothesis_quality": 0.0,
+          "localization": 0.0,
+          "fix_quality": 0.0,
+          "semantic_similarity": 0.0,
+          "efficiency_potential": 0.0
         },
         "test_results": {
           "passed": 0,

@@ -1,7 +1,7 @@
 import os
 import sys
 
-# ensure data is importable
+
 sys.path.append(os.path.abspath('.'))
 
 from data.generate_bugs import TIER1_BUGS, TIER2_BUGS, TIER3_BUGS
@@ -34,7 +34,7 @@ for b in TIER1_BUGS:
 for b in TIER2_BUGS:
     if b["id"] == "t2_003":
         for t in b["test_cases"]:
-            # If t["input"] is nested too deep, unpack it first.
+            
             while len(t["input"]) == 1 and isinstance(t["input"][0], list) and len(t["input"][0]) == 2:
                 t["input"] = t["input"][0]
             if len(t["input"]) == 2 and not isinstance(t["input"][0], list) and not isinstance(t["input"], tuple):
@@ -55,10 +55,10 @@ for b in TIER2_BUGS:
 for b in TIER3_BUGS:
     if b["id"] == "t3_002":
         for t in b["test_cases"]:
-            # Unpack completely
+            
             while len(t["input"]) == 1 and isinstance(t["input"][0], list):
                 t["input"] = t["input"][0]
-            # Wrap once
+            
             t["input"] = [t["input"]]
     elif b["id"] == "t3_007":
         b["buggy_code"] = b["buggy_code"].replace("calc_area(height, width)", "calc_area(height, height)")

@@ -1,5 +1,5 @@
 t3_bugs = [
-    # 6 bugs: wrong argument order
+    
     {
         "id": "t3_003", "difficulty": 3, "bug_type": "wrong_argument_order", "function_name": "process_user",
         "buggy_code": "def format_name(first, last):\n    return f'{last}, {first}'\n\ndef process_user(first_name, last_name):\n    return format_name(last_name, first_name)",
@@ -42,7 +42,7 @@ t3_bugs = [
         "initial_error": "AssertionError: expected 8, got 9", "bug_location": {"function": "power_wrapper", "line_start": 5},
         "test_cases": [{"input": [2, 3], "expected_output": 8}, {"input": [3, 2], "expected_output": 9}, {"input": [5, 2], "expected_output": 25}, {"input": [2, 4], "expected_output": 16}]
     },
-    # 6 bugs: state not reset
+    
     {
         "id": "t3_009", "difficulty": 3, "bug_type": "state_not_reset", "function_name": "get_unique_items",
         "buggy_code": "seen = set()\ndef filter_unique(items):\n    res = []\n    for item in items:\n        if item not in seen:\n            seen.add(item)\n            res.append(item)\n    return res\n\ndef get_unique_items(items):\n    return filter_unique(items)",
@@ -85,7 +85,7 @@ t3_bugs = [
         "initial_error": "AssertionError: state leak between calls", "bug_location": {"function": "log_error", "line_start": 3},
         "test_cases": [{"input": [["e1"]], "expected_output": ["e1"]}, {"input": [["e2"]], "expected_output": ["e2"]}, {"input": [["e3", "e4"]], "expected_output": ["e3", "e4"]}, {"input": [["e5"]], "expected_output": ["e5"]}]
     },
-    # 6 bugs: missing edge case in helper
+    
     {
         "id": "t3_015", "difficulty": 3, "bug_type": "missing_edge_case", "function_name": "process_data",
         "buggy_code": "def get_first(lst):\n    return lst[0]\n\ndef process_data(data):\n    if not data:\n        return None\n    return [get_first(d) for d in data]",

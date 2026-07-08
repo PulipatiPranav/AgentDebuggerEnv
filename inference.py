@@ -1,14 +1,3 @@
-"""
-AgentDebuggerEnv Baseline Inference Script
-==========================================
-Baseline evaluation script for testing agent performance in the 
-AgentDebugger environment.
-
-System Configuration:
-- API_BASE_URL: LLM API endpoint
-- MODEL_NAME:   Model identifier for evaluation
-- HF_TOKEN:     Authentication token
-"""
 
 import os
 import json
@@ -18,7 +7,7 @@ import random
 from openai import OpenAI, APIError, RateLimitError, APIConnectionError, APITimeoutError
 import requests
 
-# ── Environment variables (never hardcode these) ──────────────────────────────
+
 API_BASE_URL = os.environ.get("API_BASE_URL", "https://router.huggingface.co/v1")
 MODEL_NAME   = os.environ.get("MODEL_NAME", "meta-llama/Llama-3.1-70B-Instruct")
 HF_TOKEN     = os.environ.get("HF_TOKEN") or os.environ.get("OPENAI_API_KEY", "")
@@ -66,10 +55,9 @@ Guidelines:
 - For concurrent tasks, ensure atomic operations and proper synchronization.
 """
 
-# ── Robust API Completion Helper ──────────────────────────────────────────────
+
 
 def get_completion(messages: list, model: str = MODEL_NAME, max_retries: int = 5) -> str:
-    """Gets LLM completion with exponential backoff and retry logic."""
     for attempt in range(max_retries):
         try:
             completion = client.chat.completions.create(
@@ -77,7 +65,7 @@ def get_completion(messages: list, model: str = MODEL_NAME, max_retries: int = 5
                 messages=messages,
                 max_tokens=1200,
                 temperature=0.2,
-                timeout=60.0  # Add a timeout to prevent hanging forever
+                timeout=60.0  
             )
             return completion.choices[0].message.content
         except (RateLimitError, APIConnectionError, APITimeoutError) as e:
@@ -87,7 +75,7 @@ def get_completion(messages: list, model: str = MODEL_NAME, max_retries: int = 5
             print(f"  [!] API Error ({type(e).__name__}). Retrying in {wait_time:.1f}s... (Attempt {attempt+1}/{max_retries})")
             time.sleep(wait_time)
         except APIError as e:
-            # For general API errors, log and potentially retry if it's a 5xx
+            
             print(f"  [!] OpenAI API Error: {e}")
             if attempt == max_retries - 1:
                 return ""
@@ -99,22 +87,21 @@ def get_completion(messages: list, model: str = MODEL_NAME, max_retries: int = 5
 
 
 def parse_action(raw: str) -> dict:
-    """Parse LLM response to action dict. Handle markdown code blocks."""
     raw = raw.strip()
-    # Strip markdown code blocks if present
+    
     raw = re.sub(r'^```(?:json)?\s*', '', raw, flags=re.MULTILINE)
     raw = re.sub(r'\s*```$', '', raw, flags=re.MULTILINE)
     try:
         return json.loads(raw)
     except json.JSONDecodeError:
-        # Try to extract first JSON object
+        
         match = re.search(r'\{.*\}', raw, re.DOTALL)
         if match:
             try:
                 return json.loads(match.group())
             except json.JSONDecodeError:
                 pass
-    # Fallback: give up
+    
     return {
         "action_type": "give_up",
         "final_diagnosis": f"Failed to parse response: {raw[:200]}"
@@ -149,7 +136,7 @@ def build_step_message(obs: dict, reward: dict, info: dict) -> str:
 
     if last_attempt and last_attempt.get("execution_output"):
         output = last_attempt["execution_output"]
-        # Truncate long outputs to stay within token budget
+        
         if len(output) > 1500:
             output = output[:750] + "\n...[truncated]...\n" + output[-750:]
         msg += f"\nNEW TEST OUTPUT:\n{output}\n"
@@ -163,14 +150,13 @@ def build_step_message(obs: dict, reward: dict, info: dict) -> str:
 
 
 def run_episode(task_id: str) -> dict:
-    """Run one complete debugging episode. Returns result dict."""
 
-    # Reset environment
+    
     reset_resp = requests.post(f"{ENV_BASE_URL}/reset", json={"task_id": task_id}, timeout=60)
     reset_resp.raise_for_status()
     obs = reset_resp.json()
 
-    # [START] task=NAME
+    
     print(f"\n[START] task={task_id}", flush=True)
     print(f"  Description: {obs['task_description'][:100]}...", flush=True)
 
@@ -197,14 +183,14 @@ def run_episode(task_id: str) -> dict:
             action = parse_action(raw)
         except Exception as e:
             print(f"  [✗] Failed to get response from LLM after retries: {e}")
-            # Fallback action to avoid crashing the whole episode
+            
             action = {
                 "action_type": "give_up",
                 "final_diagnosis": f"Inference system failure: {str(e)}"
             }
             raw = json.dumps(action)
 
-        # Submit action to environment
+        
         step_resp = requests.post(f"{ENV_BASE_URL}/step", json=action, timeout=60)
         step_resp.raise_for_status()
         result = step_resp.json()
@@ -215,10 +201,10 @@ def run_episode(task_id: str) -> dict:
         info   = result["info"]
         last_result = result
 
-        # [STEP] step=N reward=R
+        
         print(f"  [STEP {obs['step_number']}] Action: {action.get('action_type')} | Tests: {obs['tests_passed']}/{obs['tests_total']} | Reward: {reward['step_reward']:+.3f}", flush=True)
 
-        # Build context for next LLM call
+        
         step_msg = build_step_message(obs, reward, info)
         messages.append({"role": "assistant", "content": raw})
         messages.append({"role": "user",      "content": step_msg})
@@ -239,7 +225,7 @@ def run_episode(task_id: str) -> dict:
         "final_action_type":   action.get("action_type", "unknown")
     }
 
-    # [END] task=NAME score=S steps=N
+    
     print(f"[END] task={task_id} score={result['grader_score']} steps={result['steps_taken']}", flush=True)
 
     return result
@@ -248,7 +234,7 @@ def run_episode(task_id: str) -> dict:
 def main():
     print("AgentDebuggerEnv — Baseline Inference")
     
-    # ── Environment validation ────────────────────────────────────────────────
+    
     has_token = bool(HF_TOKEN and len(HF_TOKEN) > 5)
     masked_token = f"{HF_TOKEN[:4]}...{HF_TOKEN[-4:]}" if has_token else "MISSING"
     

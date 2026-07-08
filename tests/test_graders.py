@@ -1,16 +1,12 @@
-"""
-Tests for graders — determinism and range validation.
-"""
 
 import pytest
 from env.graders import get_grader
 from env.tasks.registry import get_task
 
 
-# ── Determinism Tests ────────────────────────────────────────────────────────
+
 
 def _make_dummy_attempts(n=2, tests_passed=3, tests_total=8):
-    """Create dummy attempt data for testing."""
     return [
         {
             "attempt_number": i + 1,
@@ -27,7 +23,6 @@ def _make_dummy_attempts(n=2, tests_passed=3, tests_total=8):
 
 
 def test_easy_grader_deterministic():
-    """Same input to easy grader must produce same output."""
     grader = get_grader("easy")
     task = get_task("easy")
     attempts = _make_dummy_attempts(2, tests_passed=7, tests_total=8)
@@ -39,7 +34,6 @@ def test_easy_grader_deterministic():
 
 
 def test_medium_grader_deterministic():
-    """Same input to medium grader must produce same output."""
     grader = get_grader("medium")
     task = get_task("medium")
     attempts = _make_dummy_attempts(3, tests_passed=6, tests_total=10)
@@ -51,10 +45,9 @@ def test_medium_grader_deterministic():
 
 
 def test_hard_grader_deterministic():
-    """Same input to hard grader must produce same output (excluding concurrent test randomness)."""
     grader = get_grader("hard")
     task = get_task("hard")
-    # Use buggy code so concurrent test is deterministically failing
+    
     attempts = _make_dummy_attempts(2, tests_passed=8, tests_total=8)
     hypotheses = ["race condition in increment"]
 
@@ -63,11 +56,10 @@ def test_hard_grader_deterministic():
     assert score1 == score2, f"Hard grader not deterministic: {score1} != {score2}"
 
 
-# ── Range Tests ──────────────────────────────────────────────────────────────
+
 
 @pytest.mark.parametrize("task_id", ["easy", "medium", "hard"])
 def test_grader_range_with_zero_attempts(task_id):
-    """Grader with zero attempts should return a score in [0.0, 1.0]."""
     grader = get_grader(task_id)
     task = get_task(task_id)
     score = grader.score(task, [], 0, task["tests_total"], 0, task["max_attempts"], [])
@@ -76,7 +68,6 @@ def test_grader_range_with_zero_attempts(task_id):
 
 @pytest.mark.parametrize("task_id", ["easy", "medium", "hard"])
 def test_grader_range_with_perfect_score(task_id):
-    """Grader with all tests passing should return a score in [0.0, 1.0]."""
     grader = get_grader(task_id)
     task = get_task(task_id)
     tests_total = task["tests_total"]
@@ -89,7 +80,6 @@ def test_grader_range_with_perfect_score(task_id):
 
 @pytest.mark.parametrize("task_id", ["easy", "medium", "hard"])
 def test_grader_range_with_all_failures(task_id):
-    """Grader with no tests passing should return a score in [0.0, 1.0]."""
     grader = get_grader(task_id)
     task = get_task(task_id)
     tests_total = task["tests_total"]
@@ -99,10 +89,9 @@ def test_grader_range_with_all_failures(task_id):
     assert 0.0 <= score <= 1.0, f"{task_id} grader out of range: {score}"
 
 
-# ── Variance Tests (dummy vs perfect agents) ────────────────────────────────
+
 
 def test_easy_dummy_agent_low_score():
-    """A dummy agent submitting 'pass' should score < 0.15."""
     grader = get_grader("easy")
     task = get_task("easy")
     attempts = [
@@ -123,7 +112,6 @@ def test_easy_dummy_agent_low_score():
 
 
 def test_easy_perfect_agent_high_score():
-    """A perfect agent should score > 0.85 on easy."""
     grader = get_grader("easy")
     task = get_task("easy")
     attempts = [
@@ -143,7 +131,6 @@ def test_easy_perfect_agent_high_score():
 
 
 def test_medium_red_herring_low_score():
-    """Agent that only fixes authenticate_user should score < 0.30 on hypothesis."""
     grader = get_grader("medium")
     task = get_task("medium")
     attempts = _make_dummy_attempts(3, tests_passed=6, tests_total=10)
@@ -153,5 +140,5 @@ def test_medium_red_herring_low_score():
         "Fix authenticate_user to return True for valid users",
     ]
     score = grader.score(task, attempts, 6, 10, 3, 7, hypotheses)
-    # With only 6/10 tests and red herring hypotheses, score should be modest
+    
     assert score < 0.60, f"Red herring agent scored too high on medium: {score}"

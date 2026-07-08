@@ -1,22 +1,3 @@
-"""
-AgentDebuggerEnv — GRPO Training Script
-Model: Qwen2.5-Coder-7B-Instruct (float16/bfloat16 + LoRA, no quantization)
-Algorithm: GRPO (Group Relative Policy Optimization) via HuggingFace TRL
-GPU: auto-detected at runtime (A100/H100 → bfloat16+large batch, T4/V100 → float16+small batch)
-
-Usage:
-  # Local reward sanity-check (no GPU, no model loading):
-  python training/train_grpo.py --test-local
-
-  # Test run (Colab/GPU, 10 steps):
-  python training/train_grpo.py --test
-
-  # Full training run:
-  python training/train_grpo.py
-
-  # Resume from checkpoint:
-  python training/train_grpo.py --resume ./checkpoints/checkpoint-400
-"""
 
 import os
 import sys
@@ -28,7 +9,7 @@ import tempfile
 import shutil
 from importlib import metadata
 
-# ── Parse args ────────────────────────────────────────────────────────────────
+
 parser = argparse.ArgumentParser()
 parser.add_argument("--test", action="store_true", help="Run 10 steps for testing (Colab/GPU)")
 parser.add_argument("--test-local", action="store_true", dest="test_local",
@@ -40,15 +21,15 @@ parser.add_argument("--max_steps", type=int, default=500)
 args = parser.parse_args()
 
 
-# ── Runtime dependency install ─────────────────────────────────────────────────
-# requirements.txt only has torch (too large to install at runtime).
-# Everything else is installed here, after gradio is already up.
-# NOTE: mergekit intentionally excluded — conflicts with accelerate/peft/trl.
+
+
+
+
 if not args.test_local:
-    # ── Ensure CUDA-enabled torch is present before anything else imports it ──
-    # The default PyPI torch wheel is CPU-only. We must install from the
-    # PyTorch CUDA index so that torch.cuda.is_available() returns True and
-    # device_map="auto" maps the model to GPU, not RAM.
+    
+    
+    
+    
     import importlib.util, importlib
     _needs_cuda_torch = True
     if importlib.util.find_spec("torch") is not None:
@@ -84,7 +65,7 @@ if not args.test_local:
         sys.exit(1)
     print("Dependencies installed.", flush=True)
 
-# ── GPU/training imports (skipped in --test-local mode) ───────────────────────
+
 if not args.test_local:
     import torch
     import wandb
@@ -115,13 +96,13 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from server.reward_calculator import DebugRewardCalculator
 from server.models import parse_agent_output
 
-# ── Configuration ─────────────────────────────────────────────────────────────
+
 MODEL_NAME = "Qwen/Qwen2.5-Coder-3B-Instruct"
 HF_REPO = "shashaank0707/AgentDebugger-trained"
 MAX_STEPS = (10 if args.test else args.max_steps) - args.step_offset
 CHECKPOINT_DIR = "./checkpoints"
 
-# W&B and HF Token
+
 WANDB_API_KEY = os.environ.get("WANDB_API_KEY", "") if not args.test_local else ""
 HF_TOKEN = os.environ.get("HF_TOKEN")
 
@@ -139,7 +120,7 @@ if WANDB_API_KEY:
         }
     )
 
-# ── System prompt ─────────────────────────────────────────────────────────────
+
 SYSTEM_PROMPT = """You are an expert Python debugger. You reason through bugs systematically.
 
 You MUST respond in EXACTLY this format — no exceptions, no extra text:
@@ -156,7 +137,7 @@ Rules:
 - If proposing a fix, DETAIL must contain the complete function, not just the changed line
 - Give up only if you have exhausted all reasonable hypotheses"""
 
-# ── Load bugs ─────────────────────────────────────────────────────────────────
+
 def load_bugs(tier: int) -> list[dict]:
     path = f"data/bugs_tier{tier}.jsonl"
     if not os.path.exists(path):
@@ -184,7 +165,6 @@ def bug_to_prompt(bug: dict) -> str:
     )
 
 def _run_fix(proposed_code: str, bug: dict) -> dict:
-    """Safely run proposed fix with subprocess timeout."""
     test_cases = bug.get("test_cases", [])
     func_name = bug.get("function_name", "")
     if not proposed_code or not test_cases or not func_name:
@@ -200,7 +180,7 @@ def _run_fix(proposed_code: str, bug: dict) -> dict:
             f"    r={func_name}({args_str})\n"
             f"    print('PASS' if r=={repr(test['expected_output'])} else 'FAIL')\n"
             f"except Exception as e:\n"
-            f"    print(f'ERROR: {{e}}')\n"
+            f"    print(f'ERROR: { e} ')\n"
         )
         try:
             with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False) as f:
@@ -216,7 +196,7 @@ def _run_fix(proposed_code: str, bug: dict) -> dict:
 
     return {"passed": passed, "failed": len(test_cases) - passed, "total": len(test_cases), "newly_broken": 0}
 
-# ── Mock completions for --test-local ─────────────────────────────────────────
+
 MOCK_GOOD = """
 OBSERVATION: The loop condition on line 4 uses <= instead of 
 HYPOTHESIS: This causes an off-by-one error because Python lists are 
@@ -241,7 +221,7 @@ I think there might be a bug somewhere in the code.
 Let me try fixing it.
 """
 
-# ── --test-local: reward sanity-check without any model ───────────────────────
+
 if args.test_local:
     print("=" * 60)
     print("LOCAL TEST MODE — no model loaded, testing reward function only")
@@ -295,9 +275,9 @@ if args.test_local:
     print("\nLOCAL TEST PASSED")
     sys.exit(0)
 
-# ── Auto-detect GPU and set optimal config ────────────────────────────────────
+
 _gpu_vram_gb = 0
-_is_ampere_plus = False  # A100/H100 support bfloat16 natively (compute cap >= 8.0)
+_is_ampere_plus = False  
 if torch.cuda.is_available():
     _props = torch.cuda.get_device_properties(0)
     _gpu_vram_gb = _props.total_memory / 1e9
@@ -308,30 +288,30 @@ if torch.cuda.is_available():
 
 COMPUTE_DTYPE = torch.bfloat16 if _is_ampere_plus else torch.float16
 
-# Scale batch/generation config to available VRAM.
-# GRPO constraint: per_device_train_batch_size % num_generations == 0
-if _gpu_vram_gb >= 70:          # A100 80GB
+
+
+if _gpu_vram_gb >= 70:          
     _batch       = 8
-    _grad_accum  = 1            # effective batch = 8
-    _num_gen     = 8            # 8 % 8 == 0
+    _grad_accum  = 1            
+    _num_gen     = 8            
     _max_comp    = 256
     _lora_r      = 16
-elif _gpu_vram_gb >= 40:        # A100 40GB
+elif _gpu_vram_gb >= 40:        
     _batch       = 4
-    _grad_accum  = 2            # effective batch = 8
-    _num_gen     = 4            # 4 % 4 == 0
+    _grad_accum  = 2            
+    _num_gen     = 4            
     _max_comp    = 256
     _lora_r      = 16
-elif _gpu_vram_gb >= 20:        # A10G 24GB / V100 32GB
+elif _gpu_vram_gb >= 20:        
     _batch       = 2
     _grad_accum  = 4
-    _num_gen     = 2            # 2 % 2 == 0
+    _num_gen     = 2            
     _max_comp    = 192
     _lora_r      = 8
-else:                           # T4 15GB / anything smaller
+else:                           
     _batch       = 2
     _grad_accum  = 4
-    _num_gen     = 2            # 2 % 2 == 0
+    _num_gen     = 2            
     _max_comp    = 160
     _lora_r      = 8
 
@@ -339,9 +319,9 @@ print(f"Training config: batch={_batch} grad_accum={_grad_accum} "
       f"num_gen={_num_gen} max_comp={_max_comp} lora_r={_lora_r} "
       f"dtype={COMPUTE_DTYPE}")
 
-# ── Load model ────────────────────────────────────────────────────────────────
-# Load in native float16/bfloat16 — no bitsandbytes needed.
-# A10G (24GB) fits Qwen2.5-7B in float16 (~14GB) with room for LoRA + activations.
+
+
+
 print(f"Loading {MODEL_NAME} in {COMPUTE_DTYPE}...")
 tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME, trust_remote_code=True)
 tokenizer.pad_token = tokenizer.eos_token
@@ -374,23 +354,20 @@ model.enable_input_require_grads()
 model.gradient_checkpointing_enable()
 print(f"Trainable params: {model.num_parameters(only_trainable=True):,}")
 
-# ── Runtime device selection ──────────────────────────────────────────────────
+
 def _select_runtime_device(model) -> str:
-    """
-    Pick the safest generation device without forcing CUDA init on broken drivers.
-    """
     def _cuda_usable() -> bool:
         try:
             if not torch.cuda.is_available():
                 return False
-            # Force lightweight CUDA init probe.
+            
             _ = torch.zeros(1, device="cuda")
             return True
         except Exception as e:
             print(f"WARNING: CUDA initialization failed ({e}). Falling back to CPU.")
             return False
 
-    # Prefer model's current device when available.
+    
     try:
         model_device = str(next(model.parameters()).device)
         if model_device.startswith("cuda") and not _cuda_usable():
@@ -399,7 +376,7 @@ def _select_runtime_device(model) -> str:
     except Exception:
         pass
 
-    # Fallback to torch capability checks.
+    
     if _cuda_usable():
         return "cuda"
     return "cpu"
@@ -408,14 +385,10 @@ def _select_runtime_device(model) -> str:
 RUNTIME_DEVICE = _select_runtime_device(model)
 print(f"Using generation/training runtime device: {RUNTIME_DEVICE}")
 
-# ── Reward function ───────────────────────────────────────────────────────────
+
 calculator = DebugRewardCalculator()
 
 def reward_fn(completions: list[str], prompts: list[str], **kwargs) -> list[float]:
-    """
-    GRPO reward function. Called on groups of completions for the same prompt.
-    GRPO learns from RELATIVE differences within each group.
-    """
     rewards = []
     bugs_raw = kwargs.get("bug_metadata", [{}] * len(completions))
     bugs = [json.loads(b) if isinstance(b, str) else b for b in bugs_raw]
@@ -424,7 +397,7 @@ def reward_fn(completions: list[str], prompts: list[str], **kwargs) -> list[floa
         try:
             agent_output = parse_agent_output(completion)
 
-            # Run fix if agent proposes one
+            
             test_results = {"passed": 0, "failed": 0, "total": 0, "newly_broken": 0}
             if agent_output.action == "propose_fix" and bug:
                 test_results = _run_fix(agent_output.detail, bug)
@@ -452,7 +425,7 @@ def reward_fn(completions: list[str], prompts: list[str], **kwargs) -> list[floa
 
     return rewards
 
-# ── Baseline evaluation (run BEFORE training) ─────────────────────────────────
+
 def run_baseline(n: int = 20) -> dict:
     print("\nRunning baseline evaluation on UNTRAINED model...")
     model.eval()
@@ -481,12 +454,12 @@ def run_baseline(n: int = 20) -> dict:
 baseline = run_baseline()
 model.train()
 
-# ── Build initial dataset ─────────────────────────────────────────────────────
+
 def make_dataset(step: int) -> Dataset:
     bugs = get_bugs_for_step(step)
     return Dataset.from_list([{"prompt": bug_to_prompt(b), "bug_metadata": json.dumps(b)} for b in bugs])
 
-# ── Training config ───────────────────────────────────────────────────────────
+
 config = GRPOConfig(
     output_dir=CHECKPOINT_DIR,
     max_steps=MAX_STEPS,
@@ -499,7 +472,7 @@ config = GRPOConfig(
     max_completion_length=_max_comp,
     temperature=0.9,
     logging_steps=5,
-    save_steps=25,               # Save to local disk every 25 steps
+    save_steps=25,               
     save_strategy="steps",
     report_to="wandb" if WANDB_API_KEY else "none",
 )
@@ -512,7 +485,7 @@ trainer = GRPOTrainer(
     processing_class=tokenizer,
 )
 
-# ── Curriculum callback ───────────────────────────────────────────────────────
+
 class CurriculumCallback(TrainerCallback):
     def on_step_end(self, callback_args, state, control, **kwargs):
         step = state.global_step + args.step_offset
@@ -524,15 +497,14 @@ class CurriculumCallback(TrainerCallback):
 
 trainer.add_callback(CurriculumCallback())
 
-# ── HF Hub checkpoint push callback (CRITICAL: survives container restarts) ────
-# Pushes LoRA adapter weights to HF Hub every HUB_PUSH_EVERY steps.
-# This is the fix for the original problem: ephemeral Space storage meant that
-# checkpoints saved to ./checkpoints/ were lost when the Space stopped.
-# Now even if training is interrupted, the latest adapter weights are on HF Hub.
-HUB_PUSH_EVERY = 50  # push every 50 steps — ~15min on T4, ~5min on A100
+
+
+
+
+
+HUB_PUSH_EVERY = 50  
 
 class CheckpointPushCallback(TrainerCallback):
-    """Push LoRA adapter to HF Hub every HUB_PUSH_EVERY steps."""
 
     def on_step_end(self, callback_args, state, control, **kwargs):
         step = state.global_step + args.step_offset
@@ -553,28 +525,28 @@ class CheckpointPushCallback(TrainerCallback):
                 private=True,
                 commit_message=f"tokenizer checkpoint-step-{step}",
             )
-            # Write a step marker file so we know the latest pushed step
+            
             with open("./last_hub_push.txt", "w") as _f:
                 _f.write(str(step))
             print(f"[HubPush] ✓ Step {step} pushed to HF Hub.", flush=True)
             if WANDB_API_KEY:
                 wandb.log({"hub/last_pushed_step": step})
         except Exception as e:
-            # Never crash training because of a push failure
+            
             print(f"[HubPush] WARNING: push failed at step {step}: {e}", flush=True)
 
-if not args.test:  # Don't push during 10-step test runs
+if not args.test:  
     trainer.add_callback(CheckpointPushCallback())
     print(f"HF Hub checkpoint push enabled every {HUB_PUSH_EVERY} steps → {HF_REPO}-checkpoints")
 else:
     print("[TEST MODE] Hub checkpoint push disabled.")
 
-# ── Train ─────────────────────────────────────────────────────────────────────
+
 print(f"\nStarting GRPO training. Max steps: {MAX_STEPS}")
 print(f"Baseline solve rate: {baseline['solve_rate']:.1%} — target: >60% after training")
 trainer.train(resume_from_checkpoint=args.resume)
 
-# ── Post-training evaluation ──────────────────────────────────────────────────
+
 model.eval()
 bugs = load_bugs(1)[:20]
 post_rewards = []
@@ -602,7 +574,7 @@ if WANDB_API_KEY:
     wandb.log({"final/solve_rate": post_solve_rate, "final/improvement": post_solve_rate - baseline["solve_rate"]})
     wandb.finish()
 
-# ── Save and push ─────────────────────────────────────────────────────────────
+
 model.save_pretrained("./final_model")
 tokenizer.save_pretrained("./final_model")
 

@@ -1,7 +1,7 @@
 import sys
 import os
 
-# add parent dir to path so we can import data.generate_bugs
+
 sys.path.append(os.path.abspath('.'))
 
 from data.generate_bugs import TIER1_BUGS as T1_OLD
@@ -16,7 +16,7 @@ t1_all = T1_OLD + t1_bugs
 t2_all = T2_OLD + t2_bugs
 t3_all = T3_OLD + t3_bugs
 
-# Ensure we have the target numbers
+
 print(f"Tier 1: {len(t1_all)}")
 print(f"Tier 2: {len(t2_all)}")
 print(f"Tier 3: {len(t3_all)}")
@@ -32,12 +32,12 @@ def pretty_list(lst, name):
                     lines.append(f'        "{k}": (')
                     for line in v.split('\n'):
                         lines.append(f'            {repr(line + "\\n")}')
-                    lines[-1] = lines[-1][:-4] + "'" + lines[-1][-3:] # remove the trailing \n from the last line, wait, repr('...\\n') adds \n inside. Let's just use json dumps
-        # Actually json dumps is simpler!
-        # wait, we need to format code blocks nicely maybe?
+                    lines[-1] = lines[-1][:-4] + "'" + lines[-1][-3:] 
+        
+        
         pass
 
-# The best way to format Python code generating Python code is pprint or just repr.
+
 with open("data/generate_bugs.py", "w", encoding="utf-8") as f:
     f.write('"""\n')
     f.write('AgentDebuggerEnv — Bug Dataset Generator\n\n')
@@ -55,7 +55,7 @@ with open("data/generate_bugs.py", "w", encoding="utf-8") as f:
     f.write('import json\n')
     f.write('import os\n\n')
     
-    # write out variables
+    
     import pprint
     
     def dump_var(name, val):
@@ -71,9 +71,9 @@ with open("data/generate_bugs.py", "w", encoding="utf-8") as f:
     f.write('    with open(path, "w") as f:\n')
     f.write('        for bug in bugs:\n')
     f.write('            f.write(json.dumps(bug) + "\\n")\n')
-    f.write('    print(f"Tier {path[-12]}: {len(bugs)}")\n')  # to print Tier 1: 40 etc. wait, format is different
-    # wait, the prompt says "It should print: Tier 1: 40, Tier 2: 30, Tier 3: 20"
-    # let's change the output slightly.
+    f.write('    print(f"Tier {path[-12]}: {len(bugs)}")\n')  
+    
+    
     f.write('\n\n')
     f.write('if __name__ == "__main__":\n')
     f.write('    os.makedirs("data", exist_ok=True)\n')

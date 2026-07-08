@@ -8,16 +8,16 @@ from dotenv import load_dotenv
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from peft import PeftModel
 
-# Load environment variables
+
 load_dotenv()
 
-# Insert workspace root to path
+
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from env.environment import DebuggerEnvironment
 from env.models import parse_agent_output
 from server.reward_calculator import DebugRewardCalculator
 
-# System prompt matching train_grpo.py
+
 SYSTEM_PROMPT = """You are an expert Python debugger. You reason through bugs systematically.
 
 You MUST respond in EXACTLY this format — no exceptions, no extra text:
@@ -51,7 +51,7 @@ def main():
     parser.add_argument("--base-model", type=str, default="Qwen/Qwen2.5-Coder-3B-Instruct", help="Base model identifier")
     args = parser.parse_args()
 
-    # Verify HF Token if repository is private
+    
     hf_token = os.environ.get("HF_TOKEN")
     if not hf_token:
         print("WARNING: HF_TOKEN environment variable not set. Loading a private repository might fail.")
@@ -80,7 +80,7 @@ def main():
             token=hf_token
         )
         
-        # Explicitly move to target device if using MPS or CPU
+        
         if device in ["mps", "cpu"]:
             print(f"Moving model to target device: {device}...")
             model = model.to(device)
@@ -125,12 +125,12 @@ def main():
         tier_solved = 0
 
         for bug in tqdm(bugs):
-            # Setup environment context for this bug
+            
             env.current_bug = bug
             env.current_episode_trajectory = []
             env.turn_number = 0
 
-            # Generate prompt
+            
             prompt = bug_to_prompt(bug)
             inputs = tokenizer(prompt, return_tensors="pt").to(device)
 
@@ -143,7 +143,7 @@ def main():
             
             completion = tokenizer.decode(out[0][inputs["input_ids"].shape[1]:], skip_special_tokens=True)
 
-            # Step the environment with model's completion
+            
             step_result = env.step_curriculum(completion)
             info = step_result["info"]
             reward_breakdown = info["reward_breakdown"]
@@ -154,7 +154,7 @@ def main():
                 solved_bugs_count += 1
             total_bugs_count += 1
 
-            # Store details
+            
             bug_detail = {
                 "id": bug.get("id"),
                 "function_name": bug.get("function_name"),
@@ -190,7 +190,7 @@ def main():
         "solve_rate": solved_bugs_count / total_bugs_count if total_bugs_count else 0.0,
     }
 
-    # Save to file
+    
     output = {
         "summary": summary,
         "results": results

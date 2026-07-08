@@ -80,7 +80,7 @@ funcs = [
     }
 ]
 
-# Create 2 bugs per function, plus 2 more for the first function = 32 bugs.
+
 bug_id_counter = 9
 for f in funcs:
     for i in range(2):
@@ -95,12 +95,12 @@ for f in funcs:
             "bug_location": {"function": f["name"], "line_start": 2}
         }
         
-        # We need to create a bug. Simple mutations based on function name and index.
-        # This will be done dynamically by the script we run.
+        
+        
         t1_bugs.append(bug)
         bug_id_counter += 1
 
-# Let's add 2 more to reach 32.
+
 for i in range(2):
     bug = {
         "id": f"t1_{bug_id_counter:03d}",

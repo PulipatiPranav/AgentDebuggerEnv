@@ -1,6 +1,3 @@
-"""
-Tests for the core environment — reset, step, state.
-"""
 
 import pytest
 from env.environment import DebuggerEnvironment
@@ -12,7 +9,7 @@ def env():
     return DebuggerEnvironment()
 
 
-# ── Reset Tests ──────────────────────────────────────────────────────────────
+
 
 def test_reset_easy_returns_observation(env):
     obs = env.reset("easy")
@@ -49,7 +46,7 @@ def test_reset_invalid_task_raises(env):
 
 def test_reset_clears_previous_state(env):
     env.reset("easy")
-    # Do a step
+    
     action = Action(
         action_type="submit_fix",
         fixed_code="def binary_search(arr, target): return -1",
@@ -57,14 +54,14 @@ def test_reset_clears_previous_state(env):
     )
     env.step(action)
 
-    # Reset should clear everything
+    
     obs = env.reset("easy")
     assert obs["step_number"] == 0
     assert obs["previous_attempts"] == []
     assert obs["attempts_remaining"] == 5
 
 
-# ── Step Tests ───────────────────────────────────────────────────────────────
+
 
 def test_step_submit_fix_without_hypothesis(env):
     env.reset("easy")
@@ -133,8 +130,8 @@ def test_step_query_context_second_costs(env):
         action_type="query_context",
         query_type="error_explanation",
     )
-    env.step(action)  # First — free
-    result = env.step(action)  # Second — costs -0.05
+    env.step(action)  
+    result = env.step(action)  
     assert result["reward"]["step_reward"] == -0.05
 
 
@@ -173,7 +170,7 @@ def test_step_invalid_query_type(env):
     assert result["info"]["error"] is not None
 
 
-# ── State Tests ──────────────────────────────────────────────────────────────
+
 
 def test_state_before_reset(env):
     state = env.state()
@@ -203,7 +200,7 @@ def test_state_after_step(env):
     assert len(state["all_hypotheses"]) == 1
 
 
-# ── Attempts Exhaustion Tests ────────────────────────────────────────────────
+
 
 def test_attempts_exhausted(env):
     env.reset("easy")
@@ -215,10 +212,10 @@ def test_attempts_exhausted(env):
         )
         result = env.step(action)
 
-    # After 5 attempts, episode should be done (max_attempts=5)
+    
     assert result["done"] is True or result["observation"]["attempts_remaining"] == 0
 
-    # Trying another fix should either fail or episode is done
+    
     if not result["done"]:
         action = Action(
             action_type="submit_fix",

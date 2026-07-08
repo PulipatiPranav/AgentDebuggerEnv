@@ -1,9 +1,3 @@
-"""
-AgentDebuggerEnv — Interactive Gradio Demo
-==========================================
-Demonstrates the live debugging environment with a rule-based agent.
-Shows structured multi-turn reasoning, reward breakdown, and fix verification.
-"""
 
 import os
 import sys
@@ -18,7 +12,7 @@ import gradio as gr
 from env.models import parse_agent_output
 from server.reward_calculator import DebugRewardCalculator
 
-# ── Pre-loaded bug examples (one per bug type) ────────────────────────────────
+
 
 EXAMPLES = {
     "🔢 Off-by-One: binary_search": {
@@ -256,10 +250,9 @@ DETAIL: def fibonacci(n):
     },
 }
 
-# ── Test runner ───────────────────────────────────────────────────────────────
+
 
 def _run_tests(code: str, function_name: str, test_cases: list) -> dict:
-    """Run test cases against code in a subprocess. Returns pass/fail counts."""
     passed = 0
     python = shutil.which("python3") or shutil.which("python") or sys.executable
     for tc in test_cases:
@@ -270,9 +263,9 @@ def _run_tests(code: str, function_name: str, test_cases: list) -> dict:
             f"{code}\n"
             f"try:\n"
             f"    r = {function_name}({args_str})\n"
-            f"    print('PASS' if r == {repr(expected)} else f'FAIL: got {{r}}')\n"
+            f"    print('PASS' if r == {repr(expected)} else f'FAIL: got { r} ')\n"
             f"except Exception as e:\n"
-            f"    print(f'ERROR: {{e}}')\n"
+            f"    print(f'ERROR: { e} ')\n"
         )
         try:
             with tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False) as f:
@@ -288,16 +281,12 @@ def _run_tests(code: str, function_name: str, test_cases: list) -> dict:
     return {"passed": passed, "failed": total - passed, "total": total, "newly_broken": 0}
 
 
-# ── Rule-based agent runner ───────────────────────────────────────────────────
+
 
 def run_debug_session(example_name: str, custom_code: str) -> str:
-    """
-    Run the rule-based debug agent for 2 turns.
-    Returns a formatted string showing each turn's output and reward.
-    """
     calculator = DebugRewardCalculator()
 
-    # Determine which bug we're working with
+    
     if example_name and example_name in EXAMPLES:
         bug = EXAMPLES[example_name]
         code = bug["buggy_code"]
@@ -312,7 +301,7 @@ def run_debug_session(example_name: str, custom_code: str) -> str:
         function_name = bug["function_name"]
         initial_error = bug["initial_error"]
     else:
-        # Custom code — generic 2-turn agent
+        
         code = custom_code.strip() if custom_code.strip() else "# No code provided"
         agent_turns = [
             """\
@@ -336,7 +325,7 @@ DETAIL: """ + code,
         function_name = ""
         initial_error = "Unknown — paste your own code and observe the agent reasoning"
 
-    # ── Build output ──────────────────────────────────────────────────────────
+    
     lines = []
     lines.append("━" * 60)
     lines.append(f"🐛  BUGGY CODE")
@@ -356,12 +345,12 @@ DETAIL: """ + code,
 
         agent_output = parse_agent_output(raw_turn)
 
-        # Run tests if this is a fix proposal
+        
         test_results = {"passed": 0, "failed": 0, "total": len(test_cases), "newly_broken": 0}
         if agent_output.action == "propose_fix" and test_cases and function_name:
             test_results = _run_tests(agent_output.detail, function_name, test_cases)
 
-        # Compute reward
+        
         reward = calculator.compute_turn_reward(
             agent_output=agent_output,
             ground_truth=ground_truth,
@@ -370,7 +359,7 @@ DETAIL: """ + code,
         )
         total_episode_reward += reward.total
 
-        # Format the structured output
+        
         lines.append(f"OBSERVATION:  {agent_output.observation}")
         lines.append("")
         lines.append(f"HYPOTHESIS:   {agent_output.hypothesis}")
@@ -380,7 +369,7 @@ DETAIL: """ + code,
         lines.append(f"DETAIL:       {agent_output.detail[:120]}{'...' if len(agent_output.detail) > 120 else ''}")
         lines.append("")
 
-        # Reward breakdown table
+        
         lines.append("┌─────────────────────────────────────────────┐")
         lines.append("│  Reward Breakdown                           │")
         lines.append("├──────────────────────────┬──────────────────┤")
@@ -395,7 +384,7 @@ DETAIL: """ + code,
         lines.append(f"│  TURN REWARD             │  {reward.total:+.4f}          │")
         lines.append("└──────────────────────────┴──────────────────┘")
 
-        # Test results for fix turns
+        
         if agent_output.action == "propose_fix" and test_results["total"] > 0:
             p = test_results["passed"]
             t = test_results["total"]
@@ -409,7 +398,7 @@ DETAIL: """ + code,
 
         lines.append("")
 
-    # ── Episode summary ───────────────────────────────────────────────────────
+    
     lines.append("━" * 60)
     if solved:
         lines.append(f"  ✅  SOLVED in {len(agent_turns)} turns  |  Episode reward: {total_episode_reward:+.3f}")
@@ -424,10 +413,9 @@ DETAIL: """ + code,
     return "\n".join(lines)
 
 
-# ── Gradio interface ──────────────────────────────────────────────────────────
+
 
 def load_example(example_name: str) -> str:
-    """Return the buggy code for the selected example."""
     if example_name and example_name in EXAMPLES:
         return EXAMPLES[example_name]["buggy_code"]
     return ""
@@ -480,7 +468,7 @@ The environment scores every turn across 6 reward components grounded in two res
                     inputs=example_dropdown,
                     outputs=custom_code,
                 )
-                # Pre-load first example
+                
                 demo.load(
                     fn=lambda: load_example(example_names[0]),
                     outputs=custom_code,
