@@ -60,3 +60,4 @@ CURSOR_INSTRUCTIONS_V2.md
 HANDOVER.md
 read.md
 claude.md
+wandb_export_*.csv
