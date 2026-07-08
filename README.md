@@ -49,20 +49,8 @@ LLMs often hallucinate bug fixes via blind trial-and-error. Real debugging in pr
 Our training run clearly demonstrates rapid policy adaptation. The model successfully learned the `OBSERVATION/HYPOTHESIS/ACTION` constraint almost instantly and navigated the tier-2 difficulty bump (step 150) with a textbook drop-and-recover curve.
 
 ## Training Results
-[W&B Run](https://wandb.ai/shashaankjain07-keshav-memorial-college-of-law/AgentDebuggerEnv/runs/vylbqd5m?nw=nwusershashaankjain07) | [HF Blog](#)
+[W&B Run](https://wandb.ai/shashaankjain07-keshav-memorial-college-of-law/AgentDebuggerEnv/workspace) | [HF Blog](https://huggingface.co/spaces/agentDebugger/AgentDebugger-training-v3/blob/main/Blog.md)
 
-*(Note for Hackathon Judges: Live Weights & Biases charts and Gradio UI are embedded below as evidence of the training run).*
-
-![Total Reward](https://raw.githubusercontent.com/shasshaank/AgentDebuggerEnv/main/images/total.png)
-![Format Compliance](https://raw.githubusercontent.com/shasshaank/AgentDebuggerEnv/main/images/format_compliance.png)
-
-*Additional Training Metrics:*
-<p align="center">
-  <img src="https://raw.githubusercontent.com/shasshaank/AgentDebuggerEnv/main/images/hypothesis_quality.png" width="48%" />
-  <img src="https://raw.githubusercontent.com/shasshaank/AgentDebuggerEnv/main/images/semantic.png" width="48%" />
-</p>
-
-![Gradio UI Training Monitor](https://raw.githubusercontent.com/shasshaank/AgentDebuggerEnv/main/images/gradio%20UI.png)
 
 * **Format Compliance:** Scaled to 1.0 (max) within 50 steps.
 * **Total Reward:** Scaled from baseline ~0.4 to peaks of ~1.0 by step 500.
@@ -104,4 +92,4 @@ The easiest way to re-run the exact GRPO training pipeline is via our Jupyter No
 
 ### 👥 Team Endurance
 * **Shashaank Jain** | GitHub: [@shasshaank](https://github.com/shasshaank) | Email: *[shashaankjain07@gmail.com]*
-* **Pranav Pulipati** | GitHub: [@shasshaank](https://github.com/shasshaank) | Email: *[pranavpulipatix@gmail.com]*
+* **Pranav Pulipati** | GitHub: [@shasshaank](https://github.com/PulipatiPranav) | Email: *[pranavpulipatix@gmail.com]*
