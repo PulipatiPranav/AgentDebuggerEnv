@@ -3,7 +3,7 @@ title: AgentDebuggerEnv
 emoji: 🐞
 colorFrom: purple
 colorTo: indigo
-sdk: docker
+sdk: gradio
 app_file: app.py
 pinned: false
 ---
