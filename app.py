@@ -276,6 +276,13 @@ body {
     border: 1px solid rgba(255, 255, 255, 0.06) !important;
     border-radius: 12px !important;
 }
+
+/* Flatten all markdown, prose and text blocks to transparent backgrounds */
+.prose, .markdown, .md, .gradio-markdown, div.prose, div.markdown, .prose *, .markdown *, .md * {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+}
 """
 
 # ── Dynamic Leaderboard Renderer ──────────────────────────────────────────────
