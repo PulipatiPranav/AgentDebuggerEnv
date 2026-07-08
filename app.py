@@ -140,69 +140,88 @@ MOCK_TRAJECTORIES = {
     }
 }
 
-# ── Custom CSS for Premium Design ─────────────────────────────────────────────
 CUSTOM_CSS = """
 body {
-    background-color: #0b0f19 !important;
-    font-family: 'Inter', sans-serif !important;
+    background-color: #030712 !important;
+    background-image: radial-gradient(circle at 50% -20%, #1e1b4b, #030712 60%) !important;
+    font-family: 'Inter', -apple-system, sans-serif !important;
 }
 
 .gradio-container {
-    max-width: 1300px !important;
+    max-width: 1280px !important;
+    padding: 2rem 1rem !important;
 }
 
 /* Glassmorphism Panels */
 .glass-panel {
-    background: rgba(17, 25, 40, 0.75) !important;
-    backdrop-filter: blur(12px) !important;
-    -webkit-backdrop-filter: blur(12px) !important;
+    background: rgba(17, 24, 39, 0.6) !important;
+    backdrop-filter: blur(16px) !important;
+    -webkit-backdrop-filter: blur(16px) !important;
     border: 1px solid rgba(255, 255, 255, 0.08) !important;
-    border-radius: 16px !important;
-    padding: 1.5rem !important;
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3) !important;
+    border-radius: 20px !important;
+    padding: 2rem !important;
+    box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.5) !important;
 }
 
 .glass-header {
-    background: linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(99, 102, 241, 0.15)) !important;
-    backdrop-filter: blur(8px) !important;
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
-    border-radius: 16px !important;
-    padding: 2rem !important;
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(59, 130, 246, 0.1)) !important;
+    backdrop-filter: blur(16px) !important;
+    -webkit-backdrop-filter: blur(16px) !important;
+    border: 1px solid rgba(139, 92, 246, 0.2) !important;
+    border-radius: 24px !important;
+    padding: 3rem 2rem !important;
     text-align: center;
-    margin-bottom: 2rem;
+    margin-bottom: 2.5rem;
+    box-shadow: 0 10px 30px -10px rgba(139, 92, 246, 0.3) !important;
 }
 
 /* Title styling */
-.header-title h1 {
-    font-size: 2.8rem !important;
-    font-weight: 800 !important;
-    background: linear-gradient(to right, #c084fc, #818cf8) !important;
+.glass-header h1, .glass-header .prose h1 {
+    font-family: 'Outfit', sans-serif !important;
+    font-size: 3.5rem !important;
+    font-weight: 900 !important;
+    letter-spacing: -0.03em !important;
+    background: linear-gradient(to right, #c084fc, #60a5fa) !important;
     -webkit-background-clip: text !important;
     -webkit-text-fill-color: transparent !important;
+    margin-top: 0 !important;
     margin-bottom: 0.5rem !important;
 }
 
-/* Table Style overrides */
-.leaderboard-table table {
-    width: 100%;
-    border-collapse: collapse;
+.glass-header h3, .glass-header .prose h3 {
+    font-size: 1.25rem !important;
+    color: #94a3b8 !important;
+    font-weight: 500 !important;
+    margin-top: 0 !important;
+    margin-bottom: 0.5rem !important;
 }
 
-.leaderboard-table th {
-    background: rgba(255, 255, 255, 0.05);
-    color: #94a3b8;
-    text-transform: uppercase;
-    font-size: 0.75rem;
-    font-weight: 700;
-    letter-spacing: 0.05em;
-    padding: 0.75rem 1rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+.glass-header p, .glass-header .prose p {
+    font-size: 1.05rem !important;
+    color: #cbd5e1 !important;
+    font-style: italic !important;
+    margin: 0 !important;
 }
 
-.leaderboard-table td {
-    padding: 1rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    color: #f8fafc;
+/* Tab styling overrides */
+.gradio-container .tabs {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+    margin-bottom: 1.5rem !important;
+}
+
+.gradio-container .tabs button {
+    border: none !important;
+    background: transparent !important;
+    font-size: 1.05rem !important;
+    font-weight: 600 !important;
+    color: #64748b !important;
+    padding: 0.75rem 1.5rem !important;
+    transition: all 0.3s ease !important;
+}
+
+.gradio-container .tabs button.selected {
+    color: #c084fc !important;
+    border-bottom: 2px solid #8b5cf6 !important;
 }
 
 /* Accent Buttons */
@@ -211,22 +230,28 @@ body {
     color: white !important;
     border: none !important;
     font-weight: 600 !important;
-    transition: all 0.3s ease !important;
+    font-size: 1rem !important;
+    padding: 0.75rem 1.5rem !important;
+    border-radius: 12px !important;
+    cursor: pointer !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
 .accent-btn:hover {
     transform: translateY(-2px) !important;
-    box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4) !important;
+    box-shadow: 0 8px 24px rgba(139, 92, 246, 0.5) !important;
 }
+
 .mt-8 {
     margin-top: 2rem !important;
 }
 
 /* Code fonts */
 .code-container {
-    font-family: 'Fira Code', 'JetBrains Mono', monospace !important;
-    background-color: #070913 !important;
-    border-radius: 8px !important;
+    font-family: 'JetBrains Mono', 'Fira Code', monospace !important;
+    background-color: #080c15 !important;
+    border: 1px solid rgba(255, 255, 255, 0.05) !important;
+    border-radius: 12px !important;
 }
 """
 
@@ -237,65 +262,81 @@ def render_leaderboard_html(summary_data):
     t2 = summary_data.get("tiers", {}).get("tier2", {})
     t3 = summary_data.get("tiers", {}).get("tier3", {})
 
-    qwen_overall = f"{overall.get('solve_rate', 0.672):.1%}"
     qwen_t1 = f"{t1.get('solve_rate', 1.0):.1%}"
     qwen_t2 = f"{t2.get('solve_rate', 0.774):.1%}"
     qwen_t3 = f"{t3.get('solve_rate', 0.381):.1%}"
     qwen_mean = f"{sum([t1.get('solve_rate', 1.0), t2.get('solve_rate', 0.774), t3.get('solve_rate', 0.381)]) / 3:.3f}"
 
     html = f"""
-    <div style="background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 2rem; box-shadow: 0 4px 30px rgba(0,0,0,0.1);">
-        <table style="width: 100%; border-collapse: collapse;">
+    <div style="background: rgba(17, 24, 39, 0.75); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 20px; padding: 2rem; box-shadow: 0 10px 40px rgba(0,0,0,0.5);">
+        <table style="width: 100%; border-collapse: collapse; text-align: left; font-family: 'Inter', sans-serif;">
             <thead>
-                <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
-                    <th style="padding: 1rem; text-align: left; color: #94a3b8; font-weight: 600; text-transform: uppercase; font-size: 0.85rem;">Rank</th>
-                    <th style="padding: 1rem; text-align: left; color: #94a3b8; font-weight: 600; text-transform: uppercase; font-size: 0.85rem;">Model</th>
-                    <th style="padding: 1rem; text-align: left; color: #94a3b8; font-weight: 600; text-transform: uppercase; font-size: 0.85rem;">Tier 1 (Easy)</th>
-                    <th style="padding: 1rem; text-align: left; color: #94a3b8; font-weight: 600; text-transform: uppercase; font-size: 0.85rem;">Tier 2 (Med)</th>
-                    <th style="padding: 1rem; text-align: left; color: #94a3b8; font-weight: 600; text-transform: uppercase; font-size: 0.85rem;">Tier 3 (Hard)</th>
-                    <th style="padding: 1rem; text-align: left; color: #94a3b8; font-weight: 600; text-transform: uppercase; font-size: 0.85rem;">Mean Score</th>
+                <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.15);">
+                    <th style="padding: 1.25rem 1rem; color: #94a3b8; font-weight: 600; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em;">Rank</th>
+                    <th style="padding: 1.25rem 1rem; color: #94a3b8; font-weight: 600; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em;">Model</th>
+                    <th style="padding: 1.25rem 1rem; color: #94a3b8; font-weight: 600; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em; text-align: center;">Tier 1 (Easy)</th>
+                    <th style="padding: 1.25rem 1rem; color: #94a3b8; font-weight: 600; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em; text-align: center;">Tier 2 (Med)</th>
+                    <th style="padding: 1.25rem 1rem; color: #94a3b8; font-weight: 600; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em; text-align: center;">Tier 3 (Hard)</th>
+                    <th style="padding: 1.25rem 1rem; color: #94a3b8; font-weight: 600; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em;">Mean Score</th>
                 </tr>
             </thead>
             <tbody>
-                <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); hover: background-color: rgba(255,255,255,0.02);">
-                    <td style="padding: 1rem; font-size: 1.1rem;">🥇 1</td>
-                    <td style="padding: 1rem; font-weight: 600; color: #f8fafc;">GPT-4o</td>
-                    <td style="padding: 1rem; color: #10b981; font-weight: bold;">89.0%</td>
-                    <td style="padding: 1rem; color: #f59e0b; font-weight: bold;">71.0%</td>
-                    <td style="padding: 1rem; color: #ef4444; font-weight: bold;">38.0%</td>
-                    <td style="padding: 1rem;">
-                        <span style="font-weight: 700; font-size: 1.1rem;">0.742</span>
-                        <div style="width: 100px; background: rgba(255,255,255,0.1); border-radius: 4px; height: 6px; overflow: hidden; margin-top: 4px;">
+                <!-- Rank 1 -->
+                <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.06); transition: all 0.2s;">
+                    <td style="padding: 1.25rem 1rem; font-size: 1.1rem; font-weight: bold; color: #fbbf24;">🥇 1</td>
+                    <td style="padding: 1.25rem 1rem; font-weight: 600; color: #f8fafc; font-size: 0.95rem;">GPT-4o</td>
+                    <td style="padding: 1.25rem 1rem; color: #10b981; font-weight: bold; text-align: center;">89.0%</td>
+                    <td style="padding: 1.25rem 1rem; color: #f59e0b; font-weight: bold; text-align: center;">71.0%</td>
+                    <td style="padding: 1.25rem 1rem; color: #ef4444; font-weight: bold; text-align: center;">38.0%</td>
+                    <td style="padding: 1.25rem 1rem;">
+                        <span style="font-weight: 700; font-size: 1.1rem; color: #f8fafc;">0.742</span>
+                        <div style="width: 100px; background: rgba(255, 255, 255, 0.1); border-radius: 4px; height: 6px; overflow: hidden; margin-top: 6px;">
                             <div style="width: 74.2%; height: 100%; background: linear-gradient(90deg, #6366f1, #8b5cf6);"></div>
                         </div>
                     </td>
                 </tr>
-                <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); background: rgba(139, 92, 246, 0.05);">
-                    <td style="padding: 1rem; font-size: 1.1rem;">🥈 2</td>
-                    <td style="padding: 1rem; font-weight: 600; color: #a78bfa;">
+                <!-- Rank 2 (Trained) -->
+                <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.06); background: rgba(139, 92, 246, 0.08); box-shadow: inset 0 0 12px rgba(139, 92, 246, 0.15);">
+                    <td style="padding: 1.25rem 1rem; font-size: 1.1rem; font-weight: bold; color: #e2e8f0;">🥈 2</td>
+                    <td style="padding: 1.25rem 1rem; font-weight: 600; color: #c084fc; font-size: 0.95rem;">
                         AgentDebugger-Qwen2.5-3B-GRPO
-                        <span style="background: linear-gradient(135deg, #8b5cf6, #6366f1); padding: 2px 6px; border-radius: 4px; font-size: 0.65rem; color: white; margin-left: 6px;">Trained</span>
+                        <span style="background: linear-gradient(135deg, #a78bfa, #6366f1); padding: 3px 8px; border-radius: 6px; font-size: 0.65rem; color: white; font-weight: bold; margin-left: 8px; box-shadow: 0 2px 8px rgba(139, 92, 246, 0.4);">Trained</span>
                     </td>
-                    <td style="padding: 1rem; color: #10b981; font-weight: bold;">{qwen_t1}</td>
-                    <td style="padding: 1rem; color: #10b981; font-weight: bold;">{qwen_t2}</td>
-                    <td style="padding: 1rem; color: #f59e0b; font-weight: bold;">{qwen_t3}</td>
-                    <td style="padding: 1rem;">
-                        <span style="font-weight: 700; font-size: 1.1rem; color: #a78bfa;">{qwen_mean}</span>
-                        <div style="width: 100px; background: rgba(255,255,255,0.1); border-radius: 4px; height: 6px; overflow: hidden; margin-top: 4px;">
-                            <div style="width: {float(qwen_mean)*100:.1f}%; height: 100%; background: linear-gradient(90deg, #8b5cf6, #ec4899);"></div>
+                    <td style="padding: 1.25rem 1rem; color: #10b981; font-weight: bold; text-align: center;">{qwen_t1}</td>
+                    <td style="padding: 1.25rem 1rem; color: #10b981; font-weight: bold; text-align: center;">{qwen_t2}</td>
+                    <td style="padding: 1.25rem 1rem; color: #f59e0b; font-weight: bold; text-align: center;">{qwen_t3}</td>
+                    <td style="padding: 1.25rem 1rem;">
+                        <span style="font-weight: 700; font-size: 1.1rem; color: #c084fc;">{qwen_mean}</span>
+                        <div style="width: 100px; background: rgba(255, 255, 255, 0.1); border-radius: 4px; height: 6px; overflow: hidden; margin-top: 6px;">
+                            <div style="width: {float(qwen_mean)*100:.1f}%; height: 100%; background: linear-gradient(90deg, #a78bfa, #ec4899);"></div>
                         </div>
                     </td>
                 </tr>
-                <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
-                    <td style="padding: 1rem; font-size: 1.1rem;">🥉 3</td>
-                    <td style="padding: 1rem; font-weight: 600; color: #cbd5e1;">Llama-3.1-70B-Instruct <span style="background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px; font-size: 0.65rem; color: #94a3b8; margin-left: 6px;">Baseline</span></td>
-                    <td style="padding: 1rem; color: #ef4444; font-weight: bold;">21.0%</td>
-                    <td style="padding: 1rem; color: #ef4444; font-weight: bold;">21.5%</td>
-                    <td style="padding: 1rem; color: #ef4444; font-weight: bold;">21.5%</td>
-                    <td style="padding: 1rem;">
-                        <span style="font-weight: 700; font-size: 1.1rem;">0.210</span>
-                        <div style="width: 100px; background: rgba(255,255,255,0.1); border-radius: 4px; height: 6px; overflow: hidden; margin-top: 4px;">
-                            <div style="width: 21%; height: 100%; background: #64748b;"></div>
+                <!-- Rank 3 (Llama) -->
+                <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.06); transition: all 0.2s;">
+                    <td style="padding: 1.25rem 1rem; font-size: 1.1rem; font-weight: bold; color: #cd7f32;">🥉 3</td>
+                    <td style="padding: 1.25rem 1rem; font-weight: 600; color: #cbd5e1; font-size: 0.95rem;">Llama-3.1-70B-Instruct <span style="background: rgba(255, 255, 255, 0.08); padding: 3px 8px; border-radius: 6px; font-size: 0.65rem; color: #94a3b8; margin-left: 8px; font-weight: bold;">Baseline</span></td>
+                    <td style="padding: 1.25rem 1rem; color: #ef4444; font-weight: bold; text-align: center;">21.0%</td>
+                    <td style="padding: 1.25rem 1rem; color: #ef4444; font-weight: bold; text-align: center;">21.5%</td>
+                    <td style="padding: 1.25rem 1rem; color: #ef4444; font-weight: bold; text-align: center;">21.5%</td>
+                    <td style="padding: 1.25rem 1rem;">
+                        <span style="font-weight: 700; font-size: 1.1rem; color: #cbd5e1;">0.210</span>
+                        <div style="width: 100px; background: rgba(255, 255, 255, 0.1); border-radius: 4px; height: 6px; overflow: hidden; margin-top: 6px;">
+                            <div style="width: 21.0%; height: 100%; background: #64748b;"></div>
+                        </div>
+                    </td>
+                </tr>
+                <!-- Rank 4 (Qwen Base) -->
+                <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.06); transition: all 0.2s;">
+                    <td style="padding: 1.25rem 1rem; font-size: 1.1rem; font-weight: bold; color: #64748b;">4</td>
+                    <td style="padding: 1.25rem 1rem; font-weight: 600; color: #94a3b8; font-size: 0.95rem;">Qwen2.5-Coder-3B-Instruct <span style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); padding: 3px 8px; border-radius: 6px; font-size: 0.65rem; color: #f87171; margin-left: 8px; font-weight: bold;">Base Model</span></td>
+                    <td style="padding: 1.25rem 1rem; color: #ef4444; font-weight: bold; text-align: center;">15.0%</td>
+                    <td style="padding: 1.25rem 1rem; color: #ef4444; font-weight: bold; text-align: center;">8.0%</td>
+                    <td style="padding: 1.25rem 1rem; color: #ef4444; font-weight: bold; text-align: center;">2.0%</td>
+                    <td style="padding: 1.25rem 1rem;">
+                        <span style="font-weight: 700; font-size: 1.1rem; color: #94a3b8;">0.083</span>
+                        <div style="width: 100px; background: rgba(255, 255, 255, 0.1); border-radius: 4px; height: 6px; overflow: hidden; margin-top: 6px;">
+                            <div style="width: 8.3%; height: 100%; background: #ef4444;"></div>
                         </div>
                     </td>
                 </tr>
@@ -430,8 +471,7 @@ with gr.Blocks(title="AgentDebuggerEnv Research Hub") as demo:
             # 🐞 AgentDebuggerEnv
             ### Interactive Research Showcase & Leaderboard
             *Aligning LLMs on Hypothesis-Driven Debugging using GRPO Reinforcement Learning*
-            """,
-            elem_classes=["header-title"]
+            """
         )
         
     with gr.Tabs():
