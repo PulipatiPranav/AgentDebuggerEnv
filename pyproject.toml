@@ -1,19 +1,91 @@
 [build-system]
-requires = ["setuptools", "wheel"]
+requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "agentdebugger-env"
-version = "1.0.0"
-description = "An OpenEnv-compliant debugging environment for AI agents"
+name = "agentdebugger"
+version = "2.0.0"
+description = "A reinforcement learning environment where LLM agents debug Python code in a sandbox"
 readme = "README.md"
 requires-python = ">=3.10"
-# Dependencies are managed via requirements.txt to avoid pip resolution conflicts
-# during HF Spaces Docker builds. Keep this list empty.
+license = { text = "MIT" }
+authors = [
+    { name = "Shashaank Jain" },
+    { name = "Pranav Pulipati" },
+]
+keywords = ["reinforcement-learning", "llm", "debugging", "grpo", "openenv", "sandbox"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+
+# The core environment — sandbox, tasks, rewards, dataset, CLI — runs on the
+# standard library alone. Everything heavier is an extra, so `pip install -e .`
+# on a CPU-only box stays a few seconds and a few megabytes.
 dependencies = []
 
-[tool.setuptools.packages.find]
-include = ["env*", "server*"]
+[project.optional-dependencies]
+serve = [
+    "fastapi>=0.110,<1.0",
+    "uvicorn[standard]>=0.27,<1.0",
+    "pydantic>=2.6,<3.0",
+]
+api = [
+    "openai>=1.30,<2.0",
+]
+train = [
+    "torch>=2.2",
+    "transformers>=4.46,<5.0",
+    "trl>=0.15,<0.17",
+    "peft>=0.13,<1.0",
+    "datasets>=3.0,<4.0",
+    "accelerate>=1.0,<2.0",
+    "wandb>=0.18,<1.0",
+]
+dev = [
+    "pytest>=8.0",
+    "pytest-timeout>=2.3",
+    "ruff>=0.6",
+]
+
+[project.urls]
+Homepage = "https://github.com/PulipatiPranav/AgentDebuggerEnv"
+Repository = "https://github.com/PulipatiPranav/AgentDebuggerEnv"
+Report = "https://github.com/PulipatiPranav/AgentDebuggerEnv/blob/main/docs/report.md"
 
 [project.scripts]
-server = "server.app:main"
+agentdebugger = "agentdebugger.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+"agentdebugger.dataset" = ["bugs/*.jsonl"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q --strict-markers"
+# Every sandbox test spawns a subprocess with a 10s ceiling of its own. A test
+# that outlives this timeout is hung, not slow.
+timeout = 180
+markers = [
+    "slow: exercises the whole bug dataset, or spawns many sandboxes",
+]
+
+[tool.ruff]
+line-length = 100
+src = ["src", "tests"]
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
+ignore = [
+    "E501",    # long lines are the formatter's business
+    "RUF012",  # the grader/task registries are intentionally mutable class-level dicts
+]
