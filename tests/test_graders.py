@@ -1,144 +1,145 @@
+"""Episode graders rank models, so their scores have to be earned and deterministic.
 
-import pytest
-from env.graders import get_grader
-from env.tasks.registry import get_task
+The load-bearing claims:
 
+* An agent that submits nothing scores zero — even on the hard task, where the
+  buggy code already passes every sequential test.
+* The red-herring grader pays for naming the real cause and refuses to pay for
+  following the symptom.
+* The concurrency grader only calls a fix solved if it survives the stress test,
+  and it never runs agent code in this process.
+"""
 
+from __future__ import annotations
 
-
-def _make_dummy_attempts(n=2, tests_passed=3, tests_total=8):
-    return [
-        {
-            "attempt_number": i + 1,
-            "code_submitted": "def dummy(): pass",
-            "hypothesis": "The bug is in the loop condition",
-            "execution_output": f"{tests_passed} passed, {tests_total - tests_passed} failed",
-            "tests_passed": tests_passed,
-            "tests_total": tests_total,
-            "execution_time_ms": 100,
-            "timed_out": False,
-        }
-        for i in range(n)
-    ]
+from agentdebugger.protocol import FixAttempt
+from agentdebugger.rewards import get_grader
+from agentdebugger.rewards.graders import ConcurrencyGrader, Episode, RedHerringGrader
+from agentdebugger.tasks import get_task
 
 
-def test_easy_grader_deterministic():
-    grader = get_grader("easy")
+def attempt(code="", hypothesis="", tests_passed=0, number=1, tests_total=8):
+    return FixAttempt(
+        attempt_number=number,
+        hypothesis=hypothesis,
+        code_submitted=code,
+        execution_output="",
+        tests_passed=tests_passed,
+        tests_total=tests_total,
+        execution_time_ms=10,
+        timed_out=False,
+    )
+
+
+# ── the invariant every grader shares ─────────────────────────────────────────
+
+
+def test_submitting_nothing_scores_zero_on_every_task():
+    for task_id in ("easy", "medium", "hard"):
+        task = get_task(task_id)
+        score = get_grader(task_id).score(task, Episode())
+        assert score == 0.0, f"{task_id} paid out for an empty episode"
+
+
+def test_scores_are_bounded_to_the_unit_interval():
     task = get_task("easy")
-    attempts = _make_dummy_attempts(2, tests_passed=7, tests_total=8)
-    hypotheses = ["The off by one error in the loop condition"]
-
-    score1 = grader.score(task, attempts, 7, 8, 2, 5, hypotheses)
-    score2 = grader.score(task, attempts, 7, 8, 2, 5, hypotheses)
-    assert score1 == score2, f"Easy grader not deterministic: {score1} != {score2}"
-
-
-def test_medium_grader_deterministic():
-    grader = get_grader("medium")
-    task = get_task("medium")
-    attempts = _make_dummy_attempts(3, tests_passed=6, tests_total=10)
-    hypotheses = ["Bug is in hash_password bytes conversion"]
-
-    score1 = grader.score(task, attempts, 6, 10, 3, 7, hypotheses)
-    score2 = grader.score(task, attempts, 6, 10, 3, 7, hypotheses)
-    assert score1 == score2, f"Medium grader not deterministic: {score1} != {score2}"
+    oracle = Episode(
+        attempts=(attempt(task.ground_truth.fixed_code, "off-by-one", 8),),
+        hypotheses=("binary_search off-by-one, use left <= right",),
+    )
+    score = get_grader("easy").score(task, oracle)
+    assert 0.0 <= score <= 1.0
 
 
-def test_hard_grader_deterministic():
-    grader = get_grader("hard")
+def test_grading_is_deterministic():
     task = get_task("hard")
-    
-    attempts = _make_dummy_attempts(2, tests_passed=8, tests_total=8)
-    hypotheses = ["race condition in increment"]
-
-    score1 = grader.score(task, attempts, 8, 8, 2, 10, hypotheses)
-    score2 = grader.score(task, attempts, 8, 8, 2, 10, hypotheses)
-    assert score1 == score2, f"Hard grader not deterministic: {score1} != {score2}"
-
+    episode = Episode(
+        attempts=(attempt(task.ground_truth.fixed_code, "race condition", 8),),
+        hypotheses=("a race condition; the read-modify-write needs a lock",),
+    )
+    scores = {get_grader("hard").score(task, episode) for _ in range(3)}
+    assert len(scores) == 1
 
 
-
-@pytest.mark.parametrize("task_id", ["easy", "medium", "hard"])
-def test_grader_range_with_zero_attempts(task_id):
-    grader = get_grader(task_id)
-    task = get_task(task_id)
-    score = grader.score(task, [], 0, task["tests_total"], 0, task["max_attempts"], [])
-    assert 0.0 <= score <= 1.0, f"{task_id} grader out of range: {score}"
+# ── the reference fix defines the ceiling ─────────────────────────────────────
 
 
-@pytest.mark.parametrize("task_id", ["easy", "medium", "hard"])
-def test_grader_range_with_perfect_score(task_id):
-    grader = get_grader(task_id)
-    task = get_task(task_id)
-    tests_total = task["tests_total"]
-    attempts = _make_dummy_attempts(1, tests_passed=tests_total, tests_total=tests_total)
-    hypotheses = ["off by one", "hash_password bytes", "race condition atomic lock"]
-
-    score = grader.score(task, attempts, tests_total, tests_total, 1, task["max_attempts"], hypotheses)
-    assert 0.0 <= score <= 1.0, f"{task_id} grader out of range: {score}"
-
-
-@pytest.mark.parametrize("task_id", ["easy", "medium", "hard"])
-def test_grader_range_with_all_failures(task_id):
-    grader = get_grader(task_id)
-    task = get_task(task_id)
-    tests_total = task["tests_total"]
-    attempts = _make_dummy_attempts(task["max_attempts"], tests_passed=0, tests_total=tests_total)
-
-    score = grader.score(task, attempts, 0, tests_total, task["max_attempts"], task["max_attempts"], [])
-    assert 0.0 <= score <= 1.0, f"{task_id} grader out of range: {score}"
+def test_the_reference_fix_scores_near_the_top_on_every_task():
+    for task_id in ("easy", "medium", "hard"):
+        task = get_task(task_id)
+        episode = Episode(
+            attempts=(attempt(task.ground_truth.fixed_code, task.ground_truth.reference_hypothesis, task.tests_total, tests_total=task.tests_total),),
+            hypotheses=(task.ground_truth.reference_hypothesis,),
+        )
+        score = get_grader(task_id).score(task, episode)
+        assert score >= 0.9, f"{task_id} reference fix only scored {score}"
 
 
+# ── the red herring ───────────────────────────────────────────────────────────
 
 
-def test_easy_dummy_agent_low_score():
-    grader = get_grader("easy")
-    task = get_task("easy")
-    attempts = [
-        {
-            "attempt_number": i + 1,
-            "code_submitted": "pass",
-            "hypothesis": "I don't know",
-            "execution_output": "0 passed, 8 failed",
-            "tests_passed": 0,
-            "tests_total": 8,
-            "execution_time_ms": 50,
-            "timed_out": False,
-        }
-        for i in range(5)
-    ]
-    score = grader.score(task, attempts, 0, 8, 5, 5, ["I don't know"] * 5)
-    assert score < 0.15, f"Dummy agent scored too high on easy: {score}"
-
-
-def test_easy_perfect_agent_high_score():
-    grader = get_grader("easy")
-    task = get_task("easy")
-    attempts = [
-        {
-            "attempt_number": 1,
-            "code_submitted": task["ground_truth"]["fixed_code"],
-            "hypothesis": "The off by one error: should be left <= right",
-            "execution_output": "8 passed, 0 failed",
-            "tests_passed": 8,
-            "tests_total": 8,
-            "execution_time_ms": 50,
-            "timed_out": False,
-        }
-    ]
-    score = grader.score(task, attempts, 8, 8, 1, 5, ["The off by one error: should be left <= right"])
-    assert score > 0.85, f"Perfect agent scored too low on easy: {score}"
-
-
-def test_medium_red_herring_low_score():
-    grader = get_grader("medium")
+def test_naming_the_root_cause_beats_following_the_red_herring():
     task = get_task("medium")
-    attempts = _make_dummy_attempts(3, tests_passed=6, tests_total=10)
-    hypotheses = [
-        "The bug is in authenticate_user, it's not checking credentials correctly",
-        "authenticate_user should handle the case differently",
-        "Fix authenticate_user to return True for valid users",
-    ]
-    score = grader.score(task, attempts, 6, 10, 3, 7, hypotheses)
-    
-    assert score < 0.60, f"Red herring agent scored too high on medium: {score}"
+    grader = RedHerringGrader()
+
+    root_cause = grader._score_hypothesis(
+        task, "the bug is in hash_password, which wraps hexdigest in str(bytes(...))"
+    )
+    red_herring = grader._score_hypothesis(
+        task, "authenticate_user is returning False when it should return True"
+    )
+    generic = grader._score_hypothesis(task, "there is a mismatch somewhere in the comparison")
+
+    assert root_cause == 1.0
+    assert red_herring == 0.0
+    assert red_herring < generic < root_cause
+
+
+def test_naming_the_cause_without_detail_earns_partial_credit():
+    task = get_task("medium")
+    score = RedHerringGrader()._score_hypothesis(task, "the problem is in hash_password")
+    assert score == 0.5
+
+
+# ── the concurrency grader ────────────────────────────────────────────────────
+
+
+def test_a_locked_counter_survives_the_stress_test_and_a_racy_one_does_not():
+    task = get_task("hard")
+    grader = ConcurrencyGrader()
+
+    assert grader.survives_stress_test(task.ground_truth.fixed_code, task) is True
+    assert grader.survives_stress_test(task.buggy_code, task) is False
+
+
+def test_passing_the_sequential_suite_is_not_enough_to_be_solved():
+    """The buggy code passes all eight tests; it must not count as solved."""
+    task = get_task("hard")
+    grader = ConcurrencyGrader()
+
+    buggy_but_green = attempt(task.buggy_code, "looks fine to me", tests_passed=8)
+    truly_fixed = attempt(task.ground_truth.fixed_code, "race condition", tests_passed=8)
+
+    assert grader.is_solved(task, buggy_but_green) is False
+    assert grader.is_solved(task, truly_fixed) is True
+
+
+def test_a_fix_that_only_passes_sequential_tests_scores_below_a_real_fix():
+    task = get_task("hard")
+    grader = ConcurrencyGrader()
+
+    sequential_only = grader.score(
+        task,
+        Episode(
+            attempts=(attempt(task.buggy_code, "no race here", 8),),
+            hypotheses=("the counter looks correct",),
+        ),
+    )
+    thread_safe = grader.score(
+        task,
+        Episode(
+            attempts=(attempt(task.ground_truth.fixed_code, "race condition, needs a lock", 8),),
+            hypotheses=("a race condition in the read-modify-write; add a lock",),
+        ),
+    )
+    assert sequential_only < thread_safe

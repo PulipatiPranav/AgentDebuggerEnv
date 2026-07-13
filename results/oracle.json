@@ -1,0 +1,70 @@
+{
+  "agent": "oracle",
+  "mean_score": 0.9771,
+  "solve_rate": 1.0,
+  "episodes": [
+    {
+      "task_id": "easy",
+      "agent": "oracle",
+      "grader_score": 0.96,
+      "cumulative_reward": 0.5375,
+      "steps_taken": 1,
+      "attempts_used": 1,
+      "tests_passed": 8,
+      "tests_total": 8,
+      "solved": true,
+      "turns": [
+        {
+          "step": 1,
+          "action_type": "submit_fix",
+          "hypothesis": "The loop condition is `left < right`, so the loop exits while left == right without ever examining that final candidate index. Any target that binary search narrows down to a single remaining slot \u2014 the last element, or a one-element list \u2014 is reported as missing. The termination condition should be `left <= right`, which is the classic off-by-one in this algorithm.",
+          "step_reward": 0.5375,
+          "tests_passed": 8,
+          "tests_total": 8
+        }
+      ]
+    },
+    {
+      "task_id": "medium",
+      "agent": "oracle",
+      "grader_score": 0.9714,
+      "cumulative_reward": 0.56,
+      "steps_taken": 1,
+      "attempts_used": 1,
+      "tests_passed": 10,
+      "tests_total": 10,
+      "solved": true,
+      "turns": [
+        {
+          "step": 1,
+          "action_type": "submit_fix",
+          "hypothesis": "authenticate_user is correct; the error message names it only because it is where the False surfaces. The bug is in hash_password on line 8, which wraps its hex digest in str(bytes(...)) and so returns the literal text \"b'5f4dcc\u2026'\" instead of the digest \"5f4dcc\u2026\". Stored hashes are written by hexdigest() directly, so the comparison in validate_password can never match. Returning hash_obj.hexdigest() unwrapped fixes all four failures.",
+          "step_reward": 0.56,
+          "tests_passed": 10,
+          "tests_total": 10
+        }
+      ]
+    },
+    {
+      "task_id": "hard",
+      "agent": "oracle",
+      "grader_score": 1.0,
+      "cumulative_reward": 0.5,
+      "steps_taken": 1,
+      "attempts_used": 1,
+      "tests_passed": 8,
+      "tests_total": 8,
+      "solved": true,
+      "turns": [
+        {
+          "step": 1,
+          "action_type": "submit_fix",
+          "hypothesis": "Every test calls the counter from a single thread, so none of them can see the bug. increment() is a read-modify-write: it reads self.count, calls _apply, then writes the result back. That call is a point where CPython can switch threads, so two threads can read the same count and store the same value, losing an update \u2014 which is exactly the downward drift seen in production. This is a race condition; the read-modify-write in increment, decrement, get_count and reset must be made atomic with a threading.Lock.",
+          "step_reward": 0.5,
+          "tests_passed": 8,
+          "tests_total": 8
+        }
+      ]
+    }
+  ]
+}

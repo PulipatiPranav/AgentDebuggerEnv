@@ -1,0 +1,30 @@
+{
+  "model": "shashaank0707/AgentDebugger-trained",
+  "base_model": "Qwen/Qwen2.5-Coder-3B-Instruct",
+  "note": "Published GRPO run. Generated with an earlier evaluation harness; kept for provenance. Reproduce with `agentdebugger evaluate-curriculum --adapter <repo>`.",
+  "overall": {
+    "total": 90,
+    "solved": 72,
+    "solve_rate": 0.8
+  },
+  "tiers": {
+    "tier1": {
+      "total": 40,
+      "solved": 40,
+      "solve_rate": 1.0,
+      "mean_reward": 1.0
+    },
+    "tier2": {
+      "total": 30,
+      "solved": 23,
+      "solve_rate": 0.7667,
+      "mean_reward": 0.65
+    },
+    "tier3": {
+      "total": 20,
+      "solved": 9,
+      "solve_rate": 0.45,
+      "mean_reward": 0.175
+    }
+  }
+}
