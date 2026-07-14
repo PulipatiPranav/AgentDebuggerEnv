@@ -163,12 +163,14 @@ The suite is organised around the project's claims rather than around files. The
 - **`tests/test_graders.py`** — submitting nothing scores zero on every task (including the hard one, where the buggy code passes every sequential test); grading is deterministic.
 - **`tests/test_claims.py`** — one test per sentence in this README and the report that a reader could challenge: the reward range, the curriculum schedule, the mandatory hypothesis, and that training and evaluation share a single scoring path.
 
-Run the fast suite, or include the dataset-wide sandbox checks:
+The default run includes the dataset-wide sandbox check, which executes all 90 bugs. Deselect it when iterating:
 
 ```bash
-pytest                    # fast suite
-pytest -m slow            # execute all 90 bugs through the sandbox
+pytest                    # everything (~25s)
+pytest -m "not slow"      # skip the dataset-wide sandbox check
 ```
+
+Both `ruff check` and `pytest` run in [CI](.github/workflows/ci.yml) on every push and pull request, across Python 3.10–3.13.
 
 ## Training and results
 
