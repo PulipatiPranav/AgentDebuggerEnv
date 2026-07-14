@@ -74,7 +74,7 @@ Every path to "did this fix work?" runs through one sandbox and one test runner,
 
 ## Installation
 
-Requires Python 3.10+ on Linux or macOS. The kernel resource limits (memory, CPU) are enforced on POSIX systems; on other platforms the wall-clock deadline still applies.
+Requires Python 3.10+ on Linux or macOS. The kernel resource limits are enforced where the kernel supports them: on Linux, all of them. macOS accepts the address-space (memory) ceiling but does not enforce it, so a runaway allocation there is caught by the wall-clock deadline rather than failing fast with a `MemoryError`. The deadline and the static import/builtin policy apply on every platform.
 
 ```bash
 git clone https://github.com/PulipatiPranav/AgentDebuggerEnv.git

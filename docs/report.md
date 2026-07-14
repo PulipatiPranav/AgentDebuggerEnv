@@ -82,7 +82,11 @@ answers it in three layers, in the order they take effect:
    A violation is refused without ever running the code.
 2. **Kernel limits**, applied in the child before it executes anything:
    address space, CPU time, a zero file-write budget, and no core dumps. These
-   hold even if the child stops responding to signals.
+   hold even if the child stops responding to signals. A limit the kernel will
+   not accept is skipped rather than fatal — macOS, for instance, takes the
+   address-space ceiling and ignores it, so there the wall-clock deadline is what
+   catches a runaway allocation. `MEMORY_LIMIT_ENFORCED` records where the ceiling
+   genuinely holds, so no test and no claim depends on a limit that is not real.
 3. **A wall-clock deadline** in the parent, which kills the child's entire
    process group — so a fix that spawns threads or grandchildren still dies.
 

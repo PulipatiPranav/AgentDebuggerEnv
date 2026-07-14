@@ -18,7 +18,7 @@ import pytest
 
 from agentdebugger.config import SandboxLimits
 from agentdebugger.sandbox import SandboxPolicy, analyze, execute, run_test_cases
-from agentdebugger.sandbox.runner import HAS_RLIMITS
+from agentdebugger.sandbox.runner import HAS_RLIMITS, MEMORY_LIMIT_ENFORCED
 
 # ── it runs ordinary code ─────────────────────────────────────────────────────
 
@@ -29,6 +29,21 @@ def test_runs_clean_code():
     assert not result.blocked
     assert not result.timed_out
     assert result.exit_code == 0
+
+
+def test_applying_the_limits_never_prevents_the_sandbox_from_running():
+    """A limit this kernel will not accept must be skipped, not fatal.
+
+    The limits were once applied from a ``preexec_fn``, which runs post-fork
+    where CPython cannot allocate to report an error. One unsupported
+    ``RLIMIT_*`` therefore killed *every* execution with an opaque
+    "Exception occurred in preexec_fn" — which is precisely what macOS did. The
+    sandbox has to run on any POSIX platform, enforcing whatever that kernel
+    will enforce and no less.
+    """
+    result = execute("print('ran')", policy=SandboxPolicy(limits=SandboxLimits(memory_mb=64)))
+    assert result.output == "ran"
+    assert result.exit_code == 0, "the sandbox failed to execute anything at all"
 
 
 def test_surfaces_syntax_errors_as_output_not_as_a_security_event():
@@ -157,7 +172,10 @@ def test_a_timeout_kills_the_whole_process_group(fast_policy):
     assert result.exit_code is not None and result.exit_code < 0, "expected a signal, not an exit"
 
 
-@pytest.mark.skipif(not HAS_RLIMITS, reason="setrlimit is unavailable on this platform")
+@pytest.mark.skipif(
+    not MEMORY_LIMIT_ENFORCED,
+    reason="macOS accepts RLIMIT_AS but does not enforce it; the deadline backstops instead",
+)
 def test_memory_limit_is_enforced():
     policy = SandboxPolicy(limits=SandboxLimits(memory_mb=64))
     result = execute("data = bytearray(256 * 1024 * 1024)\nprint('allocated', len(data))", policy=policy)

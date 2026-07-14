@@ -35,6 +35,13 @@ try:  # pragma: no cover - Windows has no `resource` module
 except ImportError:  # pragma: no cover
     HAS_RLIMITS = False
 
+#: Whether the address-space ceiling is actually *enforced* by the kernel.
+#: Linux enforces ``RLIMIT_AS`` strictly. macOS accepts the call and ignores it,
+#: so a runaway allocation there is caught by the wall-clock deadline instead of
+#: failing fast with a ``MemoryError``. Stating this as a constant keeps the
+#: tests and the documentation honest about what holds on which platform.
+MEMORY_LIMIT_ENFORCED = HAS_RLIMITS and sys.platform != "darwin"
+
 #: Placeholder substituted for the scratch directory, so identical code always
 #: produces identical output. Rewards are computed from this text; it must not
 #: vary run to run.
@@ -110,16 +117,34 @@ except BaseException as exc:
 
 
 def _limit_child(limits: SandboxLimits) -> None:  # pragma: no cover - runs post-fork
-    """Apply kernel resource limits. Executed in the child between fork and exec."""
-    os.setsid()
+    """Apply kernel resource limits. Executed in the child between fork and exec.
+
+    Every call is individually guarded, and this function must never raise. It
+    runs post-fork, where CPython cannot safely allocate to report an error: it
+    throws the real exception away and the parent sees only an opaque
+    "Exception occurred in preexec_fn". A single ``RLIMIT_*`` this kernel will
+    not accept therefore used to take down *every* execution — which is exactly
+    what macOS did, where the sandbox could not run at all.
+
+    A limit the kernel refuses is a limit we do not have. Skipping it is correct:
+    the wall-clock deadline in the parent is unconditional and backstops whatever
+    the kernel declines to enforce. ``MEMORY_LIMIT_ENFORCED`` records where the
+    address-space ceiling actually holds, so nothing claims otherwise.
+    """
     memory_bytes = limits.memory_mb * 1024 * 1024
-    resource.setrlimit(resource.RLIMIT_AS, (memory_bytes, memory_bytes))
-    resource.setrlimit(resource.RLIMIT_CPU, (limits.cpu_seconds, limits.cpu_seconds + 1))
-    resource.setrlimit(
-        resource.RLIMIT_FSIZE,
-        (limits.max_file_write_bytes, limits.max_file_write_bytes),
-    )
-    resource.setrlimit(resource.RLIMIT_CORE, (0, 0))
+    for name, soft, hard in (
+        ("RLIMIT_AS", memory_bytes, memory_bytes),
+        ("RLIMIT_CPU", limits.cpu_seconds, limits.cpu_seconds + 1),
+        ("RLIMIT_FSIZE", limits.max_file_write_bytes, limits.max_file_write_bytes),
+        ("RLIMIT_CORE", 0, 0),
+    ):
+        key = getattr(resource, name, None)
+        if key is None:
+            continue
+        try:
+            resource.setrlimit(key, (soft, hard))
+        except (ValueError, OSError):
+            continue
 
 
 def execute(
@@ -172,7 +197,10 @@ def _run(program: str, workdir: str, policy: SandboxPolicy) -> ExecutionResult:
         errors="replace",
         env={"PATH": "/usr/bin:/bin", "HOME": workdir, "LC_ALL": "C.UTF-8"},
         preexec_fn=(lambda: _limit_child(limits)) if HAS_RLIMITS else None,
-        start_new_session=not HAS_RLIMITS,  # _limit_child already calls setsid()
+        # setsid, done in C rather than from preexec_fn: the deadline kills the
+        # child's whole process group, so this must not be allowed to fail
+        # quietly — killing the wrong group would kill the caller.
+        start_new_session=True,
     )
 
     timed_out = False
