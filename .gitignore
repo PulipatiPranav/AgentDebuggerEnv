@@ -34,3 +34,6 @@ wandb/
 .idea/
 *.swp
 .DS_Store
+
+# Private planning / strategy documents (do not publish)
+markdown-preview.pdf
