@@ -120,7 +120,7 @@ def _evaluate_curriculum(args: argparse.Namespace) -> int:
         print(f"\r  tier {bug.tier}: {done}/{total}", end="", flush=True)
 
     report = evaluate_curriculum(
-        generate, name, tiers=args.tiers, limit=args.limit, on_bug=progress
+        generate, name, tiers=args.tiers, limit=args.limit, on_bug=progress, split=args.split
     )
 
     print("\n")
@@ -192,6 +192,8 @@ def _train(args: argparse.Namespace) -> int:
             output_dir=args.output_dir,
             seed=args.seed,
             push_to_hub=args.push_to_hub,
+            reward_config=args.reward_config,
+            split=args.split,
         )
     )
     return 0
@@ -256,6 +258,12 @@ def _build_parser() -> argparse.ArgumentParser:
     curriculum.add_argument("--adapter", help="a LoRA adapter to load on top of the base model")
     curriculum.add_argument("--tiers", nargs="+", type=int, choices=TIERS, default=list(TIERS))
     curriculum.add_argument("--limit", type=int, help="only evaluate this many bugs per tier")
+    curriculum.add_argument(
+        "--split",
+        choices=("all", "train", "heldout"),
+        default="heldout",
+        help="which dataset split to evaluate on (default: held-out, the only side to report)",
+    )
     curriculum.add_argument("--output", help="write the report to this JSON file")
     curriculum.set_defaults(handler=_evaluate_curriculum)
 
@@ -276,6 +284,18 @@ def _build_parser() -> argparse.ArgumentParser:
     train.add_argument("--max-steps", type=int, default=500)
     train.add_argument("--output-dir", default="./checkpoints")
     train.add_argument("--seed", type=int, default=0)
+    train.add_argument(
+        "--reward-config",
+        choices=("R0", "R1", "R2"),
+        default="R0",
+        help="R0 full (shipped), R1 terminal-only, R2 dense minus reasoning",
+    )
+    train.add_argument(
+        "--split",
+        choices=("all", "train", "heldout"),
+        default="train",
+        help="which dataset split to train on (default: train)",
+    )
     train.add_argument("--push-to-hub", help="a HF repo to push the trained adapter to")
     train.set_defaults(handler=_train)
 

@@ -17,14 +17,18 @@ from agentdebugger.dataset.models import Bug
 
 _PACKAGE = "agentdebugger.dataset.bugs"
 
+#: The three recognised split names. ``"all"`` applies no filter — the historical
+#: behaviour, and the safe default so nothing that omits ``split`` changes.
+SPLITS = ("all", "train", "heldout")
+
 
 class DatasetError(Exception):
     """Raised when the bug dataset is missing or malformed."""
 
 
 @cache
-def load_tier(tier: int) -> tuple[Bug, ...]:
-    """Load every bug in one difficulty tier."""
+def _read_tier(tier: int) -> tuple[Bug, ...]:
+    """Load every bug in one difficulty tier, unfiltered."""
     if tier not in TIERS:
         raise DatasetError(f"Unknown tier {tier}. Available: {list(TIERS)}")
 
@@ -46,14 +50,48 @@ def load_tier(tier: int) -> tuple[Bug, ...]:
     return tuple(bugs)
 
 
-def load_bugs(tiers: Iterable[int] = TIERS) -> tuple[Bug, ...]:
-    """Load the bugs from the given tiers, in tier order."""
-    return tuple(bug for tier in sorted(set(tiers)) for bug in load_tier(tier))
+@cache
+def load_split(split: str = "all") -> frozenset[str] | None:
+    """Return the set of bug ids in ``split``, or ``None`` for the whole dataset.
+
+    The split is a fixed, committed artifact (``bugs/split.json``): it is authored
+    once and never reseeded, because every paired comparison in the experiment plan
+    depends on every arm seeing the identical held-out set.
+    """
+    if split == "all":
+        return None
+    if split not in SPLITS:
+        raise DatasetError(f"Unknown split {split!r}. Available: {list(SPLITS)}")
+
+    source = resources.files(_PACKAGE).joinpath("split.json")
+    try:
+        data = json.loads(source.read_text(encoding="utf-8"))
+    except FileNotFoundError as exc:  # pragma: no cover - packaging failure
+        raise DatasetError("split.json is missing from the package.") from exc
+
+    ids = data.get(split)
+    if not isinstance(ids, list):
+        raise DatasetError(f"split.json has no {split!r} list.")
+    return frozenset(ids)
 
 
-def tier_counts() -> dict[int, int]:
-    """How many bugs each tier holds."""
-    return {tier: len(load_tier(tier)) for tier in TIERS}
+def load_tier(tier: int, split: str = "all") -> tuple[Bug, ...]:
+    """Load the bugs in one difficulty tier, optionally restricted to ``split``."""
+    bugs = _read_tier(tier)
+    ids = load_split(split)
+    if ids is None:
+        return bugs
+    return tuple(bug for bug in bugs if bug.id in ids)
+
+
+def load_bugs(tiers: Iterable[int] = TIERS, split: str = "all") -> tuple[Bug, ...]:
+    """Load the bugs from the given tiers and split, in tier order."""
+    return tuple(bug for tier in sorted(set(tiers)) for bug in load_tier(tier, split))
+
+
+def tier_counts(split: str = "all") -> dict[int, int]:
+    """How many bugs each tier holds in ``split``."""
+    return {tier: len(load_tier(tier, split)) for tier in TIERS}
 
 
 def find_bug(bug_id: str, tiers: Sequence[int] = TIERS) -> Bug:

@@ -68,7 +68,7 @@ agentdebugger = "agentdebugger.cli:main"
 where = ["src"]
 
 [tool.setuptools.package-data]
-"agentdebugger.dataset" = ["bugs/*.jsonl"]
+"agentdebugger.dataset" = ["bugs/*.jsonl", "bugs/*.json"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

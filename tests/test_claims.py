@@ -9,7 +9,7 @@ from __future__ import annotations
 import pytest
 
 from agentdebugger.config import DEFAULT_CURRICULUM, CurriculumSchedule
-from agentdebugger.dataset import find_bug, load_bugs
+from agentdebugger.dataset import load_bugs
 from agentdebugger.envs import CurriculumEnvironment, score_response
 from agentdebugger.evaluation import run_episode
 from agentdebugger.rewards import TurnRewardCalculator
@@ -118,11 +118,12 @@ def test_training_and_evaluation_score_a_response_identically():
     A reward reported during training must mean the same as one reported during
     evaluation, so both go through score_response for the same bug and response.
     """
-    bug = find_bug("t1_001")
+    bug = load_bugs((1,))[0]
     fix = (
-        "OBSERVATION: right starts at len(arr), one past the end\n"
-        "HYPOTHESIS: the search window includes an out-of-range index on line 2, "
-        "so binary_search raises IndexError; right should start at len(arr) - 1\n"
+        f"OBSERVATION: {bug.function_name} returns the wrong result on line "
+        f"{bug.location.line_start}\n"
+        f"HYPOTHESIS: the bug on line {bug.location.line_start} changes the computed value; "
+        "restoring the original operator makes every test pass again\n"
         "CONFIDENCE: high\n"
         "ACTION: propose_fix\n"
         f"DETAIL: {bug.original_code}\n"

@@ -81,9 +81,18 @@ class GroundTruth:
 
 
 class TurnRewardCalculator:
-    """Scores one structured response against the bug it was meant to fix."""
+    """Scores one structured response against the bug it was meant to fix.
 
-    # Component ceilings. Changing one changes the advertised reward range.
+    The component ceilings are constructor arguments, not fixed constants, so an
+    ablation is a set of ceilings rather than a fork of the scoring code. The
+    class-level defaults are the shipped **R0** reward; :meth:`terminal` (R1) and
+    :meth:`no_reasoning` (R2) are the two ablations the experiment plan calls for.
+    Setting a ceiling to ``0.0`` removes that component entirely — the earned
+    credit *and* any partial/negative signal it would otherwise contribute.
+    """
+
+    # Default component ceilings — the shipped R0 reward. Changing one changes the
+    # advertised reward range.
     FORMAT_MAX = 0.10
     HYPOTHESIS_MAX = 0.20
     LOCALIZATION_MAX = 0.15
@@ -91,13 +100,87 @@ class TurnRewardCalculator:
     SEMANTIC_MAX = 0.10
     EFFICIENCY_PER_REMAINING_TURN = 0.02
 
-    #: A fix that scores at least this much has solved the bug.
+    #: A fix that scores at least this much (the fix ceiling) has solved the bug.
     SOLVED_THRESHOLD = FIX_MAX
 
-    def __init__(self, max_turns: int = MAX_TURNS) -> None:
+    def __init__(
+        self,
+        max_turns: int = MAX_TURNS,
+        *,
+        format_max: float = FORMAT_MAX,
+        hypothesis_max: float = HYPOTHESIS_MAX,
+        localization_max: float = LOCALIZATION_MAX,
+        fix_max: float = FIX_MAX,
+        semantic_max: float = SEMANTIC_MAX,
+        efficiency_per_remaining_turn: float = EFFICIENCY_PER_REMAINING_TURN,
+    ) -> None:
         if max_turns < 1:
             raise ValueError(f"max_turns must be >= 1, got {max_turns}")
         self.max_turns = max_turns
+        # Instance ceilings shadow the class defaults, so existing references to
+        # e.g. ``calculator.FIX_MAX`` keep working and read the configured value.
+        self.FORMAT_MAX = format_max
+        self.HYPOTHESIS_MAX = hypothesis_max
+        self.LOCALIZATION_MAX = localization_max
+        self.FIX_MAX = fix_max
+        self.SEMANTIC_MAX = semantic_max
+        self.EFFICIENCY_PER_REMAINING_TURN = efficiency_per_remaining_turn
+        #: Solve detection tracks the fix ceiling, so it is correct under R1's
+        #: rescaled fix reward as well as under R0/R2.
+        self.SOLVED_THRESHOLD = fix_max
+
+    # ── reward configurations (research_plan.md §3) ───────────────────────────
+
+    @classmethod
+    def full(cls, max_turns: int = MAX_TURNS) -> TurnRewardCalculator:
+        """R0 — the full seven-component reward, exactly as shipped."""
+        return cls(max_turns=max_turns)
+
+    @classmethod
+    def terminal(cls, max_turns: int = MAX_TURNS) -> TurnRewardCalculator:
+        """R1 — monolithic terminal reward: fix outcome (rescaled to 1.0) + penalties.
+
+        Every shaping component is removed; ``fix_quality`` is rescaled to a 1.0
+        ceiling so a solve is still worth 1.0 and R0/R1 occupy the same range.
+        """
+        return cls(
+            max_turns=max_turns,
+            format_max=0.0,
+            hypothesis_max=0.0,
+            localization_max=0.0,
+            semantic_max=0.0,
+            efficiency_per_remaining_turn=0.0,
+            fix_max=1.0,
+        )
+
+    @classmethod
+    def no_reasoning(cls, max_turns: int = MAX_TURNS) -> TurnRewardCalculator:
+        """R2 — dense reward with exactly the two reasoning components zeroed.
+
+        Removes ``hypothesis_quality`` and ``localization`` only; format, fix,
+        semantic and efficiency are untouched, so R2 is still a dense, climbable
+        reward. R0 vs R2 asks whether paying for *reasoning* matters, or whether
+        any dense shaping would do.
+        """
+        return cls(max_turns=max_turns, hypothesis_max=0.0, localization_max=0.0)
+
+    @classmethod
+    def from_name(cls, name: str, max_turns: int = MAX_TURNS) -> TurnRewardCalculator:
+        """Build a calculator from a reward-config name (``R0``/``R1``/``R2``)."""
+        builders = {
+            "R0": cls.full,
+            "full": cls.full,
+            "R1": cls.terminal,
+            "terminal": cls.terminal,
+            "R2": cls.no_reasoning,
+            "no_reasoning": cls.no_reasoning,
+        }
+        try:
+            return builders[name](max_turns=max_turns)
+        except KeyError:
+            raise ValueError(
+                f"Unknown reward config {name!r}. Choose from R0, R1, R2."
+            ) from None
 
     def compute_turn_reward(
         self,
@@ -147,6 +230,8 @@ class TurnRewardCalculator:
         to the target than one that emits prose, and the reward has to say so or
         it will never find the format by exploration.
         """
+        if self.FORMAT_MAX == 0:  # component removed (R1)
+            return 0.0
         if output.valid:
             return self.FORMAT_MAX
 
@@ -168,6 +253,8 @@ class TurnRewardCalculator:
         proposing: bool,
     ) -> float:
         """Reward specific, grounded, calibrated hypotheses over generic ones."""
+        if self.HYPOTHESIS_MAX == 0:  # component removed (R1, R2)
+            return 0.0
         score = 0.0
         hypothesis = output.hypothesis
 
@@ -203,6 +290,8 @@ class TurnRewardCalculator:
         self, output: StructuredAgentOutput, ground_truth: GroundTruth
     ) -> float:
         """Reward naming where the bug is, not just what it does."""
+        if self.LOCALIZATION_MAX == 0:  # component removed (R1, R2)
+            return 0.0
         score = 0.0
         text = f"{output.hypothesis} {output.detail}".lower()
 
@@ -215,20 +304,25 @@ class TurnRewardCalculator:
         return min(score, self.LOCALIZATION_MAX)
 
     def _fix_score(self, test_results: Mapping[str, Any], proposing: bool) -> float:
-        """Pay for tests that actually pass. Graded, so partial fixes still climb."""
+        """Pay for tests that actually pass. Graded, so partial fixes still climb.
+
+        Partial credit is expressed relative to the fix ceiling, so the graded
+        shape is preserved when R1 rescales the ceiling from 0.35 to 1.0.
+        """
         total = _total(test_results)
         if not proposing or total == 0:
             return 0.0
 
         pass_rate = _passed(test_results) / total
+        scale = self.FIX_MAX / type(self).FIX_MAX  # 1.0 under R0/R2, 1/0.35 under R1
         if pass_rate == 1.0:
             return self.FIX_MAX
         if pass_rate >= 0.75:
-            return 0.20
+            return 0.20 * scale
         if pass_rate >= 0.50:
-            return 0.12
+            return 0.12 * scale
         if pass_rate > 0.0:
-            return 0.05
+            return 0.05 * scale
         return 0.0
 
     def _semantic_score(
@@ -242,6 +336,8 @@ class TurnRewardCalculator:
         Kept small on purpose: it is a similarity heuristic, not a correctness
         oracle, and it must never outweigh ``fix_quality``.
         """
+        if self.SEMANTIC_MAX == 0:  # component removed (R1)
+            return 0.0
         canonical = ground_truth.canonical_fix_code
         if not proposing or not output.detail or not canonical:
             return 0.0

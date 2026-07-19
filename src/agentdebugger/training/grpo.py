@@ -21,6 +21,7 @@ from typing import Any
 from agentdebugger.config import DEFAULT_CURRICULUM, CurriculumSchedule
 from agentdebugger.dataset import Bug, load_bugs
 from agentdebugger.envs.curriculum_env import score_response
+from agentdebugger.rewards.turn import TurnRewardCalculator
 from agentdebugger.training.prompts import bug_to_prompt
 
 #: Reward assigned when scoring a completion raises. Scoring runs untrusted model
@@ -70,14 +71,23 @@ class TrainingConfig:
     seed: int = 0
     schedule: CurriculumSchedule = DEFAULT_CURRICULUM
     push_to_hub: str | None = None
+    #: Reward configuration: R0 (full), R1 (terminal), or R2 (no-reasoning).
+    reward_config: str = "R0"
+    #: Which dataset split to train on. Training uses the train side only; the
+    #: held-out side is reserved for evaluation, so a solve rate measures learning
+    #: rather than memorisation.
+    split: str = "train"
 
 
-def make_reward_function(schedule: CurriculumSchedule = DEFAULT_CURRICULUM):
-    """Build the TRL reward function.
+def make_reward_function(
+    schedule: CurriculumSchedule = DEFAULT_CURRICULUM, reward_config: str = "R0"
+):
+    """Build the TRL reward function for a given reward configuration.
 
     TRL passes the dataset columns through as keyword arguments, so the bug each
     completion was generated from arrives in ``bug_metadata``.
     """
+    calculator = TurnRewardCalculator.from_name(reward_config)
 
     def reward_function(completions: list[str], prompts: list[str], **kwargs: Any) -> list[float]:
         raw_bugs = kwargs.get("bug_metadata") or [None] * len(completions)
@@ -89,7 +99,7 @@ def make_reward_function(schedule: CurriculumSchedule = DEFAULT_CURRICULUM):
                 continue
             try:
                 bug = Bug.from_dict(json.loads(raw) if isinstance(raw, str) else raw)
-                rewards.append(score_response(bug, completion).reward.total)
+                rewards.append(score_response(bug, completion, calculator=calculator).reward.total)
             except Exception as exc:
                 print(f"[reward] scoring failed: {type(exc).__name__}: {exc}", flush=True)
                 rewards.append(SCORING_FAILURE_REWARD)
@@ -99,11 +109,13 @@ def make_reward_function(schedule: CurriculumSchedule = DEFAULT_CURRICULUM):
     return reward_function
 
 
-def build_dataset(step: int, schedule: CurriculumSchedule = DEFAULT_CURRICULUM):
-    """The bug pool for ``step``, as a HF dataset of prompts."""
+def build_dataset(
+    step: int, schedule: CurriculumSchedule = DEFAULT_CURRICULUM, split: str = "train"
+):
+    """The bug pool for ``step`` and ``split``, as a HF dataset of prompts."""
     from datasets import Dataset
 
-    bugs = load_bugs(schedule.tiers_at(step))
+    bugs = load_bugs(schedule.tiers_at(step), split=split)
     return Dataset.from_list(
         [
             {"prompt": bug_to_prompt(bug), "bug_metadata": json.dumps(bug.as_dict())}
@@ -130,6 +142,7 @@ def train(config: TrainingConfig) -> None:
     dtype = torch.bfloat16 if ampere_or_newer else torch.float16
 
     print(f"VRAM {vram_gb:.0f}GB -> {profile}, dtype={dtype}", flush=True)
+    print(f"reward config {config.reward_config}, training on split '{config.split}'", flush=True)
 
     tokenizer = AutoTokenizer.from_pretrained(config.model)
     tokenizer.pad_token = tokenizer.pad_token or tokenizer.eos_token
@@ -174,8 +187,8 @@ def train(config: TrainingConfig) -> None:
             seed=config.seed,
             report_to="wandb" if _wandb_active() else "none",
         ),
-        train_dataset=build_dataset(0, config.schedule),
-        reward_funcs=make_reward_function(config.schedule),
+        train_dataset=build_dataset(0, config.schedule, config.split),
+        reward_funcs=make_reward_function(config.schedule, config.reward_config),
         processing_class=tokenizer,
     )
 
@@ -185,7 +198,9 @@ def train(config: TrainingConfig) -> None:
         def on_step_end(self, args, state, control, **kwargs):
             if state.global_step in config.schedule.advances_at():
                 tiers = config.schedule.tiers_at(state.global_step)
-                trainer.train_dataset = build_dataset(state.global_step, config.schedule)
+                trainer.train_dataset = build_dataset(
+                    state.global_step, config.schedule, config.split
+                )
                 print(f"\n[curriculum] step {state.global_step}: tiers {tiers}", flush=True)
 
     trainer.add_callback(CurriculumCallback())

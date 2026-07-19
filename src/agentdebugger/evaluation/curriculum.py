@@ -87,16 +87,18 @@ def evaluate_curriculum(
     tiers: Iterable[int] = TIERS,
     limit: int | None = None,
     on_bug: _Progress | None = None,
+    split: str = "heldout",
 ) -> CurriculumReport:
-    """Score ``generate`` on every bug in ``tiers``.
+    """Score ``generate`` on every bug in ``tiers`` within ``split``.
 
     ``generate`` maps a prompt to a completion; keeping it a plain callable means
     this function does not care whether the model is local, remote, or a stub in
-    a test.
+    a test. ``split`` defaults to the held-out side — the only side any reported
+    number should come from.
     """
     results = []
     for tier in tiers:
-        bugs = list(load_tier(tier))[:limit]
+        bugs = list(load_tier(tier, split))[:limit]
         records = []
         solved = 0
         total_reward = 0.0

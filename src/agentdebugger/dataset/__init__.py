@@ -1,9 +1,12 @@
-"""The tiered bug dataset: 90 hand-checked Python bugs across three difficulty tiers."""
+"""The tiered bug dataset: 180 validated Python bugs across three difficulty tiers,
+with a fixed 90/90 train/held-out split (``bugs/split.json``)."""
 
 from agentdebugger.dataset.loader import (
+    SPLITS,
     DatasetError,
     find_bug,
     load_bugs,
+    load_split,
     load_tier,
     tier_counts,
 )
@@ -16,6 +19,7 @@ from agentdebugger.dataset.validate import (
 )
 
 __all__ = [
+    "SPLITS",
     "Bug",
     "BugLocation",
     "BugReport",
@@ -24,6 +28,7 @@ __all__ = [
     "ValidationReport",
     "find_bug",
     "load_bugs",
+    "load_split",
     "load_tier",
     "tier_counts",
     "validate_bug",

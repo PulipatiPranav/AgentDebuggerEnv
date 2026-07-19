@@ -85,8 +85,12 @@ class TurnOutcome:
 
     @property
     def solved(self) -> bool:
-        """True when the response proposed a fix that passes every test case."""
-        return self.reward.fix_quality >= TurnRewardCalculator.SOLVED_THRESHOLD
+        """True when the response proposed a fix that passes every test case.
+
+        Defined on the test outcome, not on a reward threshold, so it means the
+        same thing under every reward configuration (R1 rescales ``fix_quality``).
+        """
+        return self.tests.all_passed
 
 
 def score_response(

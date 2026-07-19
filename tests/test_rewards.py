@@ -229,6 +229,62 @@ def test_efficiency_rewards_solving_while_turns_remain(calculator):
 # ── episode aggregation ───────────────────────────────────────────────────────
 
 
+# ── reward configurations R0 / R1 / R2 (research_plan.md §3) ──────────────────
+
+
+def _perfect_solve():
+    return response(
+        observation="binary_search line 4 uses left < right and skips the final index",
+        hypothesis="the termination condition on line 4 should be left <= right; as written the "
+        "loop exits one step early and the last element is never compared, reading as missing",
+        confidence="high",
+        detail=BINARY_SEARCH_TRUTH.canonical_fix_code,
+    )
+
+
+def test_r0_full_is_the_default_reward():
+    r0 = TurnRewardCalculator.from_name("R0")
+    breakdown = r0.compute_turn_reward(_perfect_solve(), BINARY_SEARCH_TRUTH, {"passed": 8, "total": 8}, 0)
+    assert breakdown.total == pytest.approx(1.0, abs=1e-9)
+
+
+def test_r1_terminal_zeroes_every_shaping_component_and_rescales_the_fix():
+    r1 = TurnRewardCalculator.terminal()
+    solved = r1.compute_turn_reward(_perfect_solve(), BINARY_SEARCH_TRUTH, {"passed": 8, "total": 8}, 0)
+    assert solved.format_compliance == 0.0
+    assert solved.hypothesis_quality == 0.0
+    assert solved.localization == 0.0
+    assert solved.semantic_similarity == 0.0
+    assert solved.efficiency_potential == 0.0
+    assert solved.fix_quality == pytest.approx(1.0)  # rescaled from 0.35 to 1.0
+    assert solved.total == pytest.approx(1.0, abs=1e-9)
+
+
+def test_r1_still_penalises_regressions():
+    """The terminal control must keep penalties, or it is a straw man, not a baseline."""
+    r1 = TurnRewardCalculator.terminal()
+    breakdown = r1.compute_turn_reward(
+        _perfect_solve(), BINARY_SEARCH_TRUTH, {"passed": 5, "total": 8, "newly_broken": 2}, 0
+    )
+    assert breakdown.penalties <= -0.20
+
+
+def test_r2_zeroes_only_the_two_reasoning_components():
+    r2 = TurnRewardCalculator.no_reasoning()
+    breakdown = r2.compute_turn_reward(_perfect_solve(), BINARY_SEARCH_TRUTH, {"passed": 8, "total": 8}, 0)
+    assert breakdown.hypothesis_quality == 0.0
+    assert breakdown.localization == 0.0
+    # everything else survives, so a perfect solve tops out at 0.65, not 1.0
+    assert breakdown.format_compliance == pytest.approx(0.10)
+    assert breakdown.fix_quality == pytest.approx(0.35)
+    assert breakdown.total == pytest.approx(0.65, abs=1e-9)
+
+
+def test_unknown_reward_config_is_rejected():
+    with pytest.raises(ValueError):
+        TurnRewardCalculator.from_name("R9")
+
+
 def test_solving_earlier_beats_solving_later(calculator):
     solve = response(
         hypothesis="binary_search line 4 off-by-one; the loop should use left <= right to compare "

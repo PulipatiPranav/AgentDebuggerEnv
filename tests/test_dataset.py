@@ -11,13 +11,20 @@ from __future__ import annotations
 import pytest
 
 from agentdebugger.config import TIERS
-from agentdebugger.dataset import load_bugs, load_tier, tier_counts, validate_bug, validate_tiers
+from agentdebugger.dataset import (
+    load_bugs,
+    load_split,
+    load_tier,
+    tier_counts,
+    validate_bug,
+    validate_tiers,
+)
 
 
-def test_the_dataset_ships_ninety_bugs_across_three_tiers():
+def test_the_dataset_ships_one_hundred_eighty_bugs_across_three_tiers():
     counts = tier_counts()
-    assert counts == {1: 40, 2: 30, 3: 20}
-    assert sum(counts.values()) == 90
+    assert counts == {1: 60, 2: 60, 3: 60}
+    assert sum(counts.values()) == 180
 
 
 def test_every_bug_parses_and_carries_test_cases():
@@ -36,7 +43,27 @@ def test_bug_ids_are_unique():
 def test_the_loader_works_from_package_data_not_a_relative_path(tmp_path, monkeypatch):
     """load_bugs() must not depend on the current working directory."""
     monkeypatch.chdir(tmp_path)
-    assert len(load_tier(1)) == 40
+    assert len(load_tier(1)) == 60
+
+
+def test_train_and_heldout_splits_partition_the_dataset_without_overlap():
+    """Every bug is in exactly one of train/held-out, and together they are the whole set."""
+    train = set(load_split("train"))
+    heldout = set(load_split("heldout"))
+    everything = {bug.id for bug in load_bugs()}
+
+    assert train.isdisjoint(heldout), "a bug may not be in both train and held-out"
+    assert train | heldout == everything, "the split must cover every bug"
+    assert load_split("all") is None  # 'all' means no filter
+
+
+def test_loading_a_split_restricts_the_bugs_returned():
+    heldout_ids = load_split("heldout")
+    heldout_bugs = load_bugs(split="heldout")
+    assert len(heldout_bugs) == len(heldout_ids)
+    assert all(bug.id in heldout_ids for bug in heldout_bugs)
+    # train + held-out recover the full set
+    assert len(load_bugs(split="train")) + len(heldout_bugs) == len(load_bugs())
 
 
 @pytest.mark.slow
