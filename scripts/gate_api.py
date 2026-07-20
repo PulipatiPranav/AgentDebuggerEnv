@@ -126,13 +126,25 @@ def make_openai_generator(model: str, base_url: str | None, temperature: float, 
 def load_dataset_bugs(
     bugs_dir: str | None, split: str, tiers: list[int], limit: int | None = None
 ) -> list[Bug]:
-    """Load the bugs to score: the packaged v1 set, or a v2 directory + split.
+    """Load the bugs to score: the packaged v1 set, a v2 directory + split, or a
+    flat single-file set such as ``data/quixbugs`` (Publication-Strategy §1.6).
 
-    ``limit`` caps the number of bugs *per tier*, for a quick representative
-    sample when an API's free tier will not allow the full set in one day.
+    A flat set (one ``bugs.jsonl``, no ``bugs_tier{N}.jsonl``/``split.json``) is
+    not tiered and is never split — it exists purely as a secondary,
+    out-of-distribution eval, so ``--tiers``/``--split`` do not apply to it.
+    ``limit`` caps the number of bugs *per tier* (or, for a flat set, in total),
+    for a quick representative sample when an API's free tier will not allow the
+    full set in one day.
     """
     if bugs_dir is None:
         bugs = list(load_bugs(tiers))
+    elif (Path(bugs_dir) / "bugs.jsonl").exists():
+        bugs = [
+            Bug.from_dict(json.loads(line))
+            for line in (Path(bugs_dir) / "bugs.jsonl").read_text(encoding="utf-8").splitlines()
+            if line.strip()
+        ]
+        return bugs[:limit] if limit is not None else bugs
     else:
         directory = Path(bugs_dir)
         allowed: set[str] | None = None
@@ -161,31 +173,40 @@ def load_dataset_bugs(
     return bugs
 
 
-def score_bugs(generate, name: str, bugs: list[Bug], on_bug=None, sleep: float = 0.0):
+def score_bugs(
+    generate, name: str, bugs: list[Bug], on_bug=None, sleep: float = 0.0, format: str = "structured"
+):
     """Score ``generate`` on ``bugs``, aggregating solve rate per tier.
 
     Mirrors ``evaluation.evaluate_curriculum`` but over an explicit bug list, so
     it can score a v2 held-out subset the packaged loader does not know about.
-    ``sleep`` paces requests to stay under per-minute rate limits.
+    ``sleep`` paces requests to stay under per-minute rate limits. ``format``
+    must match the prompt format ``generate`` was actually shown (B0 uses
+    ``"structured"``, B1 uses ``"free_form"``; research_plan.md's zero-shot
+    baselines).
     """
     import time
     from collections import defaultdict
 
-    per_tier: dict[int, dict[str, float]] = defaultdict(lambda: {"total": 0, "solved": 0, "reward": 0.0})
+    per_tier: dict[int, dict[str, float]] = defaultdict(
+        lambda: {"total": 0, "solved": 0, "reward": 0.0, "extraction_failures": 0}
+    )
     records: list[dict[str, Any]] = []
     for index, bug in enumerate(bugs, start=1):
-        completion = generate(bug_to_prompt(bug))
-        outcome = score_response(bug, completion)
+        completion = generate(bug_to_prompt(bug, format=format))
+        outcome = score_response(bug, completion, format=format)
         stats = per_tier[bug.tier]
         stats["total"] += 1
         stats["solved"] += int(outcome.solved)
         stats["reward"] += outcome.reward.total
+        stats["extraction_failures"] += int(not outcome.extraction_ok)
         records.append(
             {
                 "id": bug.id,
                 "tier": bug.tier,
                 "solved": outcome.solved,
                 "action": outcome.output.action,
+                "extraction_ok": outcome.extraction_ok,
                 "tests": outcome.tests.as_dict(),
                 "reward": outcome.reward.as_dict(),
                 "completion": completion,
@@ -198,16 +219,24 @@ def score_bugs(generate, name: str, bugs: list[Bug], on_bug=None, sleep: float =
     return per_tier, records
 
 
-def make_oracle_generator(bugs: list[Bug]):
+def make_oracle_generator(bugs: list[Bug], format: str = "structured"):
     """A generator that returns the reference fix in the required format.
 
     Used by ``--self-test`` to prove the harness scores a known-good answer as
     solved, with no API key and no network.
     """
-    by_prompt = {bug_to_prompt(bug): bug for bug in bugs}
+    by_prompt = {bug_to_prompt(bug, format=format): bug for bug in bugs}
 
     def generate(prompt: str) -> str:
         bug = by_prompt[prompt]
+        if format == "free_form":
+            return (
+                f"The function {bug.function_name} fails on its tests; the initial error was "
+                f"{bug.initial_error}. The buggy line diverges from the intended logic, which is "
+                "why the observed test cases fail; replacing the function body with the correct "
+                "implementation restores the expected outputs for every case.\n\n"
+                f"```python\n{bug.original_code}\n```"
+            )
         return (
             f"OBSERVATION: The function {bug.function_name} fails on its tests; "
             f"the initial error was {bug.initial_error}.\n"
@@ -242,6 +271,12 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--max-tokens", type=int, default=1024)
     parser.add_argument("--limit", type=int, help="cap bugs per tier (quick sample for tight free tiers)")
     parser.add_argument("--sleep", type=float, default=0.0, help="seconds to wait between requests")
+    parser.add_argument(
+        "--format",
+        choices=("structured", "free_form"),
+        default="structured",
+        help="prompt/parser format (B0 baseline: structured; B1 baseline: free_form)",
+    )
     parser.add_argument("--output", help="write the full JSON report here")
     parser.add_argument(
         "--self-test",
@@ -255,7 +290,7 @@ def main(argv: list[str] | None = None) -> int:
     scope = f"{source} [{args.split}]" if args.bugs_dir else source
 
     if args.self_test:
-        generate, name = make_oracle_generator(bugs), "oracle (self-test)"
+        generate, name = make_oracle_generator(bugs, format=args.format), "oracle (self-test)"
     else:
         generate = make_openai_generator(
             args.model, args.base_url, args.temperature, args.max_tokens
@@ -263,27 +298,33 @@ def main(argv: list[str] | None = None) -> int:
         name = args.model
 
     def progress(done: int, total: int, bug) -> None:
-        print(f"\r  scoring {name} on {scope}: {done}/{total} bugs", end="", flush=True)
+        print(f"\r  scoring {name} on {scope} [{args.format}]: {done}/{total} bugs", end="", flush=True)
 
-    per_tier, records = score_bugs(generate, name, bugs, on_bug=progress, sleep=args.sleep)
+    per_tier, records = score_bugs(
+        generate, name, bugs, on_bug=progress, sleep=args.sleep, format=args.format
+    )
 
     total = sum(s["total"] for s in per_tier.values())
     solved = sum(s["solved"] for s in per_tier.values())
+    extraction_failures = sum(s["extraction_failures"] for s in per_tier.values())
     overall = solved / total if total else 0.0
+    extraction_failure_rate = extraction_failures / total if total else 0.0
 
     print("\n")
-    print(f"  Gate result for: {name}   ({scope}, {total} bugs)")
+    print(f"  Gate result for: {name}   ({scope}, {total} bugs, format={args.format})")
     print("  " + "-" * 48)
     for tier in sorted(per_tier):
         stats = per_tier[tier]
         rate = stats["solved"] / stats["total"] if stats["total"] else 0.0
         mean_reward = stats["reward"] / stats["total"] if stats["total"] else 0.0
+        fail_rate = stats["extraction_failures"] / stats["total"] if stats["total"] else 0.0
         print(
             f"  tier {tier}   solve rate {rate:6.1%}  "
-            f"({stats['solved']}/{stats['total']})   mean reward {mean_reward:+.3f}"
+            f"({stats['solved']}/{stats['total']})   mean reward {mean_reward:+.3f}  "
+            f"extraction-fail {fail_rate:.1%}"
         )
     print("  " + "-" * 48)
-    print(f"  overall     {overall:6.1%}  ({solved}/{total})")
+    print(f"  overall     {overall:6.1%}  ({solved}/{total})   extraction-fail {extraction_failure_rate:.1%}")
     print()
 
     if overall > 0.90:
@@ -298,13 +339,22 @@ def main(argv: list[str] | None = None) -> int:
         report = {
             "model": name,
             "scope": scope,
-            "overall": {"total": total, "solved": solved, "solve_rate": round(overall, 4)},
+            "format": args.format,
+            "overall": {
+                "total": total,
+                "solved": solved,
+                "solve_rate": round(overall, 4),
+                "extraction_failure_rate": round(extraction_failure_rate, 4),
+            },
             "tiers": {
                 str(tier): {
                     "total": per_tier[tier]["total"],
                     "solved": per_tier[tier]["solved"],
                     "solve_rate": round(
                         per_tier[tier]["solved"] / per_tier[tier]["total"], 4
+                    ),
+                    "extraction_failure_rate": round(
+                        per_tier[tier]["extraction_failures"] / per_tier[tier]["total"], 4
                     ),
                 }
                 for tier in sorted(per_tier)

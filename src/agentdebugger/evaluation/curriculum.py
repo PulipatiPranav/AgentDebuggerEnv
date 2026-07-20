@@ -16,7 +16,7 @@ from typing import Any, Protocol
 from agentdebugger.config import TIERS
 from agentdebugger.dataset import Bug, load_tier
 from agentdebugger.envs.curriculum_env import score_response
-from agentdebugger.training.prompts import bug_to_prompt
+from agentdebugger.training.prompts import PromptFormat, bug_to_prompt
 
 #: Anything that turns a prompt into a completion.
 Generate = Callable[[str], str]
@@ -34,6 +34,12 @@ class TierResult:
     total: int
     solved: int
     mean_reward: float
+    #: Fraction of responses the scorer could not get a usable answer out of at
+    #: all — format-failure rate for a structured arm, extraction-failure rate
+    #: for a free-form one. Comparable across formats; see
+    #: :attr:`agentdebugger.envs.curriculum_env.TurnOutcome.extraction_ok` and
+    #: research_plan.md Threat #8.
+    extraction_failure_rate: float = 0.0
     bugs: tuple[dict[str, Any], ...] = field(default=())
 
     @property
@@ -47,6 +53,9 @@ class CurriculumReport:
 
     model: str
     tiers: tuple[TierResult, ...]
+    #: The response format used to produce this report (``"structured"`` or
+    #: ``"free_form"``), recorded so a report file is self-describing.
+    format: str = "structured"
 
     @property
     def total(self) -> int:
@@ -60,13 +69,21 @@ class CurriculumReport:
     def solve_rate(self) -> float:
         return self.solved / self.total if self.total else 0.0
 
+    @property
+    def extraction_failure_rate(self) -> float:
+        if not self.total:
+            return 0.0
+        return sum(tier.extraction_failure_rate * tier.total for tier in self.tiers) / self.total
+
     def as_dict(self) -> dict[str, Any]:
         return {
             "model": self.model,
+            "format": self.format,
             "overall": {
                 "total": self.total,
                 "solved": self.solved,
                 "solve_rate": round(self.solve_rate, 4),
+                "extraction_failure_rate": round(self.extraction_failure_rate, 4),
             },
             "tiers": {
                 f"tier{tier.tier}": {
@@ -74,6 +91,7 @@ class CurriculumReport:
                     "solved": tier.solved,
                     "solve_rate": round(tier.solve_rate, 4),
                     "mean_reward": round(tier.mean_reward, 4),
+                    "extraction_failure_rate": round(tier.extraction_failure_rate, 4),
                 }
                 for tier in self.tiers
             },
@@ -88,13 +106,16 @@ def evaluate_curriculum(
     limit: int | None = None,
     on_bug: _Progress | None = None,
     split: str = "heldout",
+    format: PromptFormat = "structured",
 ) -> CurriculumReport:
     """Score ``generate`` on every bug in ``tiers`` within ``split``.
 
     ``generate`` maps a prompt to a completion; keeping it a plain callable means
     this function does not care whether the model is local, remote, or a stub in
     a test. ``split`` defaults to the held-out side — the only side any reported
-    number should come from.
+    number should come from. ``format`` must match whatever format ``generate``
+    was steered towards (i.e. the format used to build its prompts), or the
+    reward/extraction diagnostics mean nothing.
     """
     results = []
     for tier in tiers:
@@ -102,13 +123,15 @@ def evaluate_curriculum(
         records = []
         solved = 0
         total_reward = 0.0
+        extraction_failures = 0
 
         for index, bug in enumerate(bugs, start=1):
-            completion = generate(bug_to_prompt(bug))
-            outcome = score_response(bug, completion)
+            completion = generate(bug_to_prompt(bug, format=format))
+            outcome = score_response(bug, completion, format=format)
 
             solved += outcome.solved
             total_reward += outcome.reward.total
+            extraction_failures += not outcome.extraction_ok
             records.append(
                 {
                     "id": bug.id,
@@ -120,6 +143,7 @@ def evaluate_curriculum(
                     "tests": outcome.tests.as_dict(),
                     "reward": outcome.reward.as_dict(),
                     "solved": outcome.solved,
+                    "extraction_ok": outcome.extraction_ok,
                 }
             )
             if on_bug is not None:
@@ -131,11 +155,12 @@ def evaluate_curriculum(
                 total=len(bugs),
                 solved=solved,
                 mean_reward=total_reward / len(bugs) if bugs else 0.0,
+                extraction_failure_rate=extraction_failures / len(bugs) if bugs else 0.0,
                 bugs=tuple(records),
             )
         )
 
-    return CurriculumReport(model=model_name, tiers=tuple(results))
+    return CurriculumReport(model=model_name, tiers=tuple(results), format=format)
 
 
 def load_generator(

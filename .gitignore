@@ -29,6 +29,9 @@ final_model/
 wandb/
 *.log
 
+# Scratch clones (e.g. QuixBugs, fetched by scripts/build_quixbugs.py)
+.scratch/
+
 # IDE and OS cruft
 .vscode/
 .idea/

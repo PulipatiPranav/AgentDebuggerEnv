@@ -120,20 +120,28 @@ def _evaluate_curriculum(args: argparse.Namespace) -> int:
         print(f"\r  tier {bug.tier}: {done}/{total}", end="", flush=True)
 
     report = evaluate_curriculum(
-        generate, name, tiers=args.tiers, limit=args.limit, on_bug=progress, split=args.split
+        generate,
+        name,
+        tiers=args.tiers,
+        limit=args.limit,
+        on_bug=progress,
+        split=args.split,
+        format=args.format,
     )
 
     print("\n")
-    print(f"  {heading(report.model)}")
+    print(f"  {heading(report.model)}   {style(f'format={report.format}', 'dim')}")
     print()
     for tier in report.tiers:
         print(
             f"  tier {tier.tier}   solve rate {tier.solve_rate:6.1%}  "
-            f"({tier.solved}/{tier.total})   mean reward {tier.mean_reward:+.3f}"
+            f"({tier.solved}/{tier.total})   mean reward {tier.mean_reward:+.3f}  "
+            f"extraction-fail {tier.extraction_failure_rate:.1%}"
         )
     print()
     print(f"  overall     {style(f'{report.solve_rate:.1%}', 'bold')} "
-          f"({report.solved}/{report.total})")
+          f"({report.solved}/{report.total})   "
+          f"extraction-fail {report.extraction_failure_rate:.1%}")
     print()
 
     _write_json(args.output, report.as_dict())
@@ -194,6 +202,8 @@ def _train(args: argparse.Namespace) -> int:
             push_to_hub=args.push_to_hub,
             reward_config=args.reward_config,
             split=args.split,
+            format=args.format,
+            reward_workers=args.reward_workers,
         )
     )
     return 0
@@ -264,6 +274,12 @@ def _build_parser() -> argparse.ArgumentParser:
         default="heldout",
         help="which dataset split to evaluate on (default: held-out, the only side to report)",
     )
+    curriculum.add_argument(
+        "--format",
+        choices=("structured", "free_form"),
+        default="structured",
+        help="response format the prompt asks for and the parser expects (H1's independent variable)",
+    )
     curriculum.add_argument("--output", help="write the report to this JSON file")
     curriculum.set_defaults(handler=_evaluate_curriculum)
 
@@ -295,6 +311,19 @@ def _build_parser() -> argparse.ArgumentParser:
         choices=("all", "train", "heldout"),
         default="train",
         help="which dataset split to train on (default: train)",
+    )
+    train.add_argument(
+        "--format",
+        choices=("structured", "free_form"),
+        default="structured",
+        help="response format the prompt asks for and the parser expects (H1's independent variable)",
+    )
+    train.add_argument(
+        "--reward-workers",
+        type=int,
+        default=1,
+        help="score a group's completions in a process pool of this size "
+        "(>1 only helps once the calibration run shows scoring dominates step time)",
     )
     train.add_argument("--push-to-hub", help="a HF repo to push the trained adapter to")
     train.set_defaults(handler=_train)

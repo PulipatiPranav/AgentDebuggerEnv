@@ -135,9 +135,15 @@ class StepResult:
 
 @dataclass(frozen=True)
 class StructuredAgentOutput:
-    """A parsed OBSERVATION/HYPOTHESIS/CONFIDENCE/ACTION/DETAIL response.
+    """A parsed structured or free-form response, in one common shape.
 
     ``valid`` means the response is well-formed, not that it is correct.
+    ``extraction_ok`` is the format-agnostic version of the same idea, used to
+    compare a structured arm's format-failure rate against a free-form arm's
+    extraction-failure rate on equal footing (research_plan.md, Threat #8): for
+    a structured response it is exactly ``valid`` (did the five fields parse);
+    for a free-form response it is ``True`` unless no usable fix could be
+    extracted from an apparent fix attempt, or the response was empty.
     """
 
     observation: str
@@ -147,6 +153,7 @@ class StructuredAgentOutput:
     detail: str
     valid: bool
     raw_text: str
+    extraction_ok: bool = True
 
 
 _FIELDS = ("OBSERVATION", "HYPOTHESIS", "CONFIDENCE", "ACTION", "DETAIL")
@@ -191,9 +198,96 @@ def parse_agent_output(raw_text: str) -> StructuredAgentOutput:
         detail=values["DETAIL"],
         valid=valid,
         raw_text=raw_text,
+        extraction_ok=valid,
     )
 
 
 def _extract(text: str, name: str) -> str:
     match = _FIELD_PATTERNS[name].search(text)
     return match.group(1).strip() if match else ""
+
+
+#: A fenced code block, optionally language-tagged.
+_CODE_FENCE = re.compile(r"```[A-Za-z0-9_+-]*\n?(.*?)```", re.DOTALL)
+
+#: Phrases that signal a genuine give-up in free-form prose, rather than a
+#: missing fix. Checked only when no code block was found, so a response that
+#: says "I thought about giving up but here's my fix" is still scored as a fix.
+_GIVE_UP_PATTERNS = re.compile(
+    r"\b(i\s+(?:cannot|can't|am unable to)\s+(?:find|determine|identify|fix|solve)|"
+    r"give up|giving up|no fix|unable to (?:find|fix|solve)|not able to (?:find|fix|solve))\b",
+    re.IGNORECASE,
+)
+
+#: The minimum a free-form response needs to say *something*, so an empty or
+#: near-empty completion is marked invalid rather than credited as a give-up.
+_MIN_FREEFORM_CHARS = 3
+
+
+def extract_last_fenced_block(text: str) -> tuple[str, bool]:
+    """Return the *last* fenced code block in ``text``, or the whole text.
+
+    This is the free-form fix extractor (research_plan.md, Threat #8): it takes
+    the last block on purpose, because a model that reasons in prose and then
+    fixes the bug puts the fix last; falling back to the whole response means a
+    model that never fences its code is not unfairly zeroed out. The second
+    return value is ``True`` when a fenced block was actually found.
+    """
+    blocks = _CODE_FENCE.findall(text)
+    if blocks:
+        return blocks[-1].strip(), True
+    return text.strip(), False
+
+
+def parse_freeform_output(raw_text: str) -> StructuredAgentOutput:
+    """Parse an unstructured, free-form response into the common output shape.
+
+    There is no schema to validate here, so ``valid``/``action`` are inferred
+    from content rather than from field presence:
+
+    * a fenced code block (or, failing that, prose that at least contains
+      Python-shaped code) is treated as a proposed fix — ``action="propose_fix"``;
+    * explicit give-up language with no code block is ``action="give_up"``;
+    * anything else too short or empty to be a real attempt is
+      ``action="invalid"`` with ``valid=False`` — this is the free-form
+      analogue of a structured format failure, and is what the
+      extraction-failure rate is computed from (see
+      :func:`agentdebugger.envs.curriculum_env.score_response`).
+
+    ``observation``/``hypothesis``/``confidence``/``localization`` have no
+    free-form equivalent, so they are left as best-effort text; every reward
+    config that scores free-form responses (R1) zeroes the components that
+    would read them.
+    """
+    stripped = raw_text.strip()
+    detail, fenced = extract_last_fenced_block(raw_text)
+    prose = raw_text[: raw_text.find(detail)] if fenced and detail in raw_text else raw_text
+
+    if not stripped or len(stripped) < _MIN_FREEFORM_CHARS:
+        action, valid, extraction_ok = "invalid", False, False
+    elif fenced or _looks_like_python(detail):
+        action, valid, extraction_ok = "propose_fix", True, True
+    elif _GIVE_UP_PATTERNS.search(raw_text):
+        action, valid, extraction_ok = "give_up", True, True
+    else:
+        # Prose with no code and no explicit give-up: the fallback rule still
+        # hands the whole response to the scorer as an attempted fix, but
+        # nothing was fenced and it does not read as code either — this is
+        # exactly the "extraction failure" the free-form arm must report.
+        action, valid, extraction_ok = "propose_fix", False, False
+
+    return StructuredAgentOutput(
+        observation=prose[:500].strip(),
+        hypothesis=prose.strip(),
+        confidence="low",
+        action=action,
+        detail=detail,
+        valid=valid,
+        raw_text=raw_text,
+        extraction_ok=extraction_ok,
+    )
+
+
+def _looks_like_python(text: str) -> bool:
+    """A cheap syntactic sniff test, not a parser: does this look like code?"""
+    return bool(re.search(r"\bdef\s+\w+\s*\(", text))

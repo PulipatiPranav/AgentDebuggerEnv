@@ -7,7 +7,11 @@ sides of that are load-bearing.
 
 from __future__ import annotations
 
-from agentdebugger.protocol import parse_agent_output
+from agentdebugger.protocol import (
+    extract_last_fenced_block,
+    parse_agent_output,
+    parse_freeform_output,
+)
 
 WELL_FORMED = """OBSERVATION: the loop on line 4 uses a strict less-than comparison
 HYPOTHESIS: the condition should be left <= right, otherwise the final index is skipped
@@ -74,3 +78,63 @@ def test_a_multiline_detail_is_captured_whole():
     )
     assert "line_one()" in output.detail
     assert "line_two()" in output.detail
+
+
+def test_structured_extraction_ok_matches_valid():
+    assert parse_agent_output(WELL_FORMED).extraction_ok
+    assert not parse_agent_output("garbage").extraction_ok
+
+
+# ── free-form parsing (research_plan.md H1, Threat #8) ────────────────────────
+
+
+def test_extract_last_fenced_block_takes_the_last_one():
+    text = "first thought\n```python\nfirst_attempt()\n```\nactually, on reflection:\n```python\nreal_fix()\n```"
+    code, found = extract_last_fenced_block(text)
+    assert found
+    assert code == "real_fix()"
+    assert "first_attempt" not in code
+
+
+def test_extract_last_fenced_block_falls_back_to_the_whole_response():
+    code, found = extract_last_fenced_block("def f(x):\n    return x + 1")
+    assert not found
+    assert code == "def f(x):\n    return x + 1"
+
+
+def test_freeform_response_with_a_fenced_fix_is_a_valid_propose_fix():
+    output = parse_freeform_output(
+        "The loop uses < instead of <=, which skips the last index.\n\n"
+        "```python\ndef f(x):\n    return x + 1\n```"
+    )
+    assert output.action == "propose_fix"
+    assert output.valid
+    assert output.extraction_ok
+    assert output.detail == "def f(x):\n    return x + 1"
+
+
+def test_freeform_response_with_unfenced_code_still_extracts():
+    output = parse_freeform_output("def f(x):\n    return x + 1")
+    assert output.action == "propose_fix"
+    assert output.extraction_ok
+
+
+def test_freeform_prose_with_no_code_is_an_extraction_failure():
+    output = parse_freeform_output("I looked at the loop but I am not sure what else to say.")
+    assert output.action == "propose_fix"  # the fallback rule still hands this to the scorer
+    assert not output.valid
+    assert not output.extraction_ok
+
+
+def test_freeform_explicit_give_up_is_not_an_extraction_failure():
+    output = parse_freeform_output("I cannot find the bug in this function after trying hard.")
+    assert output.action == "give_up"
+    assert output.valid
+    assert output.extraction_ok
+
+
+def test_freeform_empty_response_is_invalid():
+    output = parse_freeform_output("   ")
+    assert output.action == "invalid"
+    assert not output.valid
+    assert not output.extraction_ok

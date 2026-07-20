@@ -25,7 +25,11 @@ from typing import Any
 
 from agentdebugger.config import DEFAULT_CURRICULUM, CurriculumSchedule, SandboxLimits
 from agentdebugger.dataset import Bug, load_bugs
-from agentdebugger.protocol import StructuredAgentOutput, parse_agent_output
+from agentdebugger.protocol import (
+    StructuredAgentOutput,
+    parse_agent_output,
+    parse_freeform_output,
+)
 from agentdebugger.rewards.turn import (
     GroundTruth,
     RewardBreakdown,
@@ -76,7 +80,7 @@ def baseline_results(bug: Bug) -> TestResults:
 
 @dataclass(frozen=True)
 class TurnOutcome:
-    """Everything one structured response produced."""
+    """Everything one response produced, structured or free-form."""
 
     output: StructuredAgentOutput
     tests: TestResults
@@ -92,25 +96,50 @@ class TurnOutcome:
         """
         return self.tests.all_passed
 
+    @property
+    def extraction_ok(self) -> bool:
+        """True unless the scorer could not get a usable response out at all.
+
+        For a structured response this is format compliance; for a free-form
+        one it is whether a fix could actually be extracted (research_plan.md,
+        Threat #8 — the free-form extraction-failure rate must be reported and
+        compared against this same quantity on the structured arm).
+        """
+        return self.output.extraction_ok
+
 
 def score_response(
     bug: Bug,
     raw_text: str,
     turn_number: int = 0,
     calculator: TurnRewardCalculator | None = None,
+    format: str = "structured",
 ) -> TurnOutcome:
     """Parse a response, run any fix it proposes, and score it. No environment needed.
 
     This is the single scoring path: the trainer, the evaluator and the
     environment all go through it, so a reward reported during training means the
-    same thing as a reward reported during evaluation.
+    same thing as a reward reported during evaluation. ``format`` selects the
+    parser and fix-extraction rule to match whichever prompt (``bug_to_prompt``)
+    produced ``raw_text``:
+
+    * ``"structured"`` (default) — :func:`parse_agent_output`; the fix is the
+      *first* fenced block in DETAIL, falling back to DETAIL verbatim.
+    * ``"free_form"`` — :func:`parse_freeform_output`; the fix is the *last*
+      fenced block in the whole response, falling back to the whole response
+      (research_plan.md's parser-asymmetry mitigation for H1).
     """
     calculator = calculator or TurnRewardCalculator()
-    output = parse_agent_output(raw_text)
+    if format == "free_form":
+        output = parse_freeform_output(raw_text)
+    elif format == "structured":
+        output = parse_agent_output(raw_text)
+    else:
+        raise ValueError(f"Unknown response format {format!r}. Choose from 'structured', 'free_form'.")
 
     cases = [case.as_dict() for case in bug.test_cases]
     if output.action == "propose_fix" and cases:
-        fix_code = extract_fix_code(output.detail)
+        fix_code = output.detail if format == "free_form" else extract_fix_code(output.detail)
         tests = run_test_cases(fix_code, bug.function_name, cases, policy=CURRICULUM_POLICY)
         broken = tests.newly_broken(baseline_results(bug))
     else:
