@@ -343,6 +343,14 @@ def train(config: TrainingConfig) -> None:
     from transformers import AutoModelForCausalLM, AutoTokenizer
     from trl import GRPOConfig, GRPOTrainer
 
+    # ── Compatibility shim ────────────────────────────────────────────────────
+    # transformers 4.54+ changed Trainer._get_dataloader() to call the sampler
+    # as `sampler_fn(dataset)`. GRPOTrainer._get_train_sampler in trl 0.16.x
+    # only accepts `self`. This one-liner makes it accept (and ignore) the
+    # extra positional arg so both old and new transformers work.
+    _orig_sampler = GRPOTrainer._get_train_sampler
+    GRPOTrainer._get_train_sampler = lambda self, dataset=None: _orig_sampler(self)
+
     vram_gb = (
         torch.cuda.get_device_properties(0).total_memory / 1e9
         if torch.cuda.is_available()
@@ -384,7 +392,12 @@ def train(config: TrainingConfig) -> None:
             adapter_dir = str(stage_dir)
             continue
 
-        model = AutoModelForCausalLM.from_pretrained(config.model, device_map="auto", torch_dtype=dtype)
+        # transformers 4.57+ deprecated `torch_dtype=` in favour of `dtype=`;
+        # older versions only accept `torch_dtype=`. Try the new name first.
+        try:
+            model = AutoModelForCausalLM.from_pretrained(config.model, device_map="auto", dtype=dtype)
+        except TypeError:
+            model = AutoModelForCausalLM.from_pretrained(config.model, device_map="auto", torch_dtype=dtype)
         model.config.use_cache = False
         model = _build_lora_model(model, profile, adapter_dir)
         if stage_index == 0:
