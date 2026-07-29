@@ -384,7 +384,7 @@ def train(config: TrainingConfig) -> None:
             adapter_dir = str(stage_dir)
             continue
 
-        model = AutoModelForCausalLM.from_pretrained(config.model, device_map="auto", dtype=dtype)
+        model = AutoModelForCausalLM.from_pretrained(config.model, device_map="auto", torch_dtype=dtype)
         model.config.use_cache = False
         model = _build_lora_model(model, profile, adapter_dir)
         if stage_index == 0:
