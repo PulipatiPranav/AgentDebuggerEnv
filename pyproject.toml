@@ -41,8 +41,13 @@ api = [
 ]
 train = [
     "torch>=2.2",
-    "transformers>=4.46,<5.0",
-    "trl>=0.15,<0.17",
+    # transformers 4.57+ changed Trainer._get_dataloader() to pass the dataset
+    # positionally to the sampler callable. GRPOTrainer._get_train_sampler() in
+    # trl 0.16.x expects only `self`, so 4.57+ breaks training with a TypeError.
+    # Pin to <4.53 (the last version tested against trl 0.16) until trl 0.17+
+    # ships a fix or we adopt a newer trl that matches.
+    "transformers>=4.46,<4.53",
+    "trl>=0.16,<0.17",
     "peft>=0.13,<1.0",
     "datasets>=3.0,<4.0",
     "accelerate>=1.0,<2.0",

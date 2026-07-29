@@ -55,6 +55,12 @@ $PIP install -e '.[train,dev]'
 echo "== Removing pre-installed torchao (incompatible with PEFT >= 0.13) =="
 $PIP uninstall torchao -y 2>/dev/null || true
 
+# Kaggle pre-installs transformers 4.57+, which broke GRPOTrainer._get_train_sampler()
+# (transformers 4.57 passes `dataset` positionally to the sampler callable; trl 0.16's
+# GRPOTrainer._get_train_sampler only takes `self`).  Force the version down.
+echo "== Pinning transformers to <4.53 (compatible with trl 0.16) =="
+$PIP install "transformers>=4.46,<4.53" --upgrade 2>/dev/null || true
+
 echo "== Sanity check: CUDA visible to torch =="
 $PY -c "import torch; print('cuda available:', torch.cuda.is_available()); print('device:', torch.cuda.get_device_name(0) if torch.cuda.is_available() else 'none')"
 
