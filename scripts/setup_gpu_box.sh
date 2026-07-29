@@ -47,6 +47,14 @@ echo "== Installing agentdebugger[train] (torch, transformers, trl, peft, datase
 # On Kaggle, torch+CUDA is often already present; still safe to re-resolve.
 $PIP install -e '.[train,dev]'
 
+# Kaggle pre-installs torchao==0.10.0. Newer PEFT (>=0.13) contains a version
+# check in peft/tuners/lora/torchao.py that raises ImportError (not False) when
+# torchao is present but below 0.16.0, crashing LoRA construction even though
+# this project does not use torchao at all. Uninstalling it lets PEFT fall back
+# to its standard dispatcher with no other effect.
+echo "== Removing pre-installed torchao (incompatible with PEFT >= 0.13) =="
+$PIP uninstall torchao -y 2>/dev/null || true
+
 echo "== Sanity check: CUDA visible to torch =="
 $PY -c "import torch; print('cuda available:', torch.cuda.is_available()); print('device:', torch.cuda.get_device_name(0) if torch.cuda.is_available() else 'none')"
 
