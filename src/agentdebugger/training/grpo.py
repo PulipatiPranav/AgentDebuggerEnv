@@ -59,7 +59,7 @@ class HardwareProfile:
             return cls(4, 2, 4, 256, 16)
         if vram_gb >= 20:  # A10, 3090, 4090
             return cls(2, 4, 2, 192, 8)
-        return cls(2, 4, 2, 160, 8)  # T4, and anything smaller
+        return cls(2, 4, 2, 512, 8)  # T4, and anything smaller
 
 
 @dataclass(frozen=True)
