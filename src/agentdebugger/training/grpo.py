@@ -412,6 +412,9 @@ def train(config: TrainingConfig) -> None:
                 gradient_accumulation_steps=profile.gradient_accumulation_steps,
                 num_generations=profile.num_generations,
                 max_completion_length=profile.max_completion_length,
+                # Stop at the chat end token so the model can terminate early once it
+                # learns the format. Without this, every completion fills the cap.
+                stop_strings=["<|im_end|>"],
                 learning_rate=config.learning_rate,
                 lr_scheduler_type="cosine",
                 # Only the first stage warms up; later stages continue from an
