@@ -369,6 +369,10 @@ def train(config: TrainingConfig) -> None:
     )
 
     tokenizer = AutoTokenizer.from_pretrained(config.model)
+    # Force the EOS token to be the chat end token so generation terminates early.
+    # Qwen's base eos_token is <|endoftext|>, but the instruct template ends turns with <|im_end|>.
+    if "<|im_end|>" in tokenizer.vocab:
+        tokenizer.eos_token = "<|im_end|>"
     tokenizer.pad_token = tokenizer.pad_token or tokenizer.eos_token
     tokenizer.padding_side = "left"
 
