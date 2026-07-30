@@ -39,7 +39,7 @@ DETAIL: [For propose_fix: the complete corrected function. For inspect_lines: li
 Here is a worked example (not the bug you will see):
 
 OBSERVATION: celsius_to_fahrenheit(0) returns -32, expected 32. Line 2 reads return c * 9 / 5 - 32.
-HYPOTHESIS: Line 2 subtracts 32 instead of adding it. The formula F = C × 9/5 + 32 requires addition; the minus sign flips the offset for every input.
+HYPOTHESIS: Line 2 subtracts 32 instead of adding it. The formula F = C * 9/5 + 32 requires addition; the minus sign flips the offset for every input.
 CONFIDENCE: high
 ACTION: propose_fix
 DETAIL: ```python
