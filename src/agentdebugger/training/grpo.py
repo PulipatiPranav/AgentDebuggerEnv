@@ -413,8 +413,8 @@ def train(config: TrainingConfig) -> None:
                 num_generations=profile.num_generations,
                 max_completion_length=profile.max_completion_length,
                 # Stop at the chat end token so the model can terminate early once it
-                # learns the format. Without this, every completion fills the cap.
-                stop_strings=["<|im_end|>"],
+                # learns the format. (Removed stop_strings as it's unsupported in trl<0.17;
+                # Qwen naturally stops at EOS <|im_end|> anyway)
                 learning_rate=config.learning_rate,
                 lr_scheduler_type="cosine",
                 # Only the first stage warms up; later stages continue from an
