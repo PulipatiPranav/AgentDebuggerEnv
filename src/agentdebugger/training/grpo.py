@@ -178,6 +178,9 @@ def make_reward_function(
         breakdowns: list[dict[str, float] | None] = [None] * len(completions)
         solved: list[bool] = [False] * len(completions)
         extraction_ok: list[bool] = [False] * len(completions)
+        
+        # DEBUG: Print the first completion to see why it reaches 512 tokens
+        print(f"\n--- DEBUG: FIRST COMPLETION ---\n{completions[0]}\n--- END DEBUG ---\n", flush=True)
 
         scorable = [i for i, raw in enumerate(raw_bugs) if raw is not None]
         tasks = [
