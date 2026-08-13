@@ -70,7 +70,7 @@ class TrainingConfig:
     max_steps: int = 500
     learning_rate: float = 2e-5
     warmup_steps: int = 30
-    temperature: float = 0.9
+    temperature: float = 0.7
     output_dir: str = "./checkpoints"
     save_steps: int = 25
     logging_steps: int = 5
@@ -93,14 +93,30 @@ class TrainingConfig:
     reward_workers: int = 1
 
 
-def _score_one(args: tuple[str, dict[str, Any], str, str]) -> dict[str, Any]:
+def _extract_completion_text(completion: Any) -> str:
+    """Extract plain text string from completion, whether str or chat message dict."""
+    if isinstance(completion, str):
+        return completion
+    if isinstance(completion, list) and len(completion) > 0:
+        last = completion[-1]
+        if isinstance(last, dict) and "content" in last:
+            return last["content"]
+        if isinstance(last, str):
+            return last
+    if isinstance(completion, dict) and "content" in completion:
+        return completion["content"]
+    return str(completion)
+
+
+def _score_one(args: tuple[Any, dict[str, Any], str, str]) -> dict[str, Any]:
     """Score exactly one completion. A module-level function so it can be sent
     to a :class:`~concurrent.futures.ProcessPoolExecutor` (closures cannot be
     pickled). Never raises: a crashed rollout must cost the policy something
     rather than take down a whole worker process mid-batch.
     """
-    completion, bug_dict, reward_config, response_format = args
+    raw_completion, bug_dict, reward_config, response_format = args
     try:
+        completion = _extract_completion_text(raw_completion)
         calculator = TurnRewardCalculator.from_name(reward_config)
         bug = Bug.from_dict(bug_dict)
         outcome = score_response(bug, completion, calculator=calculator, format=response_format)
@@ -179,8 +195,9 @@ def make_reward_function(
         solved: list[bool] = [False] * len(completions)
         extraction_ok: list[bool] = [False] * len(completions)
         
-        # DEBUG: Print the first completion to see why it reaches 512 tokens
-        print(f"\n--- DEBUG: FIRST COMPLETION ---\n{completions[0]}\n--- END DEBUG ---\n", flush=True)
+        # DEBUG: Print the first completion
+        if completions:
+            print(f"\n--- DEBUG: FIRST COMPLETION ---\n{_extract_completion_text(completions[0])}\n--- END DEBUG ---\n", flush=True)
 
         scorable = [i for i, raw in enumerate(raw_bugs) if raw is not None]
         tasks = [
@@ -404,18 +421,15 @@ def train(config: TrainingConfig) -> None:
         try:
             model = AutoModelForCausalLM.from_pretrained(
                 config.model,
-                device_map="auto",
                 dtype=dtype,
                 attn_implementation="sdpa",
             )
         except TypeError:
             model = AutoModelForCausalLM.from_pretrained(
                 config.model,
-                device_map="auto",
                 torch_dtype=dtype,
                 attn_implementation="sdpa",
             )
-        model.config.use_cache = False
         model = _build_lora_model(model, profile, adapter_dir)
         if stage_index == 0:
             print(f"Trainable parameters: {model.num_parameters(only_trainable=True):,}", flush=True)
