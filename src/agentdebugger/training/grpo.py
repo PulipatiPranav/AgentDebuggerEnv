@@ -335,7 +335,7 @@ def _build_lora_model(model, profile: HardwareProfile, adapter_dir: str | None) 
     else:
         model = PeftModel.from_pretrained(model, adapter_dir, is_trainable=True)
     model.enable_input_require_grads()
-    model.gradient_checkpointing_enable()
+    # model.gradient_checkpointing_enable()
     return model
 
 
