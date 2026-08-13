@@ -26,6 +26,13 @@ from agentdebugger.dataset import Bug
 
 PromptFormat = Literal["structured", "free_form"]
 
+#: The user-turn content for a bug, shared by both the string prompt and the
+#: structured-message prompt so they are always identical.
+_USER_TEMPLATE = (
+    "Debug this Python function:\n\n```python\n{buggy_code}\n```\n\n"
+    "Initial failure: {initial_error}"
+)
+
 SYSTEM_PROMPT = """You are an expert Python debugger. You reason through bugs systematically.
 
 You MUST respond in EXACTLY this format — no exceptions, no extra text:
@@ -92,11 +99,33 @@ def bug_to_prompt(bug: Bug, format: PromptFormat = "structured") -> str:
     except KeyError:
         raise ValueError(f"Unknown prompt format {format!r}. Choose from {tuple(_SYSTEM_PROMPTS)}.") from None
 
+    user_content = _USER_TEMPLATE.format(
+        buggy_code=bug.buggy_code, initial_error=bug.initial_error
+    )
     return (
         f"<|im_start|>system\n{system_prompt}<|im_end|>\n"
-        f"<|im_start|>user\n"
-        f"Debug this Python function:\n\n```python\n{bug.buggy_code}\n```\n\n"
-        f"Initial failure: {bug.initial_error}\n"
-        f"<|im_end|>\n"
+        f"<|im_start|>user\n{user_content}\n<|im_end|>\n"
         f"<|im_start|>assistant\n"
     )
+
+
+def bug_to_messages(bug: Bug, format: PromptFormat = "structured") -> list[dict[str, str]]:
+    """Render a bug as a list of chat messages for ``tokenizer.apply_chat_template``.
+
+    Unlike :func:`bug_to_prompt` (which bakes in ChatML markup as a raw string),
+    this returns the structured message list that HuggingFace tokenizers and TRL
+    expect.  ``apply_chat_template`` then inserts the correct special-token IDs,
+    ensuring the model sees the chat structure it was fine-tuned with.
+    """
+    try:
+        system_prompt = _SYSTEM_PROMPTS[format]
+    except KeyError:
+        raise ValueError(f"Unknown prompt format {format!r}. Choose from {tuple(_SYSTEM_PROMPTS)}.") from None
+
+    user_content = _USER_TEMPLATE.format(
+        buggy_code=bug.buggy_code, initial_error=bug.initial_error
+    )
+    return [
+        {"role": "system", "content": system_prompt},
+        {"role": "user", "content": user_content},
+    ]

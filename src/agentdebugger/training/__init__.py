@@ -12,13 +12,19 @@ from agentdebugger.training.grpo import (
     make_reward_function,
     train,
 )
-from agentdebugger.training.prompts import FREE_FORM_SYSTEM_PROMPT, SYSTEM_PROMPT, bug_to_prompt
+from agentdebugger.training.prompts import (
+    FREE_FORM_SYSTEM_PROMPT,
+    SYSTEM_PROMPT,
+    bug_to_messages,
+    bug_to_prompt,
+)
 
 __all__ = [
     "FREE_FORM_SYSTEM_PROMPT",
     "SYSTEM_PROMPT",
     "HardwareProfile",
     "TrainingConfig",
+    "bug_to_messages",
     "bug_to_prompt",
     "build_dataset",
     "make_reward_function",

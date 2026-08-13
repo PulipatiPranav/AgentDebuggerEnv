@@ -16,6 +16,7 @@ from agentdebugger.dataset import load_bugs
 from agentdebugger.training.prompts import (
     FREE_FORM_SYSTEM_PROMPT,
     SYSTEM_PROMPT,
+    bug_to_messages,
     bug_to_prompt,
 )
 
@@ -56,3 +57,27 @@ def test_bug_to_prompt_free_form_uses_the_free_form_system_prompt():
 def test_unknown_format_is_rejected():
     with pytest.raises(ValueError):
         bug_to_prompt(BUG, format="verbose")  # type: ignore[arg-type]
+
+
+def test_bug_to_messages_defaults_to_structured():
+    messages = bug_to_messages(BUG)
+    assert messages == bug_to_messages(BUG, format="structured")
+    assert len(messages) == 2
+    assert messages[0] == {"role": "system", "content": SYSTEM_PROMPT}
+    assert messages[1]["role"] == "user"
+    assert BUG.buggy_code in messages[1]["content"]
+    assert BUG.initial_error in messages[1]["content"]
+
+
+def test_bug_to_messages_free_form_uses_the_free_form_system_prompt():
+    messages = bug_to_messages(BUG, format="free_form")
+    assert len(messages) == 2
+    assert messages[0] == {"role": "system", "content": FREE_FORM_SYSTEM_PROMPT}
+    assert messages[1]["role"] == "user"
+    assert BUG.buggy_code in messages[1]["content"]
+    assert BUG.initial_error in messages[1]["content"]
+
+
+def test_bug_to_messages_unknown_format_is_rejected():
+    with pytest.raises(ValueError):
+        bug_to_messages(BUG, format="verbose")  # type: ignore[arg-type]

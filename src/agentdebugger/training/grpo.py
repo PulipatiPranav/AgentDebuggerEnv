@@ -23,7 +23,7 @@ from agentdebugger.config import DEFAULT_CURRICULUM, CurriculumSchedule
 from agentdebugger.dataset import Bug, load_bugs
 from agentdebugger.envs.curriculum_env import score_response
 from agentdebugger.rewards.turn import TurnRewardCalculator
-from agentdebugger.training.prompts import PromptFormat, bug_to_prompt
+from agentdebugger.training.prompts import PromptFormat, bug_to_messages
 
 #: Reward assigned when scoring a completion raises. Scoring runs untrusted model
 #: output, so it can fail in ways the reward function cannot anticipate; a
@@ -121,7 +121,7 @@ def _score_one(args: tuple[str, dict[str, Any], str, str]) -> dict[str, Any]:
         }
 
 
-def _grouped(prompts: list[str], values: list[Any]) -> list[list[Any]]:
+def _grouped(prompts: list[Any], values: list[Any]) -> list[list[Any]]:
     """Split ``values`` into runs of contiguous identical ``prompts``.
 
     GRPO's reward function is called once per generation batch, in which TRL
@@ -170,7 +170,7 @@ def make_reward_function(
 
         executor = ProcessPoolExecutor(max_workers=reward_workers)
 
-    def reward_function(completions: list[str], prompts: list[str], **kwargs: Any) -> list[float]:
+    def reward_function(completions: list[str], prompts: list[Any], **kwargs: Any) -> list[float]:
         raw_bugs = kwargs.get("bug_metadata") or [None] * len(completions)
         started = time.perf_counter()
 
@@ -215,7 +215,7 @@ def make_reward_function(
 
 
 def _log_batch_diagnostics(
-    prompts: list[str],
+    prompts: list[Any],
     rewards: list[float],
     breakdowns: list[dict[str, float] | None],
     solved: list[bool],
@@ -277,7 +277,7 @@ def build_dataset(
     bugs = load_bugs(schedule.tiers_at(step), split=split)
     return Dataset.from_list(
         [
-            {"prompt": bug_to_prompt(bug, format=format), "bug_metadata": json.dumps(bug.as_dict())}
+            {"prompt": bug_to_messages(bug, format=format), "bug_metadata": json.dumps(bug.as_dict())}
             for bug in bugs
         ]
     )

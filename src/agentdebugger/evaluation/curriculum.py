@@ -16,10 +16,10 @@ from typing import Any, Protocol
 from agentdebugger.config import TIERS
 from agentdebugger.dataset import Bug, load_tier
 from agentdebugger.envs.curriculum_env import score_response
-from agentdebugger.training.prompts import PromptFormat, bug_to_prompt
+from agentdebugger.training.prompts import PromptFormat, bug_to_messages
 
-#: Anything that turns a prompt into a completion.
-Generate = Callable[[str], str]
+#: Anything that turns a prompt (list of chat messages or raw prompt string) into a completion.
+Generate = Callable[[list[dict[str, str]] | str], str]
 
 
 class _Progress(Protocol):
@@ -126,7 +126,7 @@ def evaluate_curriculum(
         extraction_failures = 0
 
         for index, bug in enumerate(bugs, start=1):
-            completion = generate(bug_to_prompt(bug, format=format))
+            completion = generate(bug_to_messages(bug, format=format))
             outcome = score_response(bug, completion, format=format)
 
             solved += outcome.solved
@@ -197,8 +197,14 @@ def load_generator(
     model = model.to(device)
     model.eval()
 
-    def generate(prompt: str) -> str:
-        inputs = tokenizer(prompt, return_tensors="pt").to(device)
+    def generate(prompt: list[dict[str, str]] | str) -> str:
+        if isinstance(prompt, str):
+            prompt_str = prompt
+        else:
+            prompt_str = tokenizer.apply_chat_template(
+                prompt, tokenize=False, add_generation_prompt=True
+            )
+        inputs = tokenizer(prompt_str, return_tensors="pt").to(device)
         with torch.no_grad():
             output = model.generate(**inputs, max_new_tokens=max_new_tokens, do_sample=False)
         generated = output[0][inputs["input_ids"].shape[1] :]

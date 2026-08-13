@@ -95,13 +95,14 @@ def make_openai_generator(model: str, base_url: str | None, temperature: float, 
 
     client = OpenAI(api_key=api_key, base_url=base_url)
 
-    def generate(prompt: str) -> str:
+    def generate(prompt: list[dict[str, str]] | str) -> str:
+        messages = prompt if isinstance(prompt, list) else chatml_to_messages(prompt)
         max_attempts = 8
         for attempt in range(max_attempts):
             try:
                 completion = client.chat.completions.create(
                     model=model,
-                    messages=chatml_to_messages(prompt),
+                    messages=messages,
                     temperature=temperature,
                     max_tokens=max_tokens,
                     timeout=90.0,

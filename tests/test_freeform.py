@@ -74,7 +74,7 @@ def test_build_dataset_free_form_uses_the_free_form_prompt():
     from agentdebugger.training.prompts import FREE_FORM_SYSTEM_PROMPT
 
     dataset = build_dataset(step=0, split="train", format="free_form")
-    assert FREE_FORM_SYSTEM_PROMPT in dataset[0]["prompt"]
+    assert dataset[0]["prompt"][0]["content"] == FREE_FORM_SYSTEM_PROMPT
 
 
 def test_training_and_evaluation_score_free_form_identically():
