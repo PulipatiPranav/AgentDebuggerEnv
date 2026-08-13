@@ -402,9 +402,19 @@ def train(config: TrainingConfig) -> None:
         # transformers 4.57+ deprecated `torch_dtype=` in favour of `dtype=`;
         # older versions only accept `torch_dtype=`. Try the new name first.
         try:
-            model = AutoModelForCausalLM.from_pretrained(config.model, device_map="auto", dtype=dtype)
+            model = AutoModelForCausalLM.from_pretrained(
+                config.model,
+                device_map="auto",
+                dtype=dtype,
+                attn_implementation="sdpa",
+            )
         except TypeError:
-            model = AutoModelForCausalLM.from_pretrained(config.model, device_map="auto", torch_dtype=dtype)
+            model = AutoModelForCausalLM.from_pretrained(
+                config.model,
+                device_map="auto",
+                torch_dtype=dtype,
+                attn_implementation="sdpa",
+            )
         model.config.use_cache = False
         model = _build_lora_model(model, profile, adapter_dir)
         if stage_index == 0:
