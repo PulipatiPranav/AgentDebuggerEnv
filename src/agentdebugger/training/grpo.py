@@ -195,10 +195,6 @@ def make_reward_function(
         solved: list[bool] = [False] * len(completions)
         extraction_ok: list[bool] = [False] * len(completions)
         
-        # DEBUG: Print the first completion
-        if completions:
-            print(f"\n--- DEBUG: FIRST COMPLETION ---\n{_extract_completion_text(completions[0])}\n--- END DEBUG ---\n", flush=True)
-
         scorable = [i for i, raw in enumerate(raw_bugs) if raw is not None]
         tasks = [
             (
