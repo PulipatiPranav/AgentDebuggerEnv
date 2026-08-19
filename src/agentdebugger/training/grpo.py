@@ -61,6 +61,18 @@ class HardwareProfile:
             return cls(2, 4, 2, 192, 8)
         return cls(2, 4, 2, 512, 8)  # T4, and anything smaller
 
+def _completion_length_for(profile: HardwareProfile, format: PromptFormat) -> int:
+    """Free-form responses run longer before ever emitting a fenced code block —
+    they write full prose analysis (headers, numbered sections) ahead of the fix,
+    where structured responses get to DETAIL's code block much faster. Diagnostic
+    completions at the default 192-token budget consistently got cut off one
+    sentence before the fix even started, with correct reasoning throughout —
+    a token-budget problem, not a parsing or reasoning-quality problem. Give
+    free-form ~1.8x the room so it has a real chance to finish.
+    """
+    if format == "free_form":
+        return int(profile.max_completion_length * 1.8)
+    return profile.max_completion_length
 
 @dataclass(frozen=True)
 class TrainingConfig:
@@ -438,7 +450,8 @@ def train(config: TrainingConfig) -> None:
                 per_device_train_batch_size=profile.batch_size,
                 gradient_accumulation_steps=profile.gradient_accumulation_steps,
                 num_generations=profile.num_generations,
-                max_completion_length=profile.max_completion_length,
+                # max_completion_length=profile.max_completion_length,
+                max_completion_length=_completion_length_for(profile, config.format),
                 # Stop at the chat end token so the model can terminate early once it
                 # learns the format. (Removed stop_strings as it's unsupported in trl<0.17;
                 # Qwen naturally stops at EOS <|im_end|> anyway)
