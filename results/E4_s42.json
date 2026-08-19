@@ -1,0 +1,2555 @@
+{
+  "model": "./ckpt/E4_s42",
+  "format": "structured",
+  "overall": {
+    "total": 90,
+    "solved": 47,
+    "solve_rate": 0.5222,
+    "extraction_failure_rate": 0.0
+  },
+  "tiers": {
+    "tier1": {
+      "total": 30,
+      "solved": 10,
+      "solve_rate": 0.3333,
+      "mean_reward": 0.5927,
+      "extraction_failure_rate": 0.0
+    },
+    "tier2": {
+      "total": 30,
+      "solved": 14,
+      "solve_rate": 0.4667,
+      "mean_reward": 0.657,
+      "extraction_failure_rate": 0.0
+    },
+    "tier3": {
+      "total": 30,
+      "solved": 23,
+      "solve_rate": 0.7667,
+      "mean_reward": 0.791,
+      "extraction_failure_rate": 0.0
+    }
+  },
+  "bugs": [
+    {
+      "id": "v2_t1_001",
+      "tier": 1,
+      "bug_type": "off_by_one",
+      "function_name": "count_list",
+      "completion": "OBSERVATION: The function `count_list` returns the cube of the length of the input list, not the number of elements in the list.\nHYPOTHESIS: The function is incorrectly calculating the cube of the length rather than the number of elements in the list.\nCONFIDENCE: high\nACTION: propose_fix\nDETAIL: ```python\ndef count_list(input_list):\n    return len(input_list)\n```",
+      "action": "propose_fix",
+      "tests": {
+        "passed": 0,
+        "failed": 3,
+        "total": 3,
+        "newly_broken": 0,
+        "timed_out": false,
+        "blocked": false
+      },
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.0,
+        "localization": 0.08,
+        "fix_quality": 0.0,
+        "semantic_similarity": 0.1,
+        "efficiency_potential": 0.1,
+        "penalties": 0.0,
+        "total": 0.38
+      },
+      "solved": false,
+      "extraction_ok": true
+    },
+    {
+      "id": "v2_t1_002",
+      "tier": 1,
+      "bug_type": "off_by_one",
+      "function_name": "_sum",
+      "completion": "OBSERVATION: The function `_sum` returns 1 instead of 6 when given the input `[1, 2, 3]`.\nHYPOTHESIS: The variable `sum` is initialized to 1, which is incorrect. It should be initialized to 0 to correctly accumulate the sum of the array elements.\nCONFIDENCE: high\nACTION: propose_fix\nDETAIL: ```python\ndef _sum(arr):\n    sum = 0\n    for i in arr:\n        sum = sum + i\n    return sum\n```",
+      "action": "propose_fix",
+      "tests": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "newly_broken": 0,
+        "timed_out": false,
+        "blocked": false
+      },
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.2,
+        "localization": 0.08,
+        "fix_quality": 0.35,
+        "semantic_similarity": 0.1,
+        "efficiency_potential": 0.1,
+        "penalties": 0.0,
+        "total": 0.93
+      },
+      "solved": true,
+      "extraction_ok": true
+    },
+    {
+      "id": "v2_t1_004",
+      "tier": 1,
+      "bug_type": "off_by_one",
+      "function_name": "frequency_Of_Smallest",
+      "completion": "OBSERVATION: The function `frequency_Of_Smallest` returns 1 when it should return 2.\nHYPOTHESIS: The function incorrectly sets the frequency to 1 when it encounters a new minimum value, instead of resetting it to 1.\nCONFIDENCE: high\nACTION: propose_fix\nDETAIL: ```python\ndef frequency_Of_Smallest(n, arr):\n    mn = arr[0]\n    freq = 1\n    for i in range(2, n):\n        if arr[i] < mn:\n            mn = arr[i]\n            freq = 1  # Reset frequency to 1 when a new minimum is found\n        elif arr[i] == mn:\n            freq += 1\n    return freq\n```",
+      "action": "propose_fix",
+      "tests": {
+        "passed": 1,
+        "failed": 2,
+        "total": 3,
+        "newly_broken": 0,
+        "timed_out": false,
+        "blocked": false
+      },
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.1,
+        "localization": 0.08,
+        "fix_quality": 0.05,
+        "semantic_similarity": 0.1,
+        "efficiency_potential": 0.1,
+        "penalties": 0.0,
+        "total": 0.53
+      },
+      "solved": false,
+      "extraction_ok": true
+    },
+    {
+      "id": "v2_t1_006",
+      "tier": 1,
+      "bug_type": "off_by_one",
+      "function_name": "first_Element",
+      "completion": "OBSERVATION: The function `first_Element` does not correctly find the first element that appears exactly `k` times in the array. It seems to be missing a crucial step to initialize the count map properly.\nHYPOTHESIS: The function is not initializing the count map before the first iteration of the loop, which means it will always return `-1` because the map is empty.\nCONFIDENCE: high\nACTION: propose_fix\nDETAIL: ```python\ndef first_Element(arr, n, k):\n    count_map = {}\n    for i in range(n):  # Initialize the count map\n        if arr[i] in count_map.keys():\n            count_map[arr[i]] += 1\n        else:\n            count_map[arr[i]] = 1\n    for i in range(n):\n        if count_map[arr[i]] == k:\n            return arr[i]\n    return -1\n```",
+      "action": "propose_fix",
+      "tests": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "newly_broken": 0,
+        "timed_out": false,
+        "blocked": false
+      },
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.2,
+        "localization": 0.08,
+        "fix_quality": 0.35,
+        "semantic_similarity": 0.1,
+        "efficiency_potential": 0.1,
+        "penalties": 0.0,
+        "total": 0.93
+      },
+      "solved": true,
+      "extraction_ok": true
+    },
+    {
+      "id": "v2_t1_008",
+      "tier": 1,
+      "bug_type": "off_by_one",
+      "function_name": "odd_values_string",
+      "completion": "OBSERVATION: The function `odd_values_string` does not correctly select characters at odd indices. It only selects characters at multiples of 3.\nHYPOTHESIS: The function is incorrectly using modulo operation to determine odd indices. It should use `i % 2 != 0` to check for odd indices.\nCONFIDENCE: high\nACTION: propose_fix\nDETAIL: ```python\ndef odd_values_string(str):\n    result = ''\n    for i in range(len(str)):\n        if i % 2 != 0:\n            result = result + str[i]\n    return result\n```",
+      "action": "propose_fix",
+      "tests": {
+        "passed": 0,
+        "failed": 3,
+        "total": 3,
+        "newly_broken": 0,
+        "timed_out": false,
+        "blocked": false
+      },
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.15,
+        "localization": 0.08,
+        "fix_quality": 0.0,
+        "semantic_similarity": 0.1,
+        "efficiency_potential": 0.1,
+        "penalties": 0.0,
+        "total": 0.53
+      },
+      "solved": false,
+      "extraction_ok": true
+    },
+    {
+      "id": "v2_t1_011",
+      "tier": 1,
+      "bug_type": "off_by_one",
+      "function_name": "fourth_Power_Sum",
+      "completion": "OBSERVATION: The function `fourth_Power_Sum` returns 16 for `n=2`, but the expected result is 17.\nHYPOTHESIS: The function is missing the multiplication by 4 in the loop.\nCONFIDENCE: high\nACTION: propose_fix\nDETAIL: ```python\nimport math\n\ndef fourth_Power_Sum(n):\n    sum = 0\n    for i in range(2, n + 1):\n        sum = sum + i * i * i * i * 4\n    return sum\n```",
+      "action": "propose_fix",
+      "tests": {
+        "passed": 0,
+        "failed": 3,
+        "total": 3,
+        "newly_broken": 0,
+        "timed_out": false,
+        "blocked": false
+      },
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.05,
+        "localization": 0.08,
+        "fix_quality": 0.0,
+        "semantic_similarity": 0.1,
+        "efficiency_potential": 0.1,
+        "penalties": 0.0,
+        "total": 0.43
+      },
+      "solved": false,
+      "extraction_ok": true
+    },
+    {
+      "id": "v2_t1_012",
+      "tier": 1,
+      "bug_type": "comparison_boundary",
+      "function_name": "func",
+      "completion": "OBSERVATION: The function `func` does not correctly handle the case where the maximum frequency is less than `k`. It should return all elements with the highest frequency if there are fewer than `k` such elements.\nHYPOTHESIS: The function is not correctly handling cases where the number of elements with the highest frequency is less than `k`. It should return all elements with the highest frequency.\nCONFIDENCE: high\nACTION: propose_fix\nDETAIL: ```python\ndef func(nums, k):\n    import collections\n    d = collections.defaultdict(int)\n    for row in nums:\n        for i in row:\n            d[i] += 1\n    max_freq = max(d.values())\n    temp = [(freq, key) for key, freq in d.items() if freq == max_freq]\n    result = []\n    while temp:\n        v, key = heapq.heappop(temp)\n        result.append(key)\n    return result\n```",
+      "action": "propose_fix",
+      "tests": {
+        "passed": 0,
+        "failed": 3,
+        "total": 3,
+        "newly_broken": 0,
+        "timed_out": false,
+        "blocked": false
+      },
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.1,
+        "localization": 0.08,
+        "fix_quality": 0.0,
+        "semantic_similarity": 0.02,
+        "efficiency_potential": 0.1,
+        "penalties": 0.0,
+        "total": 0.4
+      },
+      "solved": false,
+      "extraction_ok": true
+    },
+    {
+      "id": "v2_t1_013",
+      "tier": 1,
+      "bug_type": "off_by_one",
+      "function_name": "bell_number",
+      "completion": "OBSERVATION: The function `bell_number` returns 1 for `n=2`, but the expected result is 2.\nHYPOTHESIS: The function is incorrectly calculating the Bell number for `n=2`. The formula for Bell numbers involves summing up the previous row's values at the same column and the previous row's values at the next column.\nCONFIDENCE: high\nACTION: propose_fix\nDETAIL: ```python\ndef bell_number(n):\n    bell = [[0 for i in range(n + 1)] for j in range(n + 1)]\n    bell[0][0] = 1\n    for i in range(1, n + 1):\n        bell[i][0] = bell[i - 1][i - 1]\n        for j in range(1, i + 1):\n            bell[i][j] = bell[i - 1][j - 1] + bell[i - 1][j]\n    return bell[n][0]\n```",
+      "action": "propose_fix",
+      "tests": {
+        "passed": 0,
+        "failed": 3,
+        "total": 3,
+        "newly_broken": 0,
+        "timed_out": false,
+        "blocked": false
+      },
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.15,
+        "localization": 0.08,
+        "fix_quality": 0.0,
+        "semantic_similarity": 0.1,
+        "efficiency_potential": 0.1,
+        "penalties": 0.0,
+        "total": 0.53
+      },
+      "solved": false,
+      "extraction_ok": true
+    },
+    {
+      "id": "v2_t1_015",
+      "tier": 1,
+      "bug_type": "off_by_one",
+      "function_name": "Check_Solution",
+      "completion": "OBSERVATION: The function `Check_Solution` returns 'No' when `b` is not equal to -1, even though the test case expects 'Yes'.\nHYPOTHESIS: The function does not correctly handle the case where `b` is not equal to -1. It should return 'Yes' only when `b` is -1.\nCONFIDENCE: high\nACTION: propose_fix\nDETAIL: ```python\ndef Check_Solution(a, b, c):\n    if b == -1:\n        return 'Yes'\n    else:\n        return 'No'\n```",
+      "action": "propose_fix",
+      "tests": {
+        "passed": 1,
+        "failed": 2,
+        "total": 3,
+        "newly_broken": 0,
+        "timed_out": false,
+        "blocked": false
+      },
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.15,
+        "localization": 0.08,
+        "fix_quality": 0.05,
+        "semantic_similarity": 0.1,
+        "efficiency_potential": 0.1,
+        "penalties": 0.0,
+        "total": 0.58
+      },
+      "solved": false,
+      "extraction_ok": true
+    },
+    {
+      "id": "v2_t1_016",
+      "tier": 1,
+      "bug_type": "off_by_one",
+      "function_name": "overlapping",
+      "completion": "OBSERVATION: The function `overlapping` returns `1` instead of `-1` when the lists do not overlap.\nHYPOTHESIS: The function incorrectly returns `1` when there is at least one common element between the lists, but it should return `-1` if there are no common elements.\nCONFIDENCE: high\nACTION: propose_fix\nDETAIL: ```python\ndef overlapping(list1, list2):\n    c = 0\n    d = 0\n    for i in list1:\n        c += 1\n    for i in list2:\n        d += 1\n    for i in range(0, c):\n        for j in range(0, d):\n            if list1[i] == list2[j]:\n                return 1\n    return -1\n```",
+      "action": "propose_fix",
+      "tests": {
+        "passed": 1,
+        "failed": 2,
+        "total": 3,
+        "newly_broken": 0,
+        "timed_out": false,
+        "blocked": false
+      },
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.15,
+        "localization": 0.08,
+        "fix_quality": 0.05,
+        "semantic_similarity": 0.1,
+        "efficiency_potential": 0.1,
+        "penalties": 0.0,
+        "total": 0.58
+      },
+      "solved": false,
+      "extraction_ok": true
+    },
+    {
+      "id": "v2_t1_021",
+      "tier": 1,
+      "bug_type": "off_by_one",
+      "function_name": "is_nonagonal",
+      "completion": "OBSERVATION: The function `is_nonagonal` returns 324 instead of 325 for `n=10`.\nHYPOTHESIS: The function is incorrectly calculating the nonagonal number using the formula \\( \\frac{n(8n-5)}{2} \\), which results in 324 for \\( n=10 \\). The correct formula should be \\( \\frac{n(8n-5)}{2} + 1 \\).\nCONFIDENCE: high\nACTION: propose_fix\nDETAIL: ```python\ndef is_nonagonal(n):\n    return int(n * (8 * n - 5) / 2 + 1)\n```",
+      "action": "propose_fix",
+      "tests": {
+        "passed": 0,
+        "failed": 3,
+        "total": 3,
+        "newly_broken": 0,
+        "timed_out": false,
+        "blocked": false
+      },
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.15,
+        "localization": 0.15,
+        "fix_quality": 0.0,
+        "semantic_similarity": 0.05,
+        "efficiency_potential": 0.1,
+        "penalties": 0.0,
+        "total": 0.55
+      },
+      "solved": false,
+      "extraction_ok": true
+    },
+    {
+      "id": "v2_t1_024",
+      "tier": 1,
+      "bug_type": "off_by_one",
+      "function_name": "get_First_Set_Bit_Pos",
+      "completion": "OBSERVATION: The function `get_First_Set_Bit_Pos` returns 2 for `n=12`, but the expected result is 3.\nHYPOTHESIS: The function is incorrectly calculating the position of the first set bit. The expression `n & -n` should correctly identify the first set bit, and adding 2 to the result is incorrect.\nCONFIDENCE: high\nACTION: propose_fix\nDETAIL: ```python\nimport math\n\ndef get_First_Set_Bit_Pos(n):\n    return math.log2(n & -n) + 1\n```",
+      "action": "propose_fix",
+      "tests": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "newly_broken": 0,
+        "timed_out": false,
+        "blocked": false
+      },
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.2,
+        "localization": 0.08,
+        "fix_quality": 0.35,
+        "semantic_similarity": 0.1,
+        "efficiency_potential": 0.1,
+        "penalties": 0.0,
+        "total": 0.93
+      },
+      "solved": true,
+      "extraction_ok": true
+    },
+    {
+      "id": "v2_t1_028",
+      "tier": 1,
+      "bug_type": "off_by_one",
+      "function_name": "min_Ops",
+      "completion": "OBSERVATION: The function `min_Ops` returns -1 for the input `[2, 2, 2, 2]`, expected 0.\nHYPOTHESIS: The function incorrectly checks divisibility by `k` and does not correctly calculate the number of operations needed.\nCONFIDENCE: high\nACTION: propose_fix\nDETAIL: ```python\ndef min_Ops(arr, n, k):\n    max1 = max(arr)\n    res = 0\n    for i in range(0, n):\n        if (max1 - arr[i]) % k != 0:\n            return -1\n        else:\n            res += (max1 - arr[i]) // k\n    return int(res)\n```",
+      "action": "propose_fix",
+      "tests": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "newly_broken": 0,
+        "timed_out": false,
+        "blocked": false
+      },
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.15,
+        "localization": 0.08,
+        "fix_quality": 0.35,
+        "semantic_similarity": 0.1,
+        "efficiency_potential": 0.1,
+        "penalties": 0.0,
+        "total": 0.88
+      },
+      "solved": true,
+      "extraction_ok": true
+    },
+    {
+      "id": "v2_t1_029",
+      "tier": 1,
+      "bug_type": "off_by_one",
+      "function_name": "Sort",
+      "completion": "OBSERVATION: The function `Sort` is supposed to sort a list of lists based on the third element of each sublist, but it is sorting in descending order instead.\nHYPOTHESIS: The `sort` method is using the default sorting order, which is ascending. To sort in descending order, the `reverse` parameter should be set to `True`.\nCONFIDENCE: high\nACTION: propose_fix\nDETAIL: ```python\ndef Sort(sub_li):\n    sub_li.sort(key=lambda x: x[2], reverse=True)\n    return sub_li\n```",
+      "action": "propose_fix",
+      "tests": {
+        "passed": 0,
+        "failed": 3,
+        "total": 3,
+        "newly_broken": 0,
+        "timed_out": false,
+        "blocked": false
+      },
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.1,
+        "localization": 0.08,
+        "fix_quality": 0.0,
+        "semantic_similarity": 0.05,
+        "efficiency_potential": 0.1,
+        "penalties": 0.0,
+        "total": 0.43
+      },
+      "solved": false,
+      "extraction_ok": true
+    },
+    {
+      "id": "v2_t1_030",
+      "tier": 1,
+      "bug_type": "off_by_one",
+      "function_name": "k_smallest_pairs",
+      "completion": "OBSERVATION: The function `k_smallest_pairs` does not correctly handle the case when `j` reaches the end of `nums2` before `i` reaches the end of `nums1`.\nHYPOTHESIS: The function incorrectly pops elements from the heap when `j` reaches the end of `nums2`, causing it to skip some pairs.\nCONFIDENCE: high\nACTION: propose_fix\nDETAIL: ```python\nimport heapq\n\ndef k_smallest_pairs(nums1, nums2, k):\n    queue = []\n\n    def push(i, j):\n        if i < len(nums1) and j < len(nums2):\n            heapq.heappush(queue, [nums1[i] + nums2[j], i, j])\n\n    push(0, 0)\n    pairs = []\n    while queue and len(pairs) < k:\n        _, i, j = heapq.heappop(queue)\n        pairs.append([nums1[i], nums2[j]])\n        push(i, j + 1)\n        if j == len(nums2) - 1:\n            push(i + 1, 0)\n    return pairs\n```",
+      "action": "propose_fix",
+      "tests": {
+        "passed": 2,
+        "failed": 1,
+        "total": 3,
+        "newly_broken": 0,
+        "timed_out": false,
+        "blocked": false
+      },
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.15,
+        "localization": 0.08,
+        "fix_quality": 0.12,
+        "semantic_similarity": 0.1,
+        "efficiency_potential": 0.1,
+        "penalties": 0.0,
+        "total": 0.65
+      },
+      "solved": false,
+      "extraction_ok": true
+    },
+    {
+      "id": "v2_t1_034",
+      "tier": 1,
+      "bug_type": "off_by_one",
+      "function_name": "count_digits",
+      "completion": "OBSERVATION: The function `count_digits` does not correctly count the digits in the sum of `num1` and `num2`.\nHYPOTHESIS: The function is incorrectly using integer division by 11, which does not correctly count the digits.\nCONFIDENCE: high\nACTION: propose_fix\nDETAIL: ```python\ndef count_digits(num1, num2):\n    number = num1 + num2\n    count = 0\n    while number > 0:\n        number = number // 10  # Corrected to use integer division by 10\n        count = count + 1\n    return count\n```",
+      "action": "propose_fix",
+      "tests": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "newly_broken": 0,
+        "timed_out": false,
+        "blocked": false
+      },
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.15,
+        "localization": 0.08,
+        "fix_quality": 0.35,
+        "semantic_similarity": 0.1,
+        "efficiency_potential": 0.1,
+        "penalties": 0.0,
+        "total": 0.88
+      },
+      "solved": true,
+      "extraction_ok": true
+    },
+    {
+      "id": "v2_t1_036",
+      "tier": 1,
+      "bug_type": "off_by_one",
+      "function_name": "equilibrium_index",
+      "completion": "OBSERVATION: The function `equilibrium_index` returns -1 when the test case `[1, 2, 3, 4, 1, 2, 3]` is executed.\nHYPOTHESIS: The function incorrectly calculates the left sum and total sum, leading to incorrect comparisons.\nCONFIDENCE: high\nACTION: propose_fix\nDETAIL: ```python\ndef equilibrium_index(arr):\n    total_sum = sum(arr)\n    left_sum = 0\n    for i, num in enumerate(arr):\n        total_sum -= num\n        if left_sum == total_sum:\n            return i\n        left_sum += num\n    return -1\n```",
+      "action": "propose_fix",
+      "tests": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "newly_broken": 0,
+        "timed_out": false,
+        "blocked": false
+      },
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.05,
+        "localization": 0.08,
+        "fix_quality": 0.35,
+        "semantic_similarity": 0.1,
+        "efficiency_potential": 0.1,
+        "penalties": 0.0,
+        "total": 0.78
+      },
+      "solved": true,
+      "extraction_ok": true
+    },
+    {
+      "id": "v2_t1_037",
+      "tier": 1,
+      "bug_type": "off_by_one",
+      "function_name": "word_len",
+      "completion": "OBSERVATION: The function `word_len` returns `True` for any string input, not just when the length of the first word is odd.\nHYPOTHESIS: The function does not correctly check if the length of the first word is odd. It always returns `True` because the condition `len(word) % 1 == 0` is always true for any integer length.\nCONFIDENCE: high\nACTION: propose_fix\nDETAIL: ```python\ndef word_len(s):\n    s = s.split(' ')\n    for word in s:\n        if len(word) % 2 != 0:\n            return True\n        else:\n            return False\n```",
+      "action": "propose_fix",
+      "tests": {
+        "passed": 0,
+        "failed": 3,
+        "total": 3,
+        "newly_broken": 0,
+        "timed_out": false,
+        "blocked": false
+      },
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.15,
+        "localization": 0.08,
+        "fix_quality": 0.0,
+        "semantic_similarity": 0.1,
+        "efficiency_potential": 0.1,
+        "penalties": -0.2,
+        "total": 0.33
+      },
+      "solved": false,
+      "extraction_ok": true
+    },
+    {
+      "id": "v2_t1_039",
+      "tier": 1,
+      "bug_type": "off_by_one",
+      "function_name": "sumofFactors",
+      "completion": "OBSERVATION: The function `sumofFactors` returns 26 for `n=18`, but the expected result is 28.\nHYPOTHESIS: The function incorrectly calculates the sum of factors by not including the factor 2 when `n` is even.\nCONFIDENCE: high\nACTION: propose_fix\nDETAIL: ```python\nimport math\n\ndef sumofFactors(n):\n    if n % 2 != 0:\n        return 0\n    res = 2\n    for i in range(2, int(math.sqrt(n)) + 1):\n        count = 0\n        curr_sum = 1\n        curr_term = 1\n        while n % i == 0:\n            count = count + 1\n            n = n // i\n            if i == 2 and count == 1:\n                curr_sum = 0\n            curr_term = curr_term * i\n            curr_sum = curr_sum + curr_term\n        res = res * curr_sum\n    if n >= 2:\n        res = res * (1 + n)\n    return res\n```",
+      "action": "propose_fix",
+      "tests": {
+        "passed": 0,
+        "failed": 3,
+        "total": 3,
+        "newly_broken": 0,
+        "timed_out": false,
+        "blocked": false
+      },
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.1,
+        "localization": 0.08,
+        "fix_quality": 0.0,
+        "semantic_similarity": 0.1,
+        "efficiency_potential": 0.1,
+        "penalties": 0.0,
+        "total": 0.48
+      },
+      "solved": false,
+      "extraction_ok": true
+    },
+    {
+      "id": "v2_t1_042",
+      "tier": 1,
+      "bug_type": "comparison_boundary",
+      "function_name": "find_Sum",
+      "completion": "OBSERVATION: The function `find_Sum` is supposed to return the sum of unique elements in the list `arr`. However, it currently returns the sum of all elements that appear at least once in the list.\n\nHYPOTHESIS: The function is incorrectly using `arr.count(x)` to count occurrences, which does not correctly identify unique elements. Instead, it should use a set to filter out duplicates before summing.\n\nCONFIDENCE: high\n\nACTION: propose_fix\n\nDETAIL: ```python\ndef find_Sum(arr, n):\n    unique_elements = set(arr)\n    return sum(unique_elements)\n```",
+      "action": "propose_fix",
+      "tests": {
+        "passed": 0,
+        "failed": 3,
+        "total": 3,
+        "newly_broken": 0,
+        "timed_out": false,
+        "blocked": false
+      },
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.1,
+        "localization": 0.08,
+        "fix_quality": 0.0,
+        "semantic_similarity": 0.02,
+        "efficiency_potential": 0.1,
+        "penalties": 0.0,
+        "total": 0.4
+      },
+      "solved": false,
+      "extraction_ok": true
+    },
+    {
+      "id": "v2_t1_043",
+      "tier": 1,
+      "bug_type": "off_by_one",
+      "function_name": "test_three_equal",
+      "completion": "OBSERVATION: The function `test_three_equal` returns 5 when called with three equal arguments, but it should return 3.\nHYPOTHESIS: The function incorrectly returns 5 when all three arguments are equal, because it subtracts the length of the set from 5 instead of adding it.\nCONFIDENCE: high\nACTION: propose_fix\nDETAIL: ```python\ndef test_three_equal(x, y, z):\n    result = set([x, y, z])\n    if len(result) == 3:\n        return 3\n    else:\n        return 5 - len(result)\n```",
+      "action": "propose_fix",
+      "tests": {
+        "passed": 0,
+        "failed": 3,
+        "total": 3,
+        "newly_broken": 0,
+        "timed_out": false,
+        "blocked": false
+      },
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.1,
+        "localization": 0.08,
+        "fix_quality": 0.0,
+        "semantic_similarity": 0.1,
+        "efficiency_potential": 0.1,
+        "penalties": -0.2,
+        "total": 0.28
+      },
+      "solved": false,
+      "extraction_ok": true
+    },
+    {
+      "id": "v2_t1_045",
+      "tier": 1,
+      "bug_type": "off_by_one",
+      "function_name": "sum_digits",
+      "completion": "OBSERVATION: The function `sum_digits` is supposed to return the sum of the digits of a number, but it fails on the test case `sum_digits(345)`, which should return 12.\nHYPOTHESIS: The function is incorrectly using integer division (`int(n / 11)`) instead of floating-point division (`n / 11`). This results in incorrect digit extraction and summation.\nCONFIDENCE: high\nACTION: propose_fix\nDETAIL: ```python\ndef sum_digits(n):\n    if n == 0:\n        return 0\n    else:\n        return n % 10 + sum_digits(n // 10)\n```",
+      "action": "propose_fix",
+      "tests": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "newly_broken": 0,
+        "timed_out": false,
+        "blocked": false
+      },
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.2,
+        "localization": 0.08,
+        "fix_quality": 0.35,
+        "semantic_similarity": 0.1,
+        "efficiency_potential": 0.1,
+        "penalties": 0.0,
+        "total": 0.93
+      },
+      "solved": true,
+      "extraction_ok": true
+    },
+    {
+      "id": "v2_t1_046",
+      "tier": 1,
+      "bug_type": "off_by_one",
+      "function_name": "No_of_Triangle",
+      "completion": "OBSERVATION: The function `No_of_Triangle` returns 3 for `N=4` and `K=3`, but the expected result is 6.\nHYPOTHESIS: The function calculates the number of triangles incorrectly. The formula for the number of triangles is incorrect.\nCONFIDENCE: high\nACTION: propose_fix\nDETAIL: ```python\ndef No_of_Triangle(N, K):\n    if N < K:\n        return -1\n    else:\n        Tri_up = 0\n        Tri_up = (N - K + 1) * (N - K + 2) // 2\n        Tri_down = 0\n        Tri_down = (N - 2 * K + 1) * (N - 2 * K + 3) // 2\n        return Tri_up + Tri_down\n```",
+      "action": "propose_fix",
+      "tests": {
+        "passed": 2,
+        "failed": 1,
+        "total": 3,
+        "newly_broken": 0,
+        "timed_out": false,
+        "blocked": false
+      },
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.0,
+        "localization": 0.08,
+        "fix_quality": 0.12,
+        "semantic_similarity": 0.1,
+        "efficiency_potential": 0.1,
+        "penalties": 0.0,
+        "total": 0.5
+      },
+      "solved": false,
+      "extraction_ok": true
+    },
+    {
+      "id": "v2_t1_047",
+      "tier": 1,
+      "bug_type": "off_by_one",
+      "function_name": "sum_range_list",
+      "completion": "OBSERVATION: The function `sum_range_list` is supposed to sum elements from index `m` to `n` (inclusive), but it includes `n + 2` in the range, which leads to an out-of-bounds error.\nHYPOTHESIS: The loop should iterate up to `n`, not `n + 2`. The correct step size should be 1.\nCONFIDENCE: high\nACTION: propose_fix\nDETAIL: ```python\ndef sum_range_list(list1, m, n):\n    sum_range = 0\n    for i in range(m, n + 1, 1):\n        sum_range += list1[i]\n    return sum_range\n```",
+      "action": "propose_fix",
+      "tests": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "newly_broken": 0,
+        "timed_out": false,
+        "blocked": false
+      },
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.2,
+        "localization": 0.08,
+        "fix_quality": 0.35,
+        "semantic_similarity": 0.1,
+        "efficiency_potential": 0.1,
+        "penalties": 0.0,
+        "total": 0.93
+      },
+      "solved": true,
+      "extraction_ok": true
+    },
+    {
+      "id": "v2_t1_048",
+      "tier": 1,
+      "bug_type": "off_by_one",
+      "function_name": "pancake_sort",
+      "completion": "OBSERVATION: The function `pancake_sort` does not sort the list correctly. The test case fails because the output is not sorted as expected.\nHYPOTHESIS: The function is not correctly implementing the pancake sort algorithm. The algorithm involves flipping the array to bring the maximum element to the front and then flipping again to move it to its correct position. The current implementation does not correctly implement these steps.\nCONFIDENCE: high\nACTION: propose_fix\nDETAIL: ```python\ndef pancake_sort(nums):\n    arr_len = len(nums)\n    while arr_len > 1:\n        mi = nums.index(max(nums[0:arr_len]))\n        # Flip the array from the start to the max index\n        nums = nums[:mi+1][::-1] + nums[mi+1:]\n        # Flip the array from the start to the end\n        nums = nums[:arr_len][::-1]\n        arr_len -= 1\n    return nums\n```",
+      "action": "propose_fix",
+      "tests": {
+        "passed": 0,
+        "failed": 3,
+        "total": 3,
+        "newly_broken": 0,
+        "timed_out": false,
+        "blocked": false
+      },
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.05,
+        "localization": 0.08,
+        "fix_quality": 0.0,
+        "semantic_similarity": 0.02,
+        "efficiency_potential": 0.1,
+        "penalties": 0.0,
+        "total": 0.35
+      },
+      "solved": false,
+      "extraction_ok": true
+    },
+    {
+      "id": "v2_t1_051",
+      "tier": 1,
+      "bug_type": "off_by_one",
+      "function_name": "max_sum",
+      "completion": "OBSERVATION: The function `max_sum` is supposed to find the maximum sum of a subarray that includes both positive and negative numbers. However, the current implementation does not correctly calculate the maximum sum of such a subarray.\n\nHYPOTHESIS: The function is incorrectly calculating the maximum sum by comparing elements from the start (`MSIBS`) and end (`MSDBS`) of the array, which does not account for the possibility of including elements from both ends in the same subarray.\n\nCONFIDENCE: high\n\nACTION: propose_fix\n\nDETAIL: ```python\ndef max_sum(arr, n):\n    MSIBS = arr[:]\n    MSDBS = arr[:]\n    \n    # Calculate Maximum Sum Incliding First Element\n    for i in range(1, n):\n        if arr[i] > arr[i-1] + arr[i]:\n            MSIBS[i] = arr[i]\n    \n    # Calculate Maximum Sum Incliding Last Element\n    for i in range(n-2, -1, -1):\n        if arr[i] > arr[i+1] + arr[i]:\n            MSDBS[i] = arr[i]\n    \n    max_sum = float('-Inf')\n    for i, j, k in zip(MSIBS, MSDBS, arr):\n        max_sum = max(max_sum, i + j - k)\n    \n    return max_sum\n```",
+      "action": "propose_fix",
+      "tests": {
+        "passed": 0,
+        "failed": 3,
+        "total": 3,
+        "newly_broken": 0,
+        "timed_out": false,
+        "blocked": false
+      },
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.1,
+        "localization": 0.08,
+        "fix_quality": 0.0,
+        "semantic_similarity": 0.02,
+        "efficiency_potential": 0.1,
+        "penalties": -0.2,
+        "total": 0.2
+      },
+      "solved": false,
+      "extraction_ok": true
+    },
+    {
+      "id": "v2_t1_052",
+      "tier": 1,
+      "bug_type": "comparison_boundary",
+      "function_name": "product_Equal",
+      "completion": "OBSERVATION: The function `product_Equal` does not correctly calculate the product of odd and even digits separately and then compare them.\nHYPOTHESIS: The function incorrectly multiplies all digits together without considering whether they are odd or even, leading to incorrect results.\nCONFIDENCE: high\nACTION: propose_fix\nDETAIL: ```python\ndef product_Equal(n):\n    if n < 10:\n        return False\n    prodOdd = 1\n    prodEven = 1\n    while n >= 0:\n        digit = n % 10\n        if digit % 2 == 0:\n            prodEven *= digit\n        else:\n            prodOdd *= digit\n        n = n // 10\n    if prodOdd == prodEven:\n        return True\n    return False\n```",
+      "action": "propose_fix",
+      "tests": {
+        "passed": 0,
+        "failed": 3,
+        "total": 3,
+        "newly_broken": 0,
+        "timed_out": true,
+        "blocked": false
+      },
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.0,
+        "localization": 0.08,
+        "fix_quality": 0.0,
+        "semantic_similarity": 0.05,
+        "efficiency_potential": 0.1,
+        "penalties": -0.2,
+        "total": 0.13
+      },
+      "solved": false,
+      "extraction_ok": true
+    },
+    {
+      "id": "v2_t1_056",
+      "tier": 1,
+      "bug_type": "off_by_one",
+      "function_name": "reverse_vowels",
+      "completion": "OBSERVATION: The function `reverse_vowels` does not correctly reverse the vowels in the string. It uses the last vowel from the `vowels` string without decrementing the index, leading to incorrect results.\nHYPOTHESIS: The function incorrectly uses `vowels[-0]` to access the last vowel, which is equivalent to `vowels[0]`. This results in the same vowel being used repeatedly, causing the output to be incorrect.\nCONFIDENCE: high\nACTION: propose_fix\nDETAIL: ```python\ndef reverse_vowels(str1):\n    vowels = ''\n    for char in str1:\n        if char in 'aeiouAEIOU':\n            vowels += char\n    result_string = ''\n    for char in str1:\n        if char in 'aeiouAEIOU':\n            result_string += vowels[-1]\n            vowels = vowels[:-1]\n        else:\n            result_string += char\n    return result_string\n```",
+      "action": "propose_fix",
+      "tests": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "newly_broken": 0,
+        "timed_out": false,
+        "blocked": false
+      },
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.2,
+        "localization": 0.08,
+        "fix_quality": 0.35,
+        "semantic_similarity": 0.1,
+        "efficiency_potential": 0.1,
+        "penalties": 0.0,
+        "total": 0.93
+      },
+      "solved": true,
+      "extraction_ok": true
+    },
+    {
+      "id": "v2_t1_059",
+      "tier": 1,
+      "bug_type": "off_by_one",
+      "function_name": "set_left_most_unset_bit",
+      "completion": "OBSERVATION: The function `set_left_most_unset_bit` does not correctly identify and set the leftmost unset bit of the input number `n`.\nHYPOTHESIS: The function incorrectly uses bitwise operations to find and set the leftmost unset bit. It should use a different approach to ensure the correct bit is set.\nCONFIDENCE: high\nACTION: propose_fix\nDETAIL: ```python\ndef set_left_most_unset_bit(n):\n    if not n & n + 1:\n        return n\n    pos = 0\n    while n & (1 << pos):\n        pos += 1\n    return n | (1 << pos)\n```",
+      "action": "propose_fix",
+      "tests": {
+        "passed": 1,
+        "failed": 2,
+        "total": 3,
+        "newly_broken": 0,
+        "timed_out": false,
+        "blocked": false
+      },
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.05,
+        "localization": 0.08,
+        "fix_quality": 0.05,
+        "semantic_similarity": 0.02,
+        "efficiency_potential": 0.1,
+        "penalties": 0.0,
+        "total": 0.4
+      },
+      "solved": false,
+      "extraction_ok": true
+    },
+    {
+      "id": "v2_t1_060",
+      "tier": 1,
+      "bug_type": "off_by_one",
+      "function_name": "surfacearea_cube",
+      "completion": "OBSERVATION: The function `surfacearea_cube` returns `150` instead of `150`, which is incorrect. The expected output is `150`.\nHYPOTHESIS: The function is multiplying `l` by `5` instead of `6`. The formula for the surface area of a cube is \\(6 \\times l^2\\).\nCONFIDENCE: high\nACTION: propose_fix\nDETAIL: ```python\ndef surfacearea_cube(l):\n    surfacearea = 6 * l * l\n    return surfacearea\n```",
+      "action": "propose_fix",
+      "tests": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "newly_broken": 0,
+        "timed_out": false,
+        "blocked": false
+      },
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.2,
+        "localization": 0.15,
+        "fix_quality": 0.35,
+        "semantic_similarity": 0.1,
+        "efficiency_potential": 0.1,
+        "penalties": 0.0,
+        "total": 1.0
+      },
+      "solved": true,
+      "extraction_ok": true
+    },
+    {
+      "id": "v2_t2_001",
+      "tier": 2,
+      "bug_type": "wrong_arithmetic_operator",
+      "function_name": "perimeter_polygon",
+      "completion": "OBSERVATION: The function `perimeter_polygon` returns `4` instead of `80`.\nHYPOTHESIS: The function is using integer division (`//`) which results in an integer value, not the floating-point division required to calculate the perimeter.\nCONFIDENCE: high\nACTION: propose_fix\nDETAIL: ```python\nfrom math import tan, pi\n\ndef perimeter_polygon(s, l):\n    perimeter = s / l\n    return perimeter\n```",
+      "action": "propose_fix",
+      "tests": {
+        "passed": 0,
+        "failed": 3,
+        "total": 3,
+        "newly_broken": 0,
+        "timed_out": false,
+        "blocked": false
+      },
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.1,
+        "localization": 0.08,
+        "fix_quality": 0.0,
+        "semantic_similarity": 0.1,
+        "efficiency_potential": 0.1,
+        "penalties": 0.0,
+        "total": 0.48
+      },
+      "solved": false,
+      "extraction_ok": true
+    },
+    {
+      "id": "v2_t2_002",
+      "tier": 2,
+      "bug_type": "wrong_boolean_operator",
+      "function_name": "snake_to_camel",
+      "completion": "OBSERVATION: The function `snake_to_camel` does not capitalize the first letter of each word after splitting by underscores.\nHYPOTHESIS: The `capitalize()` method is not being applied to the first element of the list returned by `word.split('_')`.\nCONFIDENCE: high\nACTION: propose_fix\nDETAIL: ```python\ndef snake_to_camel(word):\n    import re\n    parts = word.split('_')\n    # Capitalize the first letter of each part except the first one\n    parts[1:] = [part.capitalize() for part in parts[1:]]\n    return ''.join(parts)\n```",
+      "action": "propose_fix",
+      "tests": {
+        "passed": 0,
+        "failed": 3,
+        "total": 3,
+        "newly_broken": 0,
+        "timed_out": false,
+        "blocked": false
+      },
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.05,
+        "localization": 0.08,
+        "fix_quality": 0.0,
+        "semantic_similarity": 0.0,
+        "efficiency_potential": 0.1,
+        "penalties": 0.0,
+        "total": 0.33
+      },
+      "solved": false,
+      "extraction_ok": true
+    },
+    {
+      "id": "v2_t2_003",
+      "tier": 2,
+      "bug_type": "wrong_arithmetic_operator",
+      "function_name": "largest_palindrome",
+      "completion": "OBSERVATION: The function `largest_palindrome` does not correctly identify the largest palindrome in the list `A`. The test case fails because the expected output is 54545, but the function returns -1.\n\nHYPOTHESIS: The function is not correctly identifying palindromes. The issue might be in the logic for checking palindromes or in the sorting step.\n\nCONFIDENCE: high\n\nACTION: propose_fix\n\nDETAIL: ```python\ndef is_palindrome(n):\n    divisor = 1\n    while n / divisor >= 10:\n        divisor *= 10\n    while n != 0:\n        leading = n // divisor\n        trailing = n % 10\n        if leading != trailing:\n            return False\n        n = n % divisor // 10\n        divisor = divisor // 100\n    return True\n\ndef largest_palindrome(A, n):\n    A.sort(reverse=True)\n    for i in range(n + 1):\n        if is_palindrome(A[i]):\n            return A[i]\n    return -1\n```",
+      "action": "propose_fix",
+      "tests": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "newly_broken": 0,
+        "timed_out": false,
+        "blocked": false
+      },
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.15,
+        "localization": 0.08,
+        "fix_quality": 0.35,
+        "semantic_similarity": 0.1,
+        "efficiency_potential": 0.1,
+        "penalties": 0.0,
+        "total": 0.88
+      },
+      "solved": true,
+      "extraction_ok": true
+    },
+    {
+      "id": "v2_t2_004",
+      "tier": 2,
+      "bug_type": "wrong_boolean_operator",
+      "function_name": "check_String",
+      "completion": "OBSERVATION: The function `check_String` returns `True` for the input 'python', but it should return `False`.\nHYPOTHESIS: The function does not correctly identify that the string contains neither alphabetic characters nor digits.\nCONFIDENCE: high\nACTION: propose_fix\nDETAIL: ```python\ndef check_String(str):\n    flag_l = False\n    flag_n = False\n    for i in str:\n        if i.isalpha():\n            flag_l = True\n        if i.isdigit():\n            flag_n = True\n    return not (flag_l and flag_n)\n```",
+      "action": "propose_fix",
+      "tests": {
+        "passed": 0,
+        "failed": 3,
+        "total": 3,
+        "newly_broken": 0,
+        "timed_out": false,
+        "blocked": false
+      },
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.0,
+        "localization": 0.08,
+        "fix_quality": 0.0,
+        "semantic_similarity": 0.1,
+        "efficiency_potential": 0.1,
+        "penalties": -0.2,
+        "total": 0.18
+      },
+      "solved": false,
+      "extraction_ok": true
+    },
+    {
+      "id": "v2_t2_005",
+      "tier": 2,
+      "bug_type": "flipped_equality",
+      "function_name": "are_Equal",
+      "completion": "OBSERVATION: The function `are_Equal` returns `False` when it should return `True`. The test case `[1, 2, 3], [3, 2, 1], 3, 3` should return `True` because both arrays are equal after sorting.\nHYPOTHESIS: The function does not correctly compare the sorted arrays. It should check if all elements in the sorted array are equal to each other.\nCONFIDENCE: high\nACTION: propose_fix\nDETAIL: ```python\ndef are_Equal(arr1, arr2, n, m):\n    if n != m:\n        return False\n    arr1.sort()\n    arr2.sort()\n    for i in range(0, n):\n        if arr1[i] != arr2[i]:\n            return False\n    return True\n```",
+      "action": "propose_fix",
+      "tests": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "newly_broken": 0,
+        "timed_out": false,
+        "blocked": false
+      },
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.15,
+        "localization": 0.08,
+        "fix_quality": 0.35,
+        "semantic_similarity": 0.1,
+        "efficiency_potential": 0.1,
+        "penalties": 0.0,
+        "total": 0.88
+      },
+      "solved": true,
+      "extraction_ok": true
+    },
+    {
+      "id": "v2_t2_009",
+      "tier": 2,
+      "bug_type": "reversed_comparison",
+      "function_name": "sub_lists",
+      "completion": "OBSERVATION: The function `sub_lists` does not correctly handle the case when `len(temp)` is less than 0. This results in an incorrect extension of the `subs` list.\nHYPOTHESIS: The condition `if len(temp) < 0:` is incorrect because `combinations` always returns a list, even if the combination size is 0. The intention might be to check if `temp` is empty, which would happen if `i` is 0.\nCONFIDENCE: high\nACTION: propose_fix\nDETAIL: ```python\nfrom itertools import combinations\n\ndef sub_lists(my_list):\n    subs = []\n    for i in range(0, len(my_list) + 1):\n        temp = [list(x) for x in combinations(my_list, i)]\n        if not temp:  # Check if temp is empty\n            subs.extend(temp)\n    return subs\n```",
+      "action": "propose_fix",
+      "tests": {
+        "passed": 0,
+        "failed": 3,
+        "total": 3,
+        "newly_broken": 0,
+        "timed_out": false,
+        "blocked": false
+      },
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.15,
+        "localization": 0.08,
+        "fix_quality": 0.0,
+        "semantic_similarity": 0.1,
+        "efficiency_potential": 0.1,
+        "penalties": 0.0,
+        "total": 0.53
+      },
+      "solved": false,
+      "extraction_ok": true
+    },
+    {
+      "id": "v2_t2_011",
+      "tier": 2,
+      "bug_type": "wrong_arithmetic_operator",
+      "function_name": "count_Odd_Squares",
+      "completion": "OBSERVATION: The function `count_Odd_Squares` returns 7 instead of 8 for the input `(5, 100)`.\nHYPOTHESIS: The function is incorrectly calculating the number of odd squares by using integer division, which truncates the decimal part. This results in an underestimation of the number of odd squares.\nCONFIDENCE: high\nACTION: propose_fix\nDETAIL: ```python\nimport math\n\ndef count_Odd_Squares(n, m):\n    return int(math.sqrt(m)) - int(math.sqrt(n - 1))\n```",
+      "action": "propose_fix",
+      "tests": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "newly_broken": 0,
+        "timed_out": false,
+        "blocked": false
+      },
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.15,
+        "localization": 0.08,
+        "fix_quality": 0.35,
+        "semantic_similarity": 0.05,
+        "efficiency_potential": 0.1,
+        "penalties": 0.0,
+        "total": 0.83
+      },
+      "solved": true,
+      "extraction_ok": true
+    },
+    {
+      "id": "v2_t2_012",
+      "tier": 2,
+      "bug_type": "reversed_comparison",
+      "function_name": "max_of_two",
+      "completion": "OBSERVATION: The function `max_of_two` returns `x` when `x` is less than `y`, which is incorrect. It should return `y` when `x` is greater than `y`.\nHYPOTHESIS: The function is incorrectly comparing `x` with `y` using `<` instead of `>`. This results in the wrong value being returned.\nCONFIDENCE: high\nACTION: propose_fix\nDETAIL: ```python\ndef max_of_two(x, y):\n    if x > y:\n        return x\n    return y\n```",
+      "action": "propose_fix",
+      "tests": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "newly_broken": 0,
+        "timed_out": false,
+        "blocked": false
+      },
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.2,
+        "localization": 0.08,
+        "fix_quality": 0.35,
+        "semantic_similarity": 0.1,
+        "efficiency_potential": 0.1,
+        "penalties": 0.0,
+        "total": 0.93
+      },
+      "solved": true,
+      "extraction_ok": true
+    },
+    {
+      "id": "v2_t2_013",
+      "tier": 2,
+      "bug_type": "flipped_equality",
+      "function_name": "test_duplicate",
+      "completion": "OBSERVATION: The function `test_duplicate` returns `True` for the input `[1, 2, 3, 4, 5]`, but it should return `False`.\nHYPOTHESIS: The function is not correctly identifying duplicates. The `set` data structure removes duplicates, so if the length of the set is equal to the length of the array, there are no duplicates.\nCONFIDENCE: high\nACTION: propose_fix\nDETAIL: ```python\ndef test_duplicate(arraynums):\n    nums_set = set(arraynums)\n    return len(arraynums) != len(nums_set)\n```",
+      "action": "propose_fix",
+      "tests": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "newly_broken": 0,
+        "timed_out": false,
+        "blocked": false
+      },
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.15,
+        "localization": 0.08,
+        "fix_quality": 0.35,
+        "semantic_similarity": 0.1,
+        "efficiency_potential": 0.1,
+        "penalties": 0.0,
+        "total": 0.88
+      },
+      "solved": true,
+      "extraction_ok": true
+    },
+    {
+      "id": "v2_t2_015",
+      "tier": 2,
+      "bug_type": "flipped_equality",
+      "function_name": "decreasing_trend",
+      "completion": "OBSERVATION: The function `decreasing_trend` returns `False` for the input `[-4, -3, -2, -1]`, but it should return `True`.\nHYPOTHESIS: The function incorrectly checks if the list is sorted in ascending order instead of descending order. The condition `sorted(nums) != nums` should be reversed to check if the list is not sorted in ascending order.\nCONFIDENCE: high\nACTION: propose_fix\nDETAIL: ```python\ndef decreasing_trend(nums):\n    if sorted(nums) != nums:\n        return True\n    else:\n        return False\n```",
+      "action": "propose_fix",
+      "tests": {
+        "passed": 0,
+        "failed": 3,
+        "total": 3,
+        "newly_broken": 0,
+        "timed_out": false,
+        "blocked": false
+      },
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.1,
+        "localization": 0.08,
+        "fix_quality": 0.0,
+        "semantic_similarity": 0.1,
+        "efficiency_potential": 0.1,
+        "penalties": 0.0,
+        "total": 0.48
+      },
+      "solved": false,
+      "extraction_ok": true
+    },
+    {
+      "id": "v2_t2_017",
+      "tier": 2,
+      "bug_type": "wrong_boolean_operator",
+      "function_name": "sample_nam",
+      "completion": "OBSERVATION: The function `sample_nam` returns 14 instead of 16.\nHYPOTHESIS: The function is not correctly filtering the list of names based on the criteria provided. It should only include names where the first character is uppercase or the rest of the name is lowercase.\nCONFIDENCE: high\nACTION: propose_fix\nDETAIL: ```python\ndef sample_nam(sample_names):\n    sample_names = list(filter(lambda el: el[0].isupper() or el[1:].islower(), sample_names))\n    return len(''.join(sample_names))\n```",
+      "action": "propose_fix",
+      "tests": {
+        "passed": 0,
+        "failed": 3,
+        "total": 3,
+        "newly_broken": 0,
+        "timed_out": false,
+        "blocked": false
+      },
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.05,
+        "localization": 0.08,
+        "fix_quality": 0.0,
+        "semantic_similarity": 0.1,
+        "efficiency_potential": 0.1,
+        "penalties": 0.0,
+        "total": 0.43
+      },
+      "solved": false,
+      "extraction_ok": true
+    },
+    {
+      "id": "v2_t2_018",
+      "tier": 2,
+      "bug_type": "wrong_arithmetic_operator",
+      "function_name": "find_peak",
+      "completion": "OBSERVATION: The function `find_peak` is supposed to return the index of the peak element in the array, but it returns 4 when given the input `[2, 3, 4, 5, 6]`.\nHYPOTHESIS: The function is incorrectly checking the conditions for the peak element. The condition `(mid == 0 or arr[mid - 1] <= arr[mid]) and (mid == n - 1 or arr[mid + 1] <= arr[mid])` is not correctly implemented. It should check if the current element is greater than both its neighbors.\nCONFIDENCE: high\nACTION: propose_fix\nDETAIL: ```python\ndef find_peak_util(arr, low, high, n):\n    mid = low + (high - low) // 2\n    if (mid == 0 or arr[mid - 1] < arr[mid]) and (mid == n - 1 or arr[mid + 1] < arr[mid]):\n        return mid\n    elif mid > 0 and arr[mid - 1] > arr[mid]:\n        return find_peak_util(arr, low, mid - 1, n)\n    else:\n        return find_peak_util(arr, mid + 1, high, n)\n\ndef find_peak(arr, n):\n    return find_peak_util(arr, 0, n, n)\n```",
+      "action": "propose_fix",
+      "tests": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "newly_broken": 0,
+        "timed_out": false,
+        "blocked": false
+      },
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.2,
+        "localization": 0.08,
+        "fix_quality": 0.35,
+        "semantic_similarity": 0.0,
+        "efficiency_potential": 0.1,
+        "penalties": 0.0,
+        "total": 0.83
+      },
+      "solved": true,
+      "extraction_ok": true
+    },
+    {
+      "id": "v2_t2_023",
+      "tier": 2,
+      "bug_type": "wrong_arithmetic_operator",
+      "function_name": "sum_list",
+      "completion": "OBSERVATION: The function `sum_list` is subtracting elements from `lst2` instead of adding them. Line 2 reads `res_list = [lst1[i] - lst2[i] for i in range(len(lst1))]`.\nHYPOTHESIS: The function is intended to add corresponding elements of `lst1` and `lst2`, but it is currently subtracting them. The correct operation should be addition (`+`).\nCONFIDENCE: high\nACTION: propose_fix\nDETAIL: ```python\ndef sum_list(lst1, lst2):\n    res_list = [lst1[i] + lst2[i] for i in range(len(lst1))]\n    return res_list\n```",
+      "action": "propose_fix",
+      "tests": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "newly_broken": 0,
+        "timed_out": false,
+        "blocked": false
+      },
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.2,
+        "localization": 0.15,
+        "fix_quality": 0.35,
+        "semantic_similarity": 0.1,
+        "efficiency_potential": 0.1,
+        "penalties": 0.0,
+        "total": 1.0
+      },
+      "solved": true,
+      "extraction_ok": true
+    },
+    {
+      "id": "v2_t2_024",
+      "tier": 2,
+      "bug_type": "reversed_comparison",
+      "function_name": "is_num_keith",
+      "completion": "OBSERVATION: The function `is_num_keith` does not correctly identify Keith numbers. The test case `is_num_keith(14)` fails because the function returns `False` when it should return `True`.\n\nHYPOTHESIS: The function incorrectly calculates the next term in the sequence by summing the digits from the end of the number, rather than from the beginning. This results in incorrect sequences and ultimately leads to the wrong conclusion about whether the number is a Keith number.\n\nCONFIDENCE: high\n\nACTION: propose_fix\n\nDETAIL: ```python\ndef is_num_keith(x):\n    terms = []\n    temp = x\n    n = 0\n    while temp > 0:\n        terms.append(temp % 10)\n        temp = int(temp / 10)\n        n += 1\n    terms.reverse()\n    next_term = 0\n    i = 0\n    while next_term <= x:\n        next_term = 0\n        for j in range(1, n + 1):\n            next_term += terms[i]\n        terms.append(next_term)\n        i += 1\n    return next_term == x\n```",
+      "action": "propose_fix",
+      "tests": {
+        "passed": 1,
+        "failed": 2,
+        "total": 3,
+        "newly_broken": 0,
+        "timed_out": false,
+        "blocked": false
+      },
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.0,
+        "localization": 0.08,
+        "fix_quality": 0.05,
+        "semantic_similarity": 0.1,
+        "efficiency_potential": 0.1,
+        "penalties": 0.0,
+        "total": 0.43
+      },
+      "solved": false,
+      "extraction_ok": true
+    },
+    {
+      "id": "v2_t2_026",
+      "tier": 2,
+      "bug_type": "wrong_arithmetic_operator",
+      "function_name": "get_max_sum",
+      "completion": "OBSERVATION: The function `get_max_sum` does not correctly compute the maximum sum for `n = 60`. The test case fails because the function returns 106 instead of the expected value.\n\nHYPOTHESIS: The function is incorrectly calculating the maximum sum by using incorrect indices in the list `res`. The indices used in the expression `max(i, res[int(i / 2)] - res[int(i / 3)] + res[int(i / 4)] + res[int(i / 5)])` are not valid for the list `res`.\n\nCONFIDENCE: high\n\nACTION: propose_fix\n\nDETAIL: ```python\ndef get_max_sum(n):\n    res = list()\n    res.append(0)\n    res.append(1)\n    i = 2\n    while i < n + 1:\n        res.append(max(i, res[i // 2] - res[i // 3] + res[i // 4] + res[i // 5]))\n        i = i + 1\n    return res[n]\n```",
+      "action": "propose_fix",
+      "tests": {
+        "passed": 1,
+        "failed": 2,
+        "total": 3,
+        "newly_broken": 0,
+        "timed_out": false,
+        "blocked": false
+      },
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.15,
+        "localization": 0.08,
+        "fix_quality": 0.05,
+        "semantic_similarity": 0.05,
+        "efficiency_potential": 0.1,
+        "penalties": 0.0,
+        "total": 0.53
+      },
+      "solved": false,
+      "extraction_ok": true
+    },
+    {
+      "id": "v2_t2_027",
+      "tier": 2,
+      "bug_type": "flipped_equality",
+      "function_name": "check_isosceles",
+      "completion": "OBSERVATION: The function `check_isosceles` returns `True` when any two sides are equal, but it should return `False` when all three sides are different.\nHYPOTHESIS: The function incorrectly returns `True` when all sides are different, which is not the intended behavior for an isosceles triangle.\nCONFIDENCE: high\nACTION: propose_fix\nDETAIL: ```python\ndef check_isosceles(x, y, z):\n    if x == y or y == z or x == z:\n        return True\n    else:\n        return False\n```",
+      "action": "propose_fix",
+      "tests": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "newly_broken": 0,
+        "timed_out": false,
+        "blocked": false
+      },
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.2,
+        "localization": 0.08,
+        "fix_quality": 0.35,
+        "semantic_similarity": 0.1,
+        "efficiency_potential": 0.1,
+        "penalties": 0.0,
+        "total": 0.93
+      },
+      "solved": true,
+      "extraction_ok": true
+    },
+    {
+      "id": "v2_t2_028",
+      "tier": 2,
+      "bug_type": "wrong_arithmetic_operator",
+      "function_name": "Diff",
+      "completion": "OBSERVATION: The function `Diff` returns `[10, 20, 30, 15]`, which is incorrect. The expected output is `[10, 15, 20, 30]`.\nHYPOTHESIS: The function is incorrectly combining sets and lists, leading to duplicate elements and incorrect order.\nCONFIDENCE: high\nACTION: propose_fix\nDETAIL: ```python\ndef Diff(li1, li2):\n    return list(set(li1) - set(li2))\n```",
+      "action": "propose_fix",
+      "tests": {
+        "passed": 1,
+        "failed": 2,
+        "total": 3,
+        "newly_broken": 0,
+        "timed_out": false,
+        "blocked": false
+      },
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.0,
+        "localization": 0.08,
+        "fix_quality": 0.05,
+        "semantic_similarity": 0.05,
+        "efficiency_potential": 0.1,
+        "penalties": 0.0,
+        "total": 0.38
+      },
+      "solved": false,
+      "extraction_ok": true
+    },
+    {
+      "id": "v2_t2_030",
+      "tier": 2,
+      "bug_type": "wrong_arithmetic_operator",
+      "function_name": "round_and_sum",
+      "completion": "OBSERVATION: The function `round_and_sum` returns 243, but the expected result is 242. The issue lies in the division operation inside the `sum` function.\nHYPOTHESIS: The division operation `//` is used instead of `+`, which results in incorrect rounding and summing.\nCONFIDENCE: high\nACTION: propose_fix\nDETAIL: ```python\ndef round_and_sum(list1):\n    length = len(list1)\n    rounded_list = list(map(round, list1))\n    round_and_sum = sum(rounded_list) // length\n    return round_and_sum\n```",
+      "action": "propose_fix",
+      "tests": {
+        "passed": 0,
+        "failed": 3,
+        "total": 3,
+        "newly_broken": 0,
+        "timed_out": false,
+        "blocked": false
+      },
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.05,
+        "localization": 0.08,
+        "fix_quality": 0.0,
+        "semantic_similarity": 0.05,
+        "efficiency_potential": 0.1,
+        "penalties": 0.0,
+        "total": 0.38
+      },
+      "solved": false,
+      "extraction_ok": true
+    },
+    {
+      "id": "v2_t2_031",
+      "tier": 2,
+      "bug_type": "reversed_comparison",
+      "function_name": "min_Operations",
+      "completion": "OBSERVATION: The function `min_Operations` does not correctly handle the case when `A` is less than `B`. The function swaps `A` and `B` but then incorrectly divides `B` by the greatest common divisor (GCD) of `A` and `B`, which is not the intended operation.\n\nHYPOTHESIS: The function should swap `A` and `B` only if `A` is greater than `B`. If `A` is less than `B`, the function should divide `B` by the GCD of `A` and `B` and then return `B - 1`.\n\nCONFIDENCE: high\n\nACTION: propose_fix\n\nDETAIL: ```python\nimport math\n\ndef min_Operations(A, B):\n    if A > B:\n        swap(A, B)\n    B = B // math.gcd(A, B)\n    return B - 1\n```",
+      "action": "propose_fix",
+      "tests": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "newly_broken": 0,
+        "timed_out": false,
+        "blocked": false
+      },
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.2,
+        "localization": 0.08,
+        "fix_quality": 0.35,
+        "semantic_similarity": 0.1,
+        "efficiency_potential": 0.1,
+        "penalties": 0.0,
+        "total": 0.93
+      },
+      "solved": true,
+      "extraction_ok": true
+    },
+    {
+      "id": "v2_t2_034",
+      "tier": 2,
+      "bug_type": "flipped_equality",
+      "function_name": "divisible_by_digits",
+      "completion": "OBSERVATION: The function `divisible_by_digits` does not correctly filter numbers based on their digits. It uses a lambda function that checks if any digit is zero or if the number is not divisible by that digit, which is incorrect.\nHYPOTHESIS: The function should check if all digits of a number are non-zero and if the number is divisible by each of those digits. The current implementation incorrectly uses the presence of zero as a condition.\nCONFIDENCE: high\nACTION: propose_fix\nDETAIL: ```python\ndef divisible_by_digits(startnum, endnum):\n    return [n for n in range(startnum, endnum + 1) if all(int(digit) != 0 and n % int(digit) == 0 for digit in str(n))]\n```",
+      "action": "propose_fix",
+      "tests": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "newly_broken": 0,
+        "timed_out": false,
+        "blocked": false
+      },
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.2,
+        "localization": 0.08,
+        "fix_quality": 0.35,
+        "semantic_similarity": 0.05,
+        "efficiency_potential": 0.1,
+        "penalties": 0.0,
+        "total": 0.88
+      },
+      "solved": true,
+      "extraction_ok": true
+    },
+    {
+      "id": "v2_t2_037",
+      "tier": 2,
+      "bug_type": "wrong_arithmetic_operator",
+      "function_name": "add_list",
+      "completion": "OBSERVATION: The function `add_list` is intended to subtract corresponding elements from two lists, but it currently subtracts them instead.\nHYPOTHESIS: The lambda function `lambda x, y: x - y` is incorrectly designed to subtract elements instead of adding them. The correct operation should be `x + y`.\nCONFIDENCE: high\nACTION: propose_fix\nDETAIL: ```python\ndef add_list(nums1, nums2):\n    result = map(lambda x, y: x + y, nums1, nums2)\n    return list(result)\n```",
+      "action": "propose_fix",
+      "tests": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "newly_broken": 0,
+        "timed_out": false,
+        "blocked": false
+      },
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.2,
+        "localization": 0.08,
+        "fix_quality": 0.35,
+        "semantic_similarity": 0.1,
+        "efficiency_potential": 0.1,
+        "penalties": 0.0,
+        "total": 0.93
+      },
+      "solved": true,
+      "extraction_ok": true
+    },
+    {
+      "id": "v2_t2_040",
+      "tier": 2,
+      "bug_type": "wrong_arithmetic_operator",
+      "function_name": "max_sum_pair_diff_lessthan_K",
+      "completion": "OBSERVATION: The function `max_sum_pair_diff_lessthan_K` does not correctly compute the maximum sum of pairs with a difference less than `K`.\nHYPOTHESIS: The function incorrectly updates the `dp` array by adding the current pair to the previous `dp` value without considering the possibility of using the previous pair's difference.\nCONFIDENCE: high\nACTION: propose_fix\nDETAIL: ```python\ndef max_sum_pair_diff_lessthan_K(arr, N, K):\n    arr.sort()\n    dp = [0] * N\n    dp[0] = 0\n    for i in range(1, N):\n        dp[i] = dp[i - 1]\n        if arr[i] + arr[i - 1] < K:\n            if i >= 2:\n                dp[i] = max(dp[i], dp[i - 2] + arr[i] + arr[i - 1])\n            else:\n                dp[i] = max(dp[i], arr[i] + arr[i - 1])\n    return dp[N - 1]\n```",
+      "action": "propose_fix",
+      "tests": {
+        "passed": 0,
+        "failed": 3,
+        "total": 3,
+        "newly_broken": 0,
+        "timed_out": false,
+        "blocked": false
+      },
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.1,
+        "localization": 0.08,
+        "fix_quality": 0.0,
+        "semantic_similarity": 0.1,
+        "efficiency_potential": 0.1,
+        "penalties": 0.0,
+        "total": 0.48
+      },
+      "solved": false,
+      "extraction_ok": true
+    },
+    {
+      "id": "v2_t2_041",
+      "tier": 2,
+      "bug_type": "reversed_comparison",
+      "function_name": "minimum",
+      "completion": "OBSERVATION: The function `minimum` returns `b` when `a` is greater than or equal to `b`, which is incorrect for finding the minimum value.\nHYPOTHESIS: The function should return `a` when `a` is less than `b`, not `b`.\nCONFIDENCE: high\nACTION: propose_fix\nDETAIL: ```python\ndef minimum(a, b):\n    if a < b:\n        return a\n    else:\n        return b\n```",
+      "action": "propose_fix",
+      "tests": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "newly_broken": 0,
+        "timed_out": false,
+        "blocked": false
+      },
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.15,
+        "localization": 0.08,
+        "fix_quality": 0.35,
+        "semantic_similarity": 0.1,
+        "efficiency_potential": 0.1,
+        "penalties": 0.0,
+        "total": 0.88
+      },
+      "solved": true,
+      "extraction_ok": true
+    },
+    {
+      "id": "v2_t2_042",
+      "tier": 2,
+      "bug_type": "wrong_arithmetic_operator",
+      "function_name": "unique_Characters",
+      "completion": "OBSERVATION: The function `unique_Characters` does not correctly check for unique characters in the string. It uses a nested loop that compares each character with all previous characters, which is inefficient and incorrect.\nHYPOTHESIS: The function should use a set to track seen characters, as sets automatically handle duplicates. This approach is more efficient and correct.\nCONFIDENCE: high\nACTION: propose_fix\nDETAIL: ```python\ndef unique_Characters(str):\n    seen = set()\n    for char in str:\n        if char in seen:\n            return False\n        seen.add(char)\n    return True\n```",
+      "action": "propose_fix",
+      "tests": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "newly_broken": 0,
+        "timed_out": false,
+        "blocked": false
+      },
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.15,
+        "localization": 0.08,
+        "fix_quality": 0.35,
+        "semantic_similarity": 0.02,
+        "efficiency_potential": 0.1,
+        "penalties": 0.0,
+        "total": 0.8
+      },
+      "solved": true,
+      "extraction_ok": true
+    },
+    {
+      "id": "v2_t2_043",
+      "tier": 2,
+      "bug_type": "flipped_equality",
+      "function_name": "remove_odd",
+      "completion": "OBSERVATION: The function `remove_odd` does not correctly remove odd numbers from the list. It removes all even numbers instead.\nHYPOTHESIS: The condition `if i % 2 == 0` is incorrectly used to remove odd numbers. It should be `if i % 2 != 0` to remove odd numbers.\nCONFIDENCE: high\nACTION: propose_fix\nDETAIL: ```python\ndef remove_odd(l):\n    for i in l:\n        if i % 2 != 0:\n            l.remove(i)\n    return l\n```",
+      "action": "propose_fix",
+      "tests": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "newly_broken": 0,
+        "timed_out": false,
+        "blocked": false
+      },
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.2,
+        "localization": 0.08,
+        "fix_quality": 0.35,
+        "semantic_similarity": 0.1,
+        "efficiency_potential": 0.1,
+        "penalties": 0.0,
+        "total": 0.93
+      },
+      "solved": true,
+      "extraction_ok": true
+    },
+    {
+      "id": "v2_t2_045",
+      "tier": 2,
+      "bug_type": "flipped_equality",
+      "function_name": "extract_string",
+      "completion": "OBSERVATION: The function `extract_string` is not correctly filtering strings based on their length. It should return strings with lengths different from `l`, but it currently returns strings with lengths equal to `l`.\nHYPOTHESIS: The condition `len(e) != l` is not working as intended because it checks if the length of each string is not equal to `l`, which is incorrect. Instead, it should check if the length is equal to `l`.\nCONFIDENCE: high\nACTION: propose_fix\nDETAIL: ```python\ndef extract_string(str, l):\n    result = [e for e in str if len(e) != l]\n    return result\n```",
+      "action": "propose_fix",
+      "tests": {
+        "passed": 0,
+        "failed": 3,
+        "total": 3,
+        "newly_broken": 0,
+        "timed_out": false,
+        "blocked": false
+      },
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.1,
+        "localization": 0.08,
+        "fix_quality": 0.0,
+        "semantic_similarity": 0.1,
+        "efficiency_potential": 0.1,
+        "penalties": 0.0,
+        "total": 0.48
+      },
+      "solved": false,
+      "extraction_ok": true
+    },
+    {
+      "id": "v2_t2_048",
+      "tier": 2,
+      "bug_type": "wrong_arithmetic_operator",
+      "function_name": "is_undulating",
+      "completion": "OBSERVATION: The function `is_undulating` does not correctly check for undulating sequences. It only checks if every third character is the same, which is incorrect.\nHYPOTHESIS: The function should check if every pair of consecutive characters is the same, not every third one. This would correctly identify undulating sequences like '1212121'.\nCONFIDENCE: high\nACTION: propose_fix\nDETAIL: ```python\ndef is_undulating(n):\n    if len(n) <= 2:\n        return False\n    for i in range(len(n) - 1):\n        if n[i] != n[i + 1]:\n            return False\n    return True\n```",
+      "action": "propose_fix",
+      "tests": {
+        "passed": 1,
+        "failed": 2,
+        "total": 3,
+        "newly_broken": 0,
+        "timed_out": false,
+        "blocked": false
+      },
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.15,
+        "localization": 0.08,
+        "fix_quality": 0.05,
+        "semantic_similarity": 0.1,
+        "efficiency_potential": 0.1,
+        "penalties": 0.0,
+        "total": 0.58
+      },
+      "solved": false,
+      "extraction_ok": true
+    },
+    {
+      "id": "v2_t2_049",
+      "tier": 2,
+      "bug_type": "wrong_arithmetic_operator",
+      "function_name": "cube_Sum",
+      "completion": "OBSERVATION: The function `cube_Sum` returns 48 for `n=2`, while the expected result is 72.\nHYPOTHESIS: The function is incorrectly calculating the sum of cubes. The expression `2 * i * (2 // i) * (2 * i)` does not correctly compute the cube of `i`.\nCONFIDENCE: high\nACTION: propose_fix\nDETAIL: ```python\ndef cube_Sum(n):\n    sum = 0\n    for i in range(1, n + 1):\n        sum += i ** 3\n    return sum\n```",
+      "action": "propose_fix",
+      "tests": {
+        "passed": 0,
+        "failed": 3,
+        "total": 3,
+        "newly_broken": 0,
+        "timed_out": false,
+        "blocked": false
+      },
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.15,
+        "localization": 0.08,
+        "fix_quality": 0.0,
+        "semantic_similarity": 0.05,
+        "efficiency_potential": 0.1,
+        "penalties": 0.0,
+        "total": 0.48
+      },
+      "solved": false,
+      "extraction_ok": true
+    },
+    {
+      "id": "v2_t2_050",
+      "tier": 2,
+      "bug_type": "wrong_arithmetic_operator",
+      "function_name": "get_Char",
+      "completion": "OBSERVATION: The function `get_Char` returns 'f' for the input 'abc', but the expected output is 'g'.\nHYPOTHESIS: The function is not correctly calculating the sum of ASCII values and then applying the modulo operation to determine the character.\nCONFIDENCE: high\nACTION: propose_fix\nDETAIL: ```python\ndef get_Char(strr):\n    summ = 0\n    for i in range(len(strr)):\n        summ += ord(strr[i]) + ord('a') + 1\n    if summ % 26 == 0:\n        return chr(ord('a') + 25)  # Corrected to 'z'\n    else:\n        summ = summ % 26\n        return chr(ord('a') + summ - 1)\n```",
+      "action": "propose_fix",
+      "tests": {
+        "passed": 0,
+        "failed": 3,
+        "total": 3,
+        "newly_broken": 0,
+        "timed_out": false,
+        "blocked": false
+      },
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.05,
+        "localization": 0.08,
+        "fix_quality": 0.0,
+        "semantic_similarity": 0.05,
+        "efficiency_potential": 0.1,
+        "penalties": 0.0,
+        "total": 0.38
+      },
+      "solved": false,
+      "extraction_ok": true
+    },
+    {
+      "id": "v2_t2_051",
+      "tier": 2,
+      "bug_type": "wrong_arithmetic_operator",
+      "function_name": "rencontres_number",
+      "completion": "OBSERVATION: The function `rencontres_number` is not returning the correct value for `rencontres_number(7, 2)`. The expected output is 924, but the actual output is 1001.\n\nHYPOTHESIS: The issue lies in the calculation of the rencontres number when `m > 0`. The formula used in the function does not correctly account for the recursive calls to `binomial_coeffi` and `rencontres_number`.\n\nCONFIDENCE: high\n\nACTION: propose_fix\n\nDETAIL: ```python\ndef binomial_coeffi(n, k):\n    if k == 0 or k == n:\n        return 1\n    return binomial_coeffi(n - 1, k - 1) + binomial_coeffi(n - 1, k)\n\ndef rencontres_number(n, m):\n    if n == 0 and m == 0:\n        return 1\n    if n == 1 and m == 0:\n        return 0\n    if m == 0:\n        return (n - 1) // (rencontres_number(n - 1, 0) + rencontres_number(n - 2, 0))\n    return binomial_coeffi(n, m) * rencontres_number(n - m, 0)\n```",
+      "action": "propose_fix",
+      "tests": {
+        "passed": 2,
+        "failed": 1,
+        "total": 3,
+        "newly_broken": 0,
+        "timed_out": false,
+        "blocked": false
+      },
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.15,
+        "localization": 0.08,
+        "fix_quality": 0.12,
+        "semantic_similarity": 0.1,
+        "efficiency_potential": 0.1,
+        "penalties": 0.0,
+        "total": 0.65
+      },
+      "solved": false,
+      "extraction_ok": true
+    },
+    {
+      "id": "v2_t3_001",
+      "tier": 3,
+      "bug_type": "off_by_one_slice",
+      "function_name": "list_split",
+      "completion": "OBSERVATION: The function `list_split` does not correctly split the list `S` into sublists with the specified `step`. It seems to be using a slicing method that is incorrect for the intended functionality.\nHYPOTHESIS: The function is using a slicing method that starts from the second element (`i + 1`) and skips every `step` elements, which results in incorrect sublists. The correct approach should start from the first element and skip every `step` elements.\nCONFIDENCE: high\nACTION: propose_fix\nDETAIL: ```python\ndef list_split(S, step):\n    return [S[i::step] for i in range(len(S))]\n```",
+      "action": "propose_fix",
+      "tests": {
+        "passed": 0,
+        "failed": 3,
+        "total": 3,
+        "newly_broken": 0,
+        "timed_out": false,
+        "blocked": false
+      },
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.15,
+        "localization": 0.08,
+        "fix_quality": 0.0,
+        "semantic_similarity": 0.1,
+        "efficiency_potential": 0.1,
+        "penalties": 0.0,
+        "total": 0.53
+      },
+      "solved": false,
+      "extraction_ok": true
+    },
+    {
+      "id": "v2_t3_003",
+      "tier": 3,
+      "bug_type": "off_by_one_range",
+      "function_name": "is_Monotonic",
+      "completion": "OBSERVATION: The function `is_Monotonic` is supposed to check if the list `A` is either non-decreasing or non-increasing. However, the current implementation does not correctly handle the case where the list is neither strictly increasing nor strictly decreasing.\n\nHYPOTHESIS: The function is incorrectly using the `all()` function with reversed ranges, which results in checking the opposite condition than intended. The correct approach should be to check both conditions separately without reversing the range.\nCONFIDENCE: high\nACTION: propose_fix\nDETAIL: ```python\ndef is_Monotonic(A):\n    return all(A[i] <= A[i + 1] for i in range(len(A) - 1)) or all(A[i] >= A[i + 1] for i in range(len(A) - 1))\n```",
+      "action": "propose_fix",
+      "tests": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "newly_broken": 0,
+        "timed_out": false,
+        "blocked": false
+      },
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.2,
+        "localization": 0.08,
+        "fix_quality": 0.35,
+        "semantic_similarity": 0.1,
+        "efficiency_potential": 0.1,
+        "penalties": 0.0,
+        "total": 0.93
+      },
+      "solved": true,
+      "extraction_ok": true
+    },
+    {
+      "id": "v2_t3_005",
+      "tier": 3,
+      "bug_type": "off_by_one_range",
+      "function_name": "is_not_prime",
+      "completion": "OBSERVATION: The function `is_not_prime` returns `False` for `n = 35`, but it should return `True`.\nHYPOTHESIS: The loop condition `range(2, int(math.sqrt(n)) + 1 + -1)` is incorrect. It should be `range(2, int(math.sqrt(n)) + 1)`.\nCONFIDENCE: high\nACTION: propose_fix\nDETAIL: ```python\nimport math\n\ndef is_not_prime(n):\n    result = False\n    for i in range(2, int(math.sqrt(n)) + 1):\n        if n % i == 0:\n            result = True\n    return result\n```",
+      "action": "propose_fix",
+      "tests": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "newly_broken": 0,
+        "timed_out": false,
+        "blocked": false
+      },
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.2,
+        "localization": 0.08,
+        "fix_quality": 0.35,
+        "semantic_similarity": 0.1,
+        "efficiency_potential": 0.1,
+        "penalties": 0.0,
+        "total": 0.93
+      },
+      "solved": true,
+      "extraction_ok": true
+    },
+    {
+      "id": "v2_t3_009",
+      "tier": 3,
+      "bug_type": "off_by_one_range",
+      "function_name": "count_Rectangles",
+      "completion": "OBSERVATION: The function `count_Rectangles` does not correctly calculate the number of rectangles that can fit inside a circle with a given radius.\nHYPOTHESIS: The function is incorrectly calculating the diagonal length of each rectangle and checking if it fits within the circle's diameter. The condition `diagnalLengthSquare <= diameterSquare` should be `diagnalLengthSquare < diameterSquare` to include all rectangles that fit within the circle.\nCONFIDENCE: high\nACTION: propose_fix\nDETAIL: ```python\ndef count_Rectangles(radius):\n    rectangles = 0\n    diameter = 2 * radius\n    diameterSquare = diameter * diameter\n    for a in range(1, 2 * radius + 1):\n        for b in range(1, 2 * radius):\n            diagnalLengthSquare = a * a + b * b\n            if diagnalLengthSquare < diameterSquare:\n                rectangles += 1\n    return rectangles\n```",
+      "action": "propose_fix",
+      "tests": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "newly_broken": 0,
+        "timed_out": false,
+        "blocked": false
+      },
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.2,
+        "localization": 0.08,
+        "fix_quality": 0.35,
+        "semantic_similarity": 0.1,
+        "efficiency_potential": 0.1,
+        "penalties": 0.0,
+        "total": 0.93
+      },
+      "solved": true,
+      "extraction_ok": true
+    },
+    {
+      "id": "v2_t3_012",
+      "tier": 3,
+      "bug_type": "off_by_one_range",
+      "function_name": "odd_Num_Sum",
+      "completion": "OBSERVATION: The function `odd_Num_Sum` returns 82 for `n=2`, but the expected result is 17. The loop runs from 1 to `n + 1 + 1`, which is 4, not 3.\nHYPOTHESIS: The loop should run from 1 to `n + 1`, not `n + 1 + 1`. This change will ensure that the loop correctly calculates the sum of cubes of odd numbers up to `n`.\nCONFIDENCE: high\nACTION: propose_fix\nDETAIL: ```python\ndef odd_Num_Sum(n):\n    j = 0\n    sm = 0\n    for i in range(1, n + 1):\n        j = 2 * i - 1\n        sm = sm + j * j * j * j\n    return sm\n```",
+      "action": "propose_fix",
+      "tests": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "newly_broken": 0,
+        "timed_out": false,
+        "blocked": false
+      },
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.2,
+        "localization": 0.08,
+        "fix_quality": 0.35,
+        "semantic_similarity": 0.1,
+        "efficiency_potential": 0.1,
+        "penalties": 0.0,
+        "total": 0.93
+      },
+      "solved": true,
+      "extraction_ok": true
+    },
+    {
+      "id": "v2_t3_014",
+      "tier": 3,
+      "bug_type": "off_by_one_range",
+      "function_name": "sum_even_and_even_index",
+      "completion": "OBSERVATION: The function `sum_even_and_even_index` does not correctly iterate over even indices and check if the elements at those indices are even.\nHYPOTHESIS: The loop condition `for i in range(0, n + 1, 2)` is incorrect because it includes the index `n`, which is out of bounds for the array. The correct condition should be `for i in range(0, n, 2)`.\nCONFIDENCE: high\nACTION: propose_fix\nDETAIL: ```python\ndef sum_even_and_even_index(arr, n):\n    i = 0\n    sum = 0\n    for i in range(0, n, 2):\n        if arr[i] % 2 == 0:\n            sum += arr[i]\n    return sum\n```",
+      "action": "propose_fix",
+      "tests": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "newly_broken": 0,
+        "timed_out": false,
+        "blocked": false
+      },
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.2,
+        "localization": 0.08,
+        "fix_quality": 0.35,
+        "semantic_similarity": 0.1,
+        "efficiency_potential": 0.1,
+        "penalties": 0.0,
+        "total": 0.93
+      },
+      "solved": true,
+      "extraction_ok": true
+    },
+    {
+      "id": "v2_t3_017",
+      "tier": 3,
+      "bug_type": "off_by_one_range",
+      "function_name": "min_sum_path",
+      "completion": "OBSERVATION: The function `min_sum_path` is supposed to find the minimum sum path from the bottom-left to the top-right corner of a triangle. However, it fails with the given test case.\nHYPOTHESIS: The function is not correctly updating the `memo` array. It seems to be using the wrong indices when calculating the minimum sum path.\nCONFIDENCE: high\nACTION: propose_fix\nDETAIL: ```python\ndef min_sum_path(A):\n    memo = [None] * len(A)\n    n = len(A) - 1\n    for i in range(len(A[n])):\n        memo[i] = A[n][i]\n    for i in range(len(A) - 2, -1, -1):\n        for j in range(len(A[i])):\n            memo[j] = A[i][j] + min(memo[j], memo[j + 1])\n    return memo[0]\n```",
+      "action": "propose_fix",
+      "tests": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "newly_broken": 0,
+        "timed_out": false,
+        "blocked": false
+      },
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.2,
+        "localization": 0.08,
+        "fix_quality": 0.35,
+        "semantic_similarity": 0.1,
+        "efficiency_potential": 0.1,
+        "penalties": 0.0,
+        "total": 0.93
+      },
+      "solved": true,
+      "extraction_ok": true
+    },
+    {
+      "id": "v2_t3_019",
+      "tier": 3,
+      "bug_type": "off_by_one_range",
+      "function_name": "magic_square_test",
+      "completion": "OBSERVATION: The function `magic_square_test` is supposed to return `True` for a valid magic square, but it returns `False` for the given test case.\nHYPOTHESIS: The function is not correctly calculating the sums of rows, columns, and diagonals. It might be missing some calculations or using incorrect logic.\nCONFIDENCE: high\nACTION: propose_fix\nDETAIL: ```python\ndef magic_square_test(my_matrix):\n    iSize = len(my_matrix[0])\n    sum_list = []\n    \n    # Calculate sums of rows\n    for lines in my_matrix:\n        sum_list.append(sum(lines))\n    \n    # Calculate sums of columns\n    for col in range(iSize):\n        sum_list.append(sum((row[col] for row in my_matrix)))\n    \n    # Calculate sum of the main diagonal\n    result1 = sum(my_matrix[i][i] for i in range(iSize))\n    sum_list.append(result1)\n    \n    # Calculate sum of the secondary diagonal\n    result2 = sum(my_matrix[i][iSize - 1 - i] for i in range(iSize))\n    sum_list.append(result2)\n    \n    # Check if all sums are equal\n    if len(set(sum_list)) > 1:\n        return False\n    return True\n```",
+      "action": "propose_fix",
+      "tests": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "newly_broken": 0,
+        "timed_out": false,
+        "blocked": false
+      },
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.15,
+        "localization": 0.08,
+        "fix_quality": 0.35,
+        "semantic_similarity": 0.0,
+        "efficiency_potential": 0.1,
+        "penalties": 0.0,
+        "total": 0.78
+      },
+      "solved": true,
+      "extraction_ok": true
+    },
+    {
+      "id": "v2_t3_020",
+      "tier": 3,
+      "bug_type": "off_by_one_range",
+      "function_name": "find_Max_Num",
+      "completion": "OBSERVATION: The function `find_Max_Num` is supposed to return the largest number formed by concatenating the elements of the array in descending order. However, it currently returns 321 instead of 321.\nHYPOTHESIS: The loop condition `for i in range(1, n + -1)` is incorrect. It should be `for i in range(1, n)`. This change will ensure that the loop iterates over all elements of the array except the first one.\nCONFIDENCE: high\nACTION: propose_fix\nDETAIL: ```python\ndef find_Max_Num(arr, n):\n    arr.sort(reverse=True)\n    num = arr[0]\n    for i in range(1, n):\n        num = num * 10 + arr[i]\n    return num\n```",
+      "action": "propose_fix",
+      "tests": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "newly_broken": 0,
+        "timed_out": false,
+        "blocked": false
+      },
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.2,
+        "localization": 0.08,
+        "fix_quality": 0.35,
+        "semantic_similarity": 0.1,
+        "efficiency_potential": 0.1,
+        "penalties": 0.0,
+        "total": 0.93
+      },
+      "solved": true,
+      "extraction_ok": true
+    },
+    {
+      "id": "v2_t3_025",
+      "tier": 3,
+      "bug_type": "off_by_one_range",
+      "function_name": "heap_assending",
+      "completion": "OBSERVATION: The function `heap_assending` does not correctly return the sorted list of numbers. It seems to be popping elements from the heap and then appending them back to the list, which results in a reversed order.\n\nHYPOTHESIS: The function is incorrectly using `heappop` to pop elements from the heap and then appending them back to the list, which reverses the order of the elements. The correct approach is to use `heappop` to get the smallest element and append it to the result list until the heap is empty.\nCONFIDENCE: high\nACTION: propose_fix\nDETAIL: ```python\nimport heapq as hq\n\ndef heap_assending(nums):\n    hq.heapify(nums)\n    s_result = []\n    while nums:\n        s_result.append(hq.heappop(nums))\n    return s_result\n```",
+      "action": "propose_fix",
+      "tests": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "newly_broken": 0,
+        "timed_out": false,
+        "blocked": false
+      },
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.2,
+        "localization": 0.08,
+        "fix_quality": 0.35,
+        "semantic_similarity": 0.05,
+        "efficiency_potential": 0.1,
+        "penalties": 0.0,
+        "total": 0.88
+      },
+      "solved": true,
+      "extraction_ok": true
+    },
+    {
+      "id": "v2_t3_026",
+      "tier": 3,
+      "bug_type": "off_by_one_range",
+      "function_name": "shell_sort",
+      "completion": "OBSERVATION: The function `shell_sort` does not sort the list correctly. The test case fails because the output is not sorted as expected.\nHYPOTHESIS: The sorting logic is incorrect. The inner loop should compare elements with a gap and swap them if they are in the wrong order.\nCONFIDENCE: high\nACTION: propose_fix\nDETAIL: ```python\ndef shell_sort(my_list):\n    gap = len(my_list) // 2\n    while gap > 0:\n        for i in range(gap, len(my_list)):\n            current_item = my_list[i]\n            j = i\n            while j >= gap and my_list[j - gap] > current_item:\n                my_list[j] = my_list[j - gap]\n                j -= gap\n            my_list[j] = current_item\n        gap //= 2\n    return my_list\n```",
+      "action": "propose_fix",
+      "tests": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "newly_broken": 0,
+        "timed_out": false,
+        "blocked": false
+      },
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.1,
+        "localization": 0.08,
+        "fix_quality": 0.35,
+        "semantic_similarity": 0.1,
+        "efficiency_potential": 0.1,
+        "penalties": 0.0,
+        "total": 0.83
+      },
+      "solved": true,
+      "extraction_ok": true
+    },
+    {
+      "id": "v2_t3_027",
+      "tier": 3,
+      "bug_type": "off_by_one_range",
+      "function_name": "min_Swaps",
+      "completion": "OBSERVATION: The function `min_Swaps` returns 1 when called with the inputs '0011' and '1111', but the expected output is 2.\nHYPOTHESIS: The function is not correctly counting the number of swaps needed to make the two strings identical. It seems to be counting the number of '01' pairs and '10' pairs, but it should be counting the number of '01' and '10' transitions.\nCONFIDENCE: high\nACTION: propose_fix\nDETAIL: ```python\ndef min_Swaps(s1, s2):\n    c0 = 0\n    c1 = 0\n    for i in range(len(s1)):\n        if s1[i] != s2[i]:\n            if s1[i] == '0':\n                c0 += 1\n            else:\n                c1 += 1\n    result = c0 // 2 + c1 // 2\n    if c0 % 2 == 0 and c1 % 2 == 0:\n        return result\n    elif (c0 + c1) % 2 == 0:\n        return result + 2\n    else:\n        return -1\n```",
+      "action": "propose_fix",
+      "tests": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "newly_broken": 0,
+        "timed_out": false,
+        "blocked": false
+      },
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.2,
+        "localization": 0.08,
+        "fix_quality": 0.35,
+        "semantic_similarity": 0.05,
+        "efficiency_potential": 0.1,
+        "penalties": 0.0,
+        "total": 0.88
+      },
+      "solved": true,
+      "extraction_ok": true
+    },
+    {
+      "id": "v2_t3_030",
+      "tier": 3,
+      "bug_type": "off_by_one_range",
+      "function_name": "find_Odd_Pair",
+      "completion": "OBSERVATION: The function `find_Odd_Pair` is supposed to count the number of pairs `(A[i], A[j])` such that their XOR result is odd. However, the current implementation does not correctly count these pairs.\n\nHYPOTHESIS: The function is incorrectly counting pairs where the XOR result is even. The XOR operation between two numbers is odd if and only if one of the numbers is odd and the other is even. Therefore, the condition `(A[i] ^ A[j]) % 2 != 0` should be used to count pairs where the XOR result is odd.\n\nCONFIDENCE: high\n\nACTION: propose_fix\n\nDETAIL: ```python\ndef find_Odd_Pair(A, N):\n    oddPair = 0\n    for i in range(0, N):\n        for j in range(i + 1, N + 1):\n            if (A[i] ^ A[j]) % 2 != 0:\n                oddPair += 1\n    return oddPair\n```",
+      "action": "propose_fix",
+      "tests": {
+        "passed": 0,
+        "failed": 3,
+        "total": 3,
+        "newly_broken": 0,
+        "timed_out": false,
+        "blocked": false
+      },
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.15,
+        "localization": 0.08,
+        "fix_quality": 0.0,
+        "semantic_similarity": 0.1,
+        "efficiency_potential": 0.1,
+        "penalties": 0.0,
+        "total": 0.53
+      },
+      "solved": false,
+      "extraction_ok": true
+    },
+    {
+      "id": "v2_t3_031",
+      "tier": 3,
+      "bug_type": "off_by_one_range",
+      "function_name": "lower_ctr",
+      "completion": "OBSERVATION: The function `lower_ctr` does not correctly count lowercase letters in the string. The loop runs from `len(str) + -1`, which is incorrect.\nHYPOTHESIS: The loop should run from `0` to `len(str) - 1` to iterate over all characters in the string.\nCONFIDENCE: high\nACTION: propose_fix\nDETAIL: ```python\ndef lower_ctr(str):\n    lower_ctr = 0\n    for i in range(len(str)):\n        if str[i] >= 'a' and str[i] <= 'z':\n            lower_ctr += 1\n    return lower_ctr\n```",
+      "action": "propose_fix",
+      "tests": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "newly_broken": 0,
+        "timed_out": false,
+        "blocked": false
+      },
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.2,
+        "localization": 0.08,
+        "fix_quality": 0.35,
+        "semantic_similarity": 0.1,
+        "efficiency_potential": 0.1,
+        "penalties": 0.0,
+        "total": 0.93
+      },
+      "solved": true,
+      "extraction_ok": true
+    },
+    {
+      "id": "v2_t3_033",
+      "tier": 3,
+      "bug_type": "off_by_one_range",
+      "function_name": "find_longest_conseq_subseq",
+      "completion": "OBSERVATION: The function `find_longest_conseq_subseq` does not correctly handle consecutive duplicates in the input array. It incorrectly increments the count when it encounters a duplicate, leading to incorrect results.\nHYPOTHESIS: The function is incrementing the count unnecessarily when it encounters consecutive duplicates. It should only increment the count when it encounters a new number that is one more than the previous number.\nCONFIDENCE: high\nACTION: propose_fix\nDETAIL: ```python\ndef find_longest_conseq_subseq(arr, n):\n    ans = 0\n    count = 0\n    arr.sort()\n    v = []\n    v.append(arr[0])\n    for i in range(1, n):\n        if arr[i] != arr[i - 1]:\n            v.append(arr[i])\n    for i in range(len(v)):\n        if i > 0 and v[i] == v[i - 1] + 1:\n            count += 1\n        else:\n            count = 1\n        ans = max(ans, count)\n    return ans\n```",
+      "action": "propose_fix",
+      "tests": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "newly_broken": 0,
+        "timed_out": false,
+        "blocked": false
+      },
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.15,
+        "localization": 0.08,
+        "fix_quality": 0.35,
+        "semantic_similarity": 0.1,
+        "efficiency_potential": 0.1,
+        "penalties": 0.0,
+        "total": 0.88
+      },
+      "solved": true,
+      "extraction_ok": true
+    },
+    {
+      "id": "v2_t3_034",
+      "tier": 3,
+      "bug_type": "off_by_one_range",
+      "function_name": "find_demlo",
+      "completion": "OBSERVATION: The function `find_demlo` does not correctly generate the Demlo number for the input string '111111'.\nHYPOTHESIS: The function is missing a step to append the first half of the digits in reverse order after the initial sequence of digits.\nCONFIDENCE: high\nACTION: propose_fix\nDETAIL: ```python\ndef find_demlo(s):\n    l = len(s)\n    res = ''\n    for i in range(1, l + 1):\n        res = res + str(i)\n    for i in range(l - 1, 0, -1):\n        res = res + str(i)\n    return res\n```",
+      "action": "propose_fix",
+      "tests": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "newly_broken": 0,
+        "timed_out": false,
+        "blocked": false
+      },
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.15,
+        "localization": 0.08,
+        "fix_quality": 0.35,
+        "semantic_similarity": 0.1,
+        "efficiency_potential": 0.1,
+        "penalties": 0.0,
+        "total": 0.88
+      },
+      "solved": true,
+      "extraction_ok": true
+    },
+    {
+      "id": "v2_t3_035",
+      "tier": 3,
+      "bug_type": "off_by_one_range",
+      "function_name": "no_of_subsequences",
+      "completion": "OBSERVATION: The function `no_of_subsequences` is intended to count the number of subsequences of the array `arr` that sum up to `k`. However, the current implementation has several issues.\n\nHYPOTHESIS: The main issue is with the initialization of the `dp` table and the logic used to fill it. The loop indices and conditions need to be adjusted to correctly compute the number of subsequences.\n\nCONFIDENCE: high\n\nACTION: propose_fix\n\nDETAIL: ```python\ndef no_of_subsequences(arr, k):\n    n = len(arr)\n    dp = [[0 for _ in range(k + 1)] for _ in range(n + 1)]\n    \n    # Initialize the base case: there's one way to make a sum of 0 with any number of elements\n    for i in range(n + 1):\n        dp[i][0] = 1\n    \n    for i in range(1, n + 1):\n        for j in range(1, k + 1):\n            dp[i][j] = dp[i - 1][j]\n            if arr[i - 1] <= j and arr[i - 1] > 0:\n                dp[i][j] += dp[i - 1][j - arr[i - 1]]\n    \n    return dp[n][k]\n```",
+      "action": "propose_fix",
+      "tests": {
+        "passed": 0,
+        "failed": 3,
+        "total": 3,
+        "newly_broken": 0,
+        "timed_out": false,
+        "blocked": false
+      },
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.1,
+        "localization": 0.08,
+        "fix_quality": 0.0,
+        "semantic_similarity": 0.02,
+        "efficiency_potential": 0.1,
+        "penalties": 0.0,
+        "total": 0.4
+      },
+      "solved": false,
+      "extraction_ok": true
+    },
+    {
+      "id": "v2_t3_036",
+      "tier": 3,
+      "bug_type": "off_by_one_slice",
+      "function_name": "split_Arr",
+      "completion": "OBSERVATION: The function `split_Arr` does not correctly split the array `a` at index `k`. The slicing operation `a[:k + -1]` results in an empty list because `k + -1` is equivalent to `k - 1`, which is out of bounds for the array.\n\nHYPOTHESIS: The slicing operation is incorrectly using the negative index, which is causing the function to return an empty list. The correct slicing should be `a[:k]` to get the elements before index `k`.\nCONFIDENCE: high\nACTION: propose_fix\nDETAIL: ```python\ndef split_Arr(a, n, k):\n    b = a[:k]\n    return a[k:] + b[:]\n```",
+      "action": "propose_fix",
+      "tests": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "newly_broken": 0,
+        "timed_out": false,
+        "blocked": false
+      },
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.2,
+        "localization": 0.08,
+        "fix_quality": 0.35,
+        "semantic_similarity": 0.1,
+        "efficiency_potential": 0.1,
+        "penalties": 0.0,
+        "total": 0.93
+      },
+      "solved": true,
+      "extraction_ok": true
+    },
+    {
+      "id": "v2_t3_037",
+      "tier": 3,
+      "bug_type": "off_by_one_range",
+      "function_name": "count_pairs",
+      "completion": "OBSERVATION: The function `count_pairs` does not correctly count pairs where the absolute difference between elements is equal to `k`.\nHYPOTHESIS: The function checks for equality rather than absolute difference, leading to incorrect results.\nCONFIDENCE: high\nACTION: propose_fix\nDETAIL: ```python\ndef count_pairs(arr, n, k):\n    count = 0\n    for i in range(0, n):\n        for j in range(i + 1, n + 1):\n            if abs(arr[i] - arr[j]) == k:\n                count += 1\n    return count\n```",
+      "action": "propose_fix",
+      "tests": {
+        "passed": 0,
+        "failed": 3,
+        "total": 3,
+        "newly_broken": 0,
+        "timed_out": false,
+        "blocked": false
+      },
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.0,
+        "localization": 0.08,
+        "fix_quality": 0.0,
+        "semantic_similarity": 0.02,
+        "efficiency_potential": 0.1,
+        "penalties": 0.0,
+        "total": 0.3
+      },
+      "solved": false,
+      "extraction_ok": true
+    },
+    {
+      "id": "v2_t3_039",
+      "tier": 3,
+      "bug_type": "off_by_one_range",
+      "function_name": "count_ways",
+      "completion": "OBSERVATION: The function `count_ways` returns 2 for `n=2`, but it should return 3.\nHYPOTHESIS: The loop condition `for i in range(2, n + 1 + -1)` is incorrect, causing the loop to not execute as intended.\nCONFIDENCE: high\nACTION: propose_fix\nDETAIL: ```python\ndef count_ways(n):\n    A = [0] * (n + 1)\n    B = [0] * (n + 1)\n    A[0] = 1\n    A[1] = 0\n    B[0] = 0\n    B[1] = 1\n    for i in range(2, n + 1):\n        A[i] = A[i - 2] + 2 * B[i - 1]\n        B[i] = A[i - 1] + B[i - 2]\n    return A[n]\n```",
+      "action": "propose_fix",
+      "tests": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "newly_broken": 0,
+        "timed_out": false,
+        "blocked": false
+      },
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.2,
+        "localization": 0.08,
+        "fix_quality": 0.35,
+        "semantic_similarity": 0.1,
+        "efficiency_potential": 0.1,
+        "penalties": 0.0,
+        "total": 0.93
+      },
+      "solved": true,
+      "extraction_ok": true
+    },
+    {
+      "id": "v2_t3_044",
+      "tier": 3,
+      "bug_type": "off_by_one_range",
+      "function_name": "max_Prime_Factors",
+      "completion": "OBSERVATION: The function `max_Prime_Factors` returns 3 for `n = 15`, but the expected result is 5.\nHYPOTHESIS: The function incorrectly identifies 3 as the largest prime factor of 15. The loop should continue checking for factors beyond 3.\nCONFIDENCE: high\nACTION: propose_fix\nDETAIL: ```python\nimport math\n\ndef max_Prime_Factors(n):\n    maxPrime = -1\n    while n % 2 == 0:\n        maxPrime = 2\n        n >>= 1\n    for i in range(3, int(math.sqrt(n)) + 1, 2):\n        while n % i == 0:\n            maxPrime = i\n            n = n // i\n    if n > 2:\n        maxPrime = n\n    return int(maxPrime)\n```",
+      "action": "propose_fix",
+      "tests": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "newly_broken": 0,
+        "timed_out": false,
+        "blocked": false
+      },
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.2,
+        "localization": 0.08,
+        "fix_quality": 0.35,
+        "semantic_similarity": 0.1,
+        "efficiency_potential": 0.1,
+        "penalties": 0.0,
+        "total": 0.93
+      },
+      "solved": true,
+      "extraction_ok": true
+    },
+    {
+      "id": "v2_t3_047",
+      "tier": 3,
+      "bug_type": "removed_base_case",
+      "function_name": "get_perrin",
+      "completion": "OBSERVATION: The function `get_perrin` does not correctly compute the Perrin sequence values. It seems to be missing the base case for `n == 3`.\nHYPOTHESIS: The function is missing the base case for `n == 3`, which should return 3. This is necessary to correctly compute the sequence.\nCONFIDENCE: high\nACTION: propose_fix\nDETAIL: ```python\ndef get_perrin(n):\n    if n == 1:\n        return 0\n    if n == 2:\n        return 2\n    if n == 3:\n        return 3\n    return get_perrin(n - 2) + get_perrin(n - 3)\n```",
+      "action": "propose_fix",
+      "tests": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "newly_broken": 0,
+        "timed_out": false,
+        "blocked": false
+      },
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.2,
+        "localization": 0.08,
+        "fix_quality": 0.35,
+        "semantic_similarity": 0.05,
+        "efficiency_potential": 0.1,
+        "penalties": 0.0,
+        "total": 0.88
+      },
+      "solved": true,
+      "extraction_ok": true
+    },
+    {
+      "id": "v2_t3_048",
+      "tier": 3,
+      "bug_type": "off_by_one_range",
+      "function_name": "count_Unset_Bits",
+      "completion": "OBSERVATION: The function `count_Unset_Bits` returns 1 for `n=2`, but the expected result is 0.\nHYPOTHESIS: The loop condition `for i in range(1, n + 1 + -1)` is incorrect, causing the loop to run indefinitely or incorrectly.\nCONFIDENCE: high\nACTION: propose_fix\nDETAIL: ```python\ndef count_Unset_Bits(n):\n    cnt = 0\n    for i in range(1, n + 1):\n        temp = i\n        while temp:\n            if temp % 2 == 0:\n                cnt += 1\n            temp = temp // 2\n    return cnt\n```",
+      "action": "propose_fix",
+      "tests": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "newly_broken": 0,
+        "timed_out": false,
+        "blocked": false
+      },
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.2,
+        "localization": 0.08,
+        "fix_quality": 0.35,
+        "semantic_similarity": 0.1,
+        "efficiency_potential": 0.1,
+        "penalties": 0.0,
+        "total": 0.93
+      },
+      "solved": true,
+      "extraction_ok": true
+    },
+    {
+      "id": "v2_t3_049",
+      "tier": 3,
+      "bug_type": "removed_base_case",
+      "function_name": "get_noOfways",
+      "completion": "OBSERVATION: The function `get_noOfways` is not correctly calculating the number of ways to climb a staircase with `n` steps. It seems to be using the Fibonacci sequence incorrectly.\nHYPOTHESIS: The function is returning the sum of the number of ways to climb `n-1` steps and `n-2` steps, which is incorrect for calculating the number of ways to climb a staircase. The correct approach is to use the Fibonacci sequence where each step can either be taken as a single step or as two steps.\nCONFIDENCE: high\nACTION: propose_fix\nDETAIL: ```python\ndef get_noOfways(n):\n    if n == 1:\n        return 1\n    elif n == 2:\n        return 2\n    else:\n        return get_noOfways(n - 1) + get_noOfways(n - 2)\n```",
+      "action": "propose_fix",
+      "tests": {
+        "passed": 0,
+        "failed": 3,
+        "total": 3,
+        "newly_broken": 0,
+        "timed_out": false,
+        "blocked": false
+      },
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.15,
+        "localization": 0.15,
+        "fix_quality": 0.0,
+        "semantic_similarity": 0.05,
+        "efficiency_potential": 0.1,
+        "penalties": 0.0,
+        "total": 0.55
+      },
+      "solved": false,
+      "extraction_ok": true
+    },
+    {
+      "id": "v2_t3_052",
+      "tier": 3,
+      "bug_type": "off_by_one_slice",
+      "function_name": "merge_sort",
+      "completion": "OBSERVATION: The `merge` function does not correctly handle the case when one list is empty and the other is not. Specifically, when `a` is empty and `b` is not, the loop condition `while len(a) != 0 and len(b) != 0` is never met, and the function does not append any elements to `c`.\n\nHYPOTHESIS: The `merge` function should handle the case where one list is empty by appending the remaining elements of the other list to `c`. This can be achieved by checking if either `a` or `b` is empty before entering the loop.\n\nCONFIDENCE: high\n\nACTION: propose_fix\nDETAIL: ```python\ndef merge(a, b):\n    c = []\n    while len(a) != 0 and len(b) != 0:\n        if a[0] < b[0]:\n            c.append(a[0])\n            a.remove(a[0])\n        else:\n            c.append(b[0])\n            b.remove(b[0])\n    if len(a) == 0:\n        c += b\n    else:\n        c += a\n    return c\n\ndef merge_sort(x):\n    if len(x) == 0 or len(x) == 1:\n        return x\n    else:\n        middle = len(x) // 2\n        a = merge_sort(x[:middle + 1])\n        b = merge_sort(x[middle:])\n",
+      "action": "propose_fix",
+      "tests": {
+        "passed": 0,
+        "failed": 3,
+        "total": 3,
+        "newly_broken": 0,
+        "timed_out": false,
+        "blocked": false
+      },
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.1,
+        "localization": 0.08,
+        "fix_quality": 0.0,
+        "semantic_similarity": 0.1,
+        "efficiency_potential": 0.1,
+        "penalties": 0.0,
+        "total": 0.48
+      },
+      "solved": false,
+      "extraction_ok": true
+    },
+    {
+      "id": "v2_t3_053",
+      "tier": 3,
+      "bug_type": "off_by_one_range",
+      "function_name": "swap_count",
+      "completion": "OBSERVATION: The function `swap_count` does not correctly calculate the number of swaps needed to balance the brackets in the string. The logic for updating `imbalance` and `swap` is incorrect.\nHYPOTHESIS: The `imbalance` variable is not being updated correctly, leading to incorrect swap counts. The `swap` variable is also not being incremented properly when `imbalance` becomes positive.\nCONFIDENCE: high\nACTION: propose_fix\nDETAIL: ```python\ndef swap_count(s):\n    chars = s\n    count_left = 0\n    count_right = 0\n    swap = 0\n    imbalance = 0\n    for i in range(len(chars)):\n        if chars[i] == '[':\n            count_left += 1\n            if imbalance > 0:\n                swap += imbalance\n                imbalance -= 1\n        elif chars[i] == ']':\n            count_right += 1\n            imbalance = count_right - count_left\n    return swap\n```",
+      "action": "propose_fix",
+      "tests": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "newly_broken": 0,
+        "timed_out": false,
+        "blocked": false
+      },
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.2,
+        "localization": 0.08,
+        "fix_quality": 0.35,
+        "semantic_similarity": 0.1,
+        "efficiency_potential": 0.1,
+        "penalties": 0.0,
+        "total": 0.93
+      },
+      "solved": true,
+      "extraction_ok": true
+    },
+    {
+      "id": "v2_t3_054",
+      "tier": 3,
+      "bug_type": "removed_base_case",
+      "function_name": "catalan_number",
+      "completion": "OBSERVATION: The function `catalan_number` is not defined recursively correctly. It attempts to call itself with the same argument, which leads to infinite recursion.\nHYPOTHESIS: The function is incorrectly implemented as a direct recursive call without considering the base case or the recursive formula for Catalan numbers.\nCONFIDENCE: high\nACTION: propose_fix\nDETAIL: ```python\ndef catalan_number(num):\n    if num == 0:\n        return 1\n    res_num = 0\n    for i in range(num):\n        res_num += catalan_number(i) * catalan_number(num - i - 1)\n    return res_num\n```",
+      "action": "propose_fix",
+      "tests": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "newly_broken": 0,
+        "timed_out": false,
+        "blocked": false
+      },
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.15,
+        "localization": 0.08,
+        "fix_quality": 0.35,
+        "semantic_similarity": 0.1,
+        "efficiency_potential": 0.1,
+        "penalties": 0.0,
+        "total": 0.88
+      },
+      "solved": true,
+      "extraction_ok": true
+    },
+    {
+      "id": "v2_t3_056",
+      "tier": 3,
+      "bug_type": "off_by_one_range",
+      "function_name": "get_lcm",
+      "completion": "OBSERVATION: The `get_lcm` function does not correctly compute the least common multiple (LCM) of a list of numbers. It uses the `find_lcm` function to compute the LCM of pairs of numbers, but it does not handle the case where the list has more than two numbers.\n\nHYPOTHESIS: The `get_lcm` function is missing a loop to iterate over all pairs of numbers in the list and compute their LCM. The current implementation only computes the LCM of the first two numbers and then stops.\nCONFIDENCE: high\nACTION: propose_fix\nDETAIL: ```python\ndef find_lcm(num1, num2):\n    if num1 > num2:\n        num = num1\n        den = num2\n    else:\n        num = num2\n        den = num1\n    rem = num % den\n    while rem != 0:\n        num = den\n        den = rem\n        rem = num % den\n    gcd = den\n    lcm = int(int(num1 * num2) / int(gcd))\n    return lcm\n\ndef get_lcm(l):\n    num1 = l[0]\n    num2 = l[1]\n    lcm = find_lcm(num1, num2)\n    for i in range(2, len(l)):\n        lcm = find_lcm(lcm, l[i])\n    return lcm\n```",
+      "action": "propose_fix",
+      "tests": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "newly_broken": 0,
+        "timed_out": false,
+        "blocked": false
+      },
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.2,
+        "localization": 0.08,
+        "fix_quality": 0.35,
+        "semantic_similarity": 0.1,
+        "efficiency_potential": 0.1,
+        "penalties": 0.0,
+        "total": 0.93
+      },
+      "solved": true,
+      "extraction_ok": true
+    },
+    {
+      "id": "v2_t3_057",
+      "tier": 3,
+      "bug_type": "off_by_one_range",
+      "function_name": "re_arrange",
+      "completion": "OBSERVATION: The function `re_arrange` does not correctly rotate the array as intended. The test case fails because the elements are not being rotated as expected.\n\nHYPOTHESIS: The `right_rotate` function is not correctly implemented. It seems to be swapping elements incorrectly, leading to incorrect rotations.\n\nCONFIDENCE: high\n\nACTION: propose_fix\n\nDETAIL: ```python\ndef right_rotate(arr, n, out_of_place, cur):\n    temp = arr[cur]\n    for i in range(cur, out_of_place, -1):\n        arr[i] = arr[i - 1]\n    arr[out_of_place] = temp\n    return arr\n\ndef re_arrange(arr, n):\n    out_of_place = -1\n    for index in range(n + -1):\n        if out_of_place >= 0:\n            if arr[index] >= 0 and arr[out_of_place] < 0 or (arr[index] < 0 and arr[out_of_place] >= 0):\n                arr = right_rotate(arr, n, out_of_place, index)\n                if index - out_of_place > 2:\n                    out_of_place += 2\n                else:\n                    out_of_place = -1\n        if out_of_place == -1:\n            if arr[index] >= 0 and index % 2 == 0 or (arr[index] < 0 and index % 2 == 1):\n                out_of_place = index",
+      "action": "propose_fix",
+      "tests": {
+        "passed": 0,
+        "failed": 3,
+        "total": 3,
+        "newly_broken": 0,
+        "timed_out": false,
+        "blocked": false
+      },
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.05,
+        "localization": 0.08,
+        "fix_quality": 0.0,
+        "semantic_similarity": 0.02,
+        "efficiency_potential": 0.1,
+        "penalties": -0.2,
+        "total": 0.15
+      },
+      "solved": false,
+      "extraction_ok": true
+    },
+    {
+      "id": "v2_t3_060",
+      "tier": 3,
+      "bug_type": "off_by_one_range",
+      "function_name": "find_first_duplicate",
+      "completion": "OBSERVATION: The function `find_first_duplicate` does not handle the case where the list is empty. The loop runs one extra time when `i` equals `len(nums)`, which results in an index out of range error.\nHYPOTHESIS: The loop should stop before reaching `len(nums) + 1` to avoid accessing an invalid index.\nCONFIDENCE: high\nACTION: propose_fix\nDETAIL: ```python\ndef find_first_duplicate(nums):\n    num_set = set()\n    no_duplicate = -1\n    for i in range(len(nums)):\n        if nums[i] in num_set:\n            return nums[i]\n        else:\n            num_set.add(nums[i])\n    return no_duplicate\n```",
+      "action": "propose_fix",
+      "tests": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "newly_broken": 0,
+        "timed_out": false,
+        "blocked": false
+      },
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.15,
+        "localization": 0.08,
+        "fix_quality": 0.35,
+        "semantic_similarity": 0.1,
+        "efficiency_potential": 0.1,
+        "penalties": 0.0,
+        "total": 0.88
+      },
+      "solved": true,
+      "extraction_ok": true
+    }
+  ]
+}
