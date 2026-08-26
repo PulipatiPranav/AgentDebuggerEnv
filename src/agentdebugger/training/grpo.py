@@ -69,9 +69,15 @@ def _completion_length_for(profile: HardwareProfile, format: PromptFormat) -> in
     sentence before the fix even started, with correct reasoning throughout —
     a token-budget problem, not a parsing or reasoning-quality problem. Give
     free-form ~1.8x the room so it has a real chance to finish.
+
+    The floor (550) guards against small-VRAM profiles where the multiplier
+    alone isn't enough: on a 4090 (192 * 1.8 = 345), B1 zero-shot completions
+    ran 250-300+ tokens of prose before any code appeared, so 345 is still
+    too tight. 550 is calibrated against the eval observation that successful
+    free-form completions need ~400-600 tokens to complete reasoning + fix.
     """
     if format == "free_form":
-        return int(profile.max_completion_length * 1.8)
+        return max(int(profile.max_completion_length * 1.8), 550)
     return profile.max_completion_length
 
 @dataclass(frozen=True)

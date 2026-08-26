@@ -114,7 +114,10 @@ def _evaluate_curriculum(args: argparse.Namespace) -> int:
     """Score a local model on the tiered bug dataset."""
     from agentdebugger.evaluation import evaluate_curriculum, load_generator
 
-    generate, name = load_generator(args.base_model, args.adapter)
+    generate, name = load_generator(
+        args.base_model, args.adapter,
+        max_new_tokens=args.max_new_tokens, format=args.format,
+    )
 
     def progress(done: int, total: int, bug: Any) -> None:
         print(f"\r  tier {bug.tier}: {done}/{total}", end="", flush=True)
@@ -279,6 +282,10 @@ def _build_parser() -> argparse.ArgumentParser:
         choices=("structured", "free_form"),
         default="structured",
         help="response format the prompt asks for and the parser expects (H1's independent variable)",
+    )
+    curriculum.add_argument(
+        "--max-new-tokens", type=int, default=None,
+        help="generation budget; defaults to a format-aware value (300 structured / 700 free_form) if unset",
     )
     curriculum.add_argument("--output", help="write the report to this JSON file")
     curriculum.set_defaults(handler=_evaluate_curriculum)

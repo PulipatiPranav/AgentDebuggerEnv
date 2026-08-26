@@ -144,6 +144,8 @@ def evaluate_curriculum(
                     "reward": outcome.reward.as_dict(),
                     "solved": outcome.solved,
                     "extraction_ok": outcome.extraction_ok,
+                    "truncated": getattr(generate, "_last_truncated", None),
+                    "token_count": getattr(generate, "_last_token_count", None),
                 }
             )
             if on_bug is not None:
@@ -166,13 +168,22 @@ def evaluate_curriculum(
 def load_generator(
     base_model: str,
     adapter: str | None = None,
-    max_new_tokens: int = 300,
+    max_new_tokens: int | None = None,
+    format: str = "structured",
 ) -> tuple[Generate, str]:
     """Load a causal LM (optionally with a LoRA adapter) and return a greedy generator.
 
     Greedy decoding, not sampling: an evaluation that changes its answer between
     runs cannot be compared against anything.
+
+    ``max_new_tokens`` defaults to a format-aware budget when not given: 300 for
+    structured (compact labeled fields), 700 for free_form (unstructured prose
+    reasoning runs long before ever reaching the fix — see B1's 86.7% extraction
+    failure, root-caused to truncation before any code was emitted, not a parsing
+    or reasoning-quality problem).
     """
+    if max_new_tokens is None:
+        max_new_tokens = 700 if format == "free_form" else 300
     try:
         import torch
         from transformers import AutoModelForCausalLM, AutoTokenizer
@@ -197,6 +208,8 @@ def load_generator(
     model = model.to(device)
     model.eval()
 
+    eos_token_id = tokenizer.eos_token_id
+
     def generate(prompt: list[dict[str, str]] | str) -> str:
         if isinstance(prompt, str):
             prompt_str = prompt
@@ -208,6 +221,20 @@ def load_generator(
         with torch.no_grad():
             output = model.generate(**inputs, max_new_tokens=max_new_tokens, do_sample=False)
         generated = output[0][inputs["input_ids"].shape[1] :]
-        return tokenizer.decode(generated, skip_special_tokens=True)
+        # Detect whether generation was cut off by the token budget rather than
+        # stopping naturally at EOS. This makes truncation visible in eval
+        # records instead of hiding it inside the extraction-failure rate.
+        was_truncated = (
+            len(generated) >= max_new_tokens
+            and (len(generated) == 0 or int(generated[-1]) != eos_token_id)
+        )
+        text = tokenizer.decode(generated, skip_special_tokens=True)
+        # Attach truncation flag as an attribute so callers can log it.
+        generate._last_truncated = was_truncated  # type: ignore[attr-defined]
+        generate._last_token_count = len(generated)  # type: ignore[attr-defined]
+        return text
+
+    generate._last_truncated = False  # type: ignore[attr-defined]
+    generate._last_token_count = 0  # type: ignore[attr-defined]
 
     return generate, adapter or base_model

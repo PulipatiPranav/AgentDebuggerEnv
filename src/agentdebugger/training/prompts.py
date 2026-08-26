@@ -65,6 +65,8 @@ function and the error it produces. Think it through like an experienced enginee
 what you observe in the code and the error, reason step by step about why that failure \
 happens, then decide what to do.
 
+Keep your reasoning to 2-4 sentences of plain prose — no headers, no numbered lists.
+
 Here is a worked example of the expected style (not the bug you will see):
 
 The loop's comparison on line 4 uses `<` instead of `<=`, so the final index is never reached \
@@ -75,7 +77,14 @@ fix is to change the comparison operator.
 def example(numbers, target):
     left, right = 0, len(numbers) - 1
     while left <= right:
-        pass
+        mid = (left + right) // 2
+        if numbers[mid] == target:
+            return mid
+        elif numbers[mid] < target:
+            left = mid + 1
+        else:
+            right = mid - 1
+    return -1
 ```
 
 Write your reasoning first, then give the complete corrected function in one fenced Python \
