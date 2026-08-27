@@ -193,8 +193,8 @@ def load_generator(
             "pip install 'agentdebugger[train]'"
         ) from exc
 
-    device = "cuda" if torch.cuda.is_available() else "cpu"
-    dtype = torch.float16 if device == "cuda" else torch.float32
+    device = "cuda" if torch.cuda.is_available() else ("mps" if torch.backends.mps.is_available() else "cpu")
+    dtype = torch.float16 if device in ("cuda", "mps") else torch.float32
 
     tokenizer = AutoTokenizer.from_pretrained(base_model)
     tokenizer.pad_token = tokenizer.pad_token or tokenizer.eos_token
