@@ -1,0 +1,186 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<title>Review Pack — AgentDebuggerEnv</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400&display=swap">
+<style>
+@page { size: letter; margin: 0.85in 0.8in 0.9in; }
+html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+body { margin:0; background:#fff; color:#14181f;
+  font:400 10.4pt/1.47 "Source Serif 4", Georgia, "Times New Roman", serif;
+  text-rendering:optimizeLegibility; }
+h1 { font-size:16.5pt; line-height:1.22; font-weight:700; text-align:center;
+  margin:0 0 .7em; text-wrap:balance; letter-spacing:-.005em; }
+.authors { text-align:center; font-family:"IBM Plex Sans",system-ui,sans-serif;
+  font-size:11pt; font-weight:500; margin:0 0 .3em; }
+.authors strong { font-weight:600; }
+.repo { text-align:center; font-size:8.6pt; color:#5a6270; margin:0 0 1.1em; }
+.kw { font-size:9.2pt; color:#3c434f; }
+.rule { border-top:1.2px solid #14181f; margin:.4em 0 1.3em; }
+h2 { font-size:11.6pt; font-weight:700; margin:1.5em 0 .45em;
+  break-after:avoid; page-break-after:avoid; text-wrap:balance; }
+h3 { font-size:10.4pt; font-weight:600; margin:1.1em 0 .3em;
+  break-after:avoid; page-break-after:avoid; }
+p { margin:0 0 .62em; orphans:3; widows:3; text-align:justify; hyphens:auto; }
+ul,ol { margin:0 0 .7em; padding-left:1.25em; }
+li { margin-bottom:.28em; orphans:2; widows:2; }
+code { font:400 .85em "IBM Plex Mono", ui-monospace, monospace; }
+.url { font:400 .84em "IBM Plex Mono", ui-monospace, monospace; word-break:break-all; }
+.tablewrap { margin:.5em 0 1em; }
+.tablewrap.short { break-inside:avoid; page-break-inside:avoid; }
+thead { display:table-header-group; }
+table { border-collapse:collapse; width:100%;
+  font:400 8.5pt/1.34 "IBM Plex Sans", system-ui, sans-serif;
+  font-variant-numeric:tabular-nums; }
+th { font-weight:600; text-align:left; border-bottom:1.1px solid #14181f;
+  padding:.32em .5em .28em 0; }
+td { border-bottom:.5px solid #d8dbe0; padding:.3em .5em .27em 0; vertical-align:top; }
+tr { break-inside:avoid; page-break-inside:avoid; }
+figure { margin:1em 0 1.1em; break-inside:avoid; page-break-inside:avoid; }
+.figplate { border:.6px solid #d8dbe0; padding:.4em; background:#fff; }
+.figplate svg { width:100%; height:auto; display:block; }
+figcaption { font:400 8.6pt/1.42 "IBM Plex Sans", system-ui, sans-serif;
+  color:#3c434f; margin-top:.5em; text-align:left; }
+h2 + .tablewrap, h2 + p { break-before:avoid; }
+</style></head><body>
+<h1>Review pack — companion to <code>paper.md</code></h1>
+<p>Internal document. Everything here is derived from the repository and from statistics recomputed from <code>results/*.json</code>; nothing is estimated or assumed unless marked <strong>[A]</strong>.</p>
+<h2>1. Research contribution summary</h2>
+<p><strong>Core research question.</strong> Does decomposing an RL reward into hand-crafted components that pay for debugging <em>reasoning</em> (hypothesis quality, fault localization) improve held-out bug-fix rates over a terminal pass/fail-with-penalties reward, when everything else is held fixed?</p>
+<p><strong>Main contribution.</strong> A controlled, pre-registered negative result: at the 3B scale under GRPO, it does not. Three reward configurations (R0 seven-component dense, R1 terminal-only, R2 dense minus the two reasoning components) are statistically indistinguishable on 90 held-out bugs across three seeds each, with the point estimate favouring the <em>simplest</em> reward. The paired bootstrap bounds any dense-reward advantage at +2.6 points, versus a training effect of +9.7.</p>
+<p><strong>Secondary contributions.</strong></p>
+<ol><li>A leakage-controlled testbed: 180 execution-validated single-mutation Python bugs from MBPP, a committed immutable 90/90 tier-stratified split, a three-layer execution sandbox, and one scoring function shared verbatim by training and evaluation (asserted by test).</li><li>An evaluation-methodology cautionary result: a hard-coded 300-token generation budget manufactured an 85-point apparent format effect (free-form 1.1% → 45.6% after correction).</li><li>A demonstration that a synthetic dataset's difficulty labels can be wrong in a way that invalidates a curriculum premise: tier 1 ("off-by-one") is empirically the <em>hardest</em> tier for both the 3B base model and Llama-3.3-70B.</li></ol>
+<p><strong>Novelty — stated honestly.</strong> The novelty is <em>not</em> the environment, the reward, GRPO, or the task. It is the <strong>isolation</strong>: the reward decomposition is implemented as component ceilings on one scoring class, so R0/R1/R2 differ in nothing but a set of numbers — same model, data, optimizer, prompts, curriculum, step budget, seeds and evaluation path. Published work that compares dense against sparse rewards for code RL typically varies several factors at once. This is a clean marginal-value measurement of a design choice practitioners make routinely, plus a pre-registration that predicted the opposite of what happened.</p>
+<p><strong>Strongest evidence.</strong> Convergence of three independent analyses on the same conclusion: (i) no per-seed McNemar test survives Holm correction (the only two raw p&lt;0.05 both favour the <em>less</em> shaped arm); (ii) at the all-pairs level R1 and R2 tie exactly (28 vs 28 discordant of 270); (iii) the paired bootstrap CI on R0−R1 is [−8.5, +2.6], i.e. the dense reward's plausible advantage is smaller than the study's own training effect. All recomputed from committed per-bug records.</p>
+<p><strong>Biggest weakness.</strong> Statistical power. 90 paired bugs detects ~16-point effects; a real 5-point benefit of dense shaping would be invisible. The claim is therefore "not detected, with a +2.6-point upper bound under bug-resampling" — never "no effect."</p>
+<p><strong>Biggest reviewer risk.</strong> "Your group size is 2 — you disabled the mechanism you set out to test." With <code>num_generations=2</code>, the group-relative advantage is essentially a sign bit, which is exactly the regime where a dense reward's ability to <em>rank</em> completions within a group is least useful. This is a legitimate scope limit on the result and is stated in §6 and §8; it cannot be fixed without re-running the matrix at a larger group size (experiment P0-1).</p>
+<h2>2. Evidence audit</h2>
+<div class="tablewrap"><table><thead><tr><th>#</th><th>Paper claim</th><th>Evidence</th><th>Verified?</th><th>Experiment needed?</th></tr></thead><tbody>
+<tr><td>1</td><td>Held-out solve rates: B0 37.8%, B1c 45.6%, E1 45.6%, E3 48.5%, E4 48.5%</td><td><code>results/*.json</code>, 12 files × 90 per-bug records</td><td>✅ recomputed from raw <code>solved</code> flags; matches every published summary</td><td>no</td></tr>
+<tr><td>2</td><td>Zero train/held-out leakage</td><td><code>split.json</code> (90/90, 0 overlap); all 12 eval files score exactly the 90 held-out ids, 0 train ids</td><td>✅ verified programmatically</td><td>no</td></tr>
+<tr><td>3</td><td>No per-seed McNemar survives Holm correction</td><td>exact-binomial McNemar on discordant pairs; 9 tests; min adjusted p = 0.28</td><td>✅ recomputed</td><td>no</td></tr>
+<tr><td>4</td><td>E1−E3 bootstrap CI [−8.5, +2.6]; E1−E4 [−8.5, +2.6]; E3−E4 [−5.6, +5.6]</td><td>10,000 paired resamples over bugs, seed-averaged indicator, seed 0</td><td>✅ recomputed</td><td>no</td></tr>
+<tr><td>5</td><td>R1 and R2 tie exactly at all-pairs level (28/28, p=1.0)</td><td>270 paired observations</td><td>✅ recomputed</td><td>no</td></tr>
+<tr><td>6</td><td>Training helps: pooled RL−B0 = +9.7pp, CI [+1.0, +18.5]</td><td>paired bootstrap over 9 RL runs vs B0</td><td>✅ recomputed</td><td>no</td></tr>
+<tr><td>7</td><td>E1−B0 CI includes zero ([−0.7, +16.3]); E3−B0 and E4−B0 exclude it</td><td>same</td><td>✅ recomputed</td><td>no</td></tr>
+<tr><td>8</td><td>Extraction-failure 0.0% in every reported arm</td><td><code>overall.extraction_failure_rate</code> in each file</td><td>✅ verified</td><td>no</td></tr>
+<tr><td>9</td><td>No run broke a previously-passing test (<code>newly_broken=0</code>)</td><td>per-bug <code>tests</code> records, spot-checked B0/E1_s42/E3_s456</td><td>✅ verified on 3 files</td><td>full sweep would strengthen; low cost</td></tr>
+<tr><td>10</td><td>B1 truncation was the sole cause of the 1.1% result</td><td>700-token rerun: 45.6%, 0% extraction failure, 0/90 truncated</td><td>✅ the corrected run's <code>truncated</code> flags are all False</td><td>ideally: rerun at 300 tokens <em>with</em> truncation logging to show the flags fire (P1-3)</td></tr>
+<tr><td>11</td><td>Tier labels don't track difficulty (B0: 30/43/40; Llama-70B: 67/57/80)</td><td><code>results/B0.json</code>, <code>gate_llama70b_heldout.json</code></td><td>✅ recomputed</td><td>no</td></tr>
+<tr><td>12</td><td>20/90 bugs unsolved by all 10 configurations; boundary mutations dominate (13/20)</td><td>per-bug intersection across B0 + 9 RL runs, <code>bug_type</code> field</td><td>✅ recomputed</td><td>no</td></tr>
+<tr><td>13</td><td>Seed spread: E3 range 12.2pp (sd 6.5) vs E1 5.6pp (sd 2.9)</td><td>per-seed solve rates</td><td>✅ recomputed</td><td>claim is descriptive only; a variance test needs ≥8 seeds (P1-1)</td></tr>
+<tr><td>14</td><td>Llama-3.3-70B scores 67.8% (difficulty gate)</td><td><code>gate_llama70b_heldout.json</code></td><td>✅ verified</td><td>no</td></tr>
+<tr><td>15</td><td>Dataset validated by execution (reference passes, mutant fails)</td><td><code>scripts/build_dataset.py</code> validates through the sandbox; <code>agentdebugger validate</code>; <code>tests/test_dataset.py</code></td><td>✅ code path confirmed; full-dataset test is the <code>slow</code>-marked test</td><td>run <code>pytest -m slow</code> before camera-ready</td></tr>
+<tr><td>16</td><td>Training and eval share one scoring function</td><td>both call <code>score_response</code>; asserted in <code>tests/test_claims.py</code></td><td>✅ test passes</td><td>no</td></tr>
+<tr><td>17</td><td>Reward sums to exactly 1.0 on perfect solve, floored at −0.5</td><td><code>rewards/turn.py</code>; asserted in <code>tests/test_rewards.py</code></td><td>✅ tests pass</td><td>no</td></tr>
+<tr><td>18</td><td>Sandbox refuses 15 named escapes; rlimits + process-group deadline</td><td><code>sandbox/</code>, <code>tests/test_sandbox.py</code></td><td>✅ 156 tests pass (1 skipped, 3 slow deselected)</td><td>no</td></tr>
+<tr><td>19</td><td>Prompts length-matched within 15% by word count</td><td><code>tests/test_prompts.py</code> invariant</td><td>✅ test passes</td><td>no</td></tr>
+<tr><td>20</td><td>Training hyperparameters (500 steps, lr 2e-5, temp 0.7, LoRA r8, group 2, 192 tokens)</td><td><code>TrainingConfig</code>, <code>HardwareProfile.for_vram</code>, <code>scripts/run_matrix.sh</code></td><td>⚠️ <strong>inferred</strong>: the 24GB profile is what a 4090 selects and CONTEXT.md records dual-4090 training, but no run manifest is committed</td><td><strong>P0-2: emit and commit a run manifest</strong></td></tr>
+<tr><td>21</td><td>"~40 s/step structured, ~90 s/step free-form"</td><td><code>docs/CONTEXT.md</code> §2.7 narrative</td><td>⚠️ <strong>not independently verifiable</strong> from the repo; used only to justify dropping E2, and reported as such</td><td>P2</td></tr>
+<tr><td>22</td><td>Degenerate-group fraction is the mechanism for E3's variance</td><td>logging code exists (<code>_log_batch_diagnostics</code>) but W&amp;B output is not committed</td><td>❌ <strong>not evidenced</strong> — the paper states this as an untested hypothesis, not a finding</td><td>P1-2: export the logged series</td></tr>
+</tbody></table></div>
+<p><strong>Claims deliberately NOT made:</strong> clinical/production readiness; transfer to real repositories; transfer to QuixBugs (adapted but never evaluated); that structure beats free-form (E2 not run); that the curriculum helps (E5 not run); that GRPO beats PPO; any effect below the MDE.</p>
+<h2>3. Reproducibility checklist</h2>
+<p><strong>Present in the repository.</strong></p>
+<ul>
+<li>Source for environment, sandbox, reward, curriculum, trainer, evaluator; MIT licensed.</li>
+<li>Dataset (180 bugs, JSONL) + datacard + generator script + generation seed (0).</li>
+<li>Immutable split file, with a guard in <code>make_split.py</code> refusing to regenerate it.</li>
+<li>Exact reward configurations as code (<code>TurnRewardCalculator.full/terminal/no_reasoning</code>).</li>
+<li>Prompts for both formats, in one module shared by training and evaluation.</li>
+<li>Hyperparameters as typed defaults (<code>TrainingConfig</code>, <code>HardwareProfile</code>).</li>
+<li>The full experiment driver (<code>scripts/run_matrix.sh</code>) with arm→flag mapping and resume logic.</li>
+<li>All 12 evaluation reports with per-bug completions, actions, test results and reward breakdowns.</li>
+<li>157-test suite covering the claim-critical properties; CI across Python 3.10–3.13.</li>
+<li>Pinned dependency ranges in <code>pyproject.toml</code>; <code>uv.lock</code> committed.</li>
+</ul>
+<p><strong>Missing — must be added before camera-ready.</strong></p>
+<ol><li><strong>A run manifest per training run.</strong> Nothing in <code>results/*.json</code> records which GPU, which <code>HardwareProfile</code>, which library versions, or the resolved batch geometry produced each checkpoint. The <code>model</code> field is just a local path (<code>./ckpt/E1_s42</code>). Emit a JSON manifest at train time (profile, VRAM, dtype, transformers/trl/peft/torch versions, git SHA, wall-clock). <em>This is the single largest reproducibility gap.</em></li><li><strong>Training telemetry.</strong> W&amp;B was the only sink for reward curves, per-component means, degenerate-group fraction and extraction-failure rate. None is committed, so §6's variance discussion rests on end-point solve rates alone. Export the runs to CSV and commit.</li><li><strong>The trained adapters.</strong> Only <code>./ckpt/...</code> paths are referenced; no adapter is published for the 9 matrix runs (only the earlier, pre-split <code>shashaank0707/AgentDebugger-trained</code>).</li><li><strong>The statistics script.</strong> All numbers in the paper were recomputed ad hoc. Commit the analysis script (McNemar + Holm + Wilson + paired bootstrap, seed 0) as <code>scripts/analyze_results.py</code> so a reader can regenerate every table.</li><li><strong>Exact library versions used.</strong> <code>pyproject.toml</code> gives ranges; the compat shims in <code>grpo.py</code> (for transformers 4.54+/4.57+ and trl 0.16.x) imply a narrow working window that is not pinned. Record the resolved versions.</li><li><strong>The <code>markdown-preview.pdf</code> scoping document</strong> referenced by <code>CONTEXT.md</code> is not in the repo, so a reader cannot check the paper against the scoping authority it cites.</li><li><strong>Nothing — but fix a stale note.</strong> <code>CONTEXT.md</code> §5 is headed "Code changes applied (not yet pushed to GitHub)" and lists five edits the corrected B1 result depends on (format-aware <code>load_generator</code>, <code>--max-new-tokens</code>, free-form completion floor, prompt changes, <code>parse_freeform_output</code> restore). <strong>This heading is out of date: all five are present in <code>origin/main</code> at commit <code>91be258</code>, the working tree is clean, and local <code>HEAD</code> and <code>origin/main</code> are identical</strong> (verified by <code>git show origin/main:&lt;file&gt;</code> for each edit and by <code>git fetch</code>). No code is unpushed. Edit that heading so it does not mislead a reader — or a reviewer — into thinking the B1 correction is unreproducible from the public repository.</li></ol>
+<h2>4. Experiments still required</h2>
+<h3>P0 — necessary before submission</h3>
+<p><strong>P0-1. Group-size sweep on the R0 vs R1 contrast.</strong></p>
+<ul>
+<li><em>Objective.</em> Determine whether the null result is an artifact of <code>num_generations=2</code>.</li>
+<li><em>Hypothesis.</em> If dense shaping helps by ranking completions within a group, its benefit should</li>
+</ul>
+<p>  grow with group size; at G=8 an R0−R1 gap should appear if the mechanism is real.</p>
+<ul>
+<li><em>Design.</em> E1 and E3 only, G ∈ {2, 8}, 3 seeds each (G=2 arms already exist → 6 new runs).</li>
+</ul>
+<p>  Hold total completions/step constant by halving batch×accumulation, so the comparison is   group size, not throughput.</p>
+<ul>
+<li><em>Metric.</em> Held-out solve rate, paired McNemar R0 vs R1 within each G; interaction reported</li>
+</ul>
+<p>  descriptively.</p>
+<ul>
+<li><em>Cost.</em> ~6 × 500 steps at ~40–80 s/step ≈ <strong>40–70 GPU-hours</strong> on a 24GB card. <strong>[A]</strong> step</li>
+</ul>
+<p>  time scales roughly linearly in G.</p>
+<ul>
+<li><em>Why P0.</em> It is the first objection any RL reviewer will raise, and the current paper can only</li>
+</ul>
+<p>  answer it by acknowledgement.</p>
+<p><strong>P0-2. Run manifests + committed analysis script.</strong></p>
+<ul>
+<li>Not an experiment: instrument <code>train()</code> to write a manifest, re-emit for existing checkpoints</li>
+</ul>
+<p>  where recoverable, commit <code>scripts/analyze_results.py</code>. <strong>Cost: CPU-only, hours.</strong> Without it,   reproducibility claims in §8 are overstated.</p>
+<h3>P1 — strongly recommended</h3>
+<p><strong>P1-1. Seed expansion on E1 and E3 (3 → 8 seeds).</strong></p>
+<ul>
+<li><em>Objective.</em> Turn §6's variance observation into a testable claim and tighten every CI.</li>
+<li><em>Hypothesis.</em> R1's across-seed variance in final solve rate exceeds R0's (Levene, α=0.05).</li>
+<li><em>Metric.</em> Across-seed sd of held-out solve rate; re-run the paired bootstrap with seed-level</li>
+</ul>
+<p>  resampling as well as bug-level.</p>
+<ul>
+<li><em>Cost.</em> 10 new runs ≈ <strong>60 GPU-hours</strong>. Highest value-per-hour item after P0-1: it directly</li>
+</ul>
+<p>  attacks the "underpowered" objection and could convert a descriptive remark into a finding.</p>
+<p><strong>P1-2. Export and analyse the degenerate-group series.</strong></p>
+<ul>
+<li><em>Objective.</em> Test the pre-registered <em>mechanism</em>, which is currently unevidenced.</li>
+<li><em>Hypothesis.</em> Per-step degenerate-group fraction is higher under R1 than R0 (Mann–Whitney U</li>
+</ul>
+<p>  over steps).</p>
+<ul>
+<li><em>Data.</em> Already logged by <code>_log_batch_diagnostics</code> during the completed runs — recover from</li>
+</ul>
+<p>  W&amp;B if the runs are still retained; otherwise re-run one seed per arm.</p>
+<ul>
+<li><em>Cost.</em> Zero if W&amp;B history survives; ~14 GPU-hours if two runs must be repeated.</li>
+</ul>
+<p><strong>P1-3. QuixBugs transfer evaluation.</strong></p>
+<ul>
+<li><em>Objective.</em> Test whether the null result holds off-distribution, on bugs we did not author.</li>
+<li><em>Design.</em> Evaluate the existing 9 checkpoints + B0 on the 27 adapted QuixBugs programs. No</li>
+</ul>
+<p>  training. Paired McNemar across arms.</p>
+<ul>
+<li><em>Cost.</em> <strong>~1 GPU-hour total</strong> (270 greedy generations). Cheapest remaining experiment in the</li>
+</ul>
+<p>  plan and it adds an external-validity axis the paper currently lacks; n=27 gives very wide   intervals, so report it as descriptive.</p>
+<p><strong>P1-4. Truncation-flag confirmation of the B1 root cause.</strong></p>
+<ul>
+<li>Re-run B1 at 300 tokens with the (now present) truncation logging, showing the flags fire on</li>
+</ul>
+<p>  the same completions that previously failed extraction. Turns a narrative root-cause claim   into a demonstrated one. <strong>Cost: ~0.5 GPU-hour.</strong></p>
+<h3>P2 — nice to have</h3>
+<p><strong>P2-1. E2 (free-form GRPO) at reduced budget</strong> — 1 seed, 250 steps, to give H1 any evidence at all; report as illustrative. ~7 GPU-hours. <strong>P2-2. Flat-vs-curriculum arm (E5)</strong> — with the tier-label finding in §6, the interesting version is now <em>re-tiering by measured base-model difficulty</em> and asking whether an empirically-ordered curriculum beats the operator-category one. ~14 GPU-hours. <strong>P2-3. Weak-base-policy replication</strong> — repeat R0 vs R1 on a 0.5B model, where terminal reward should be near-zero and shaping should matter. This directly probes the paper's own explanation for why terminal reward sufficed. ~10 GPU-hours. <strong>P2-4. Full <code>newly_broken</code> sweep</strong> across all 12 result files to make the "no regressions" claim complete rather than spot-checked. CPU-only, minutes.</p>
+<h2>5. Simulated peer review</h2>
+<p><strong>Scores (workshop scale, 1–10).</strong></p>
+<div class="tablewrap short"><table><thead><tr><th>Dimension</th><th>Score</th><th>Reasoning</th></tr></thead><tbody>
+<tr><td>Novelty</td><td>5</td><td>The contribution is isolation and rigour, not a new method. Defensible for a workshop; would not clear a main track.</td></tr>
+<tr><td>Technical soundness</td><td>8</td><td>Controls are genuinely tight: one scoring class, immutable split, shared scoring path, verified no leakage. Group size 2 is the soft spot.</td></tr>
+<tr><td>Experimental rigor</td><td>7</td><td>Pre-registered, paired, corrected, three analysis levels, CIs everywhere, MDE stated. Held back by n=90 and 3 seeds.</td></tr>
+<tr><td>Clarity</td><td>8</td><td>The claim is unambiguous and the limitations are load-bearing rather than decorative.</td></tr>
+<tr><td>Reproducibility</td><td>6</td><td>Code/data/split/results all public; run manifests, telemetry and adapters missing (fixable pre-camera-ready).</td></tr>
+<tr><td>Significance</td><td>6</td><td>A useful practitioner-facing negative result in a narrow regime.</td></tr>
+<tr><td>Workshop fit</td><td>8</td><td>Strong for a negative-results / AI-for-code / RL-for-reasoning workshop.</td></tr>
+</tbody></table></div>
+<p><strong>The five most dangerous objections.</strong></p>
+<ol><li><strong>"Group size 2 disables the mechanism you're testing."</strong> <em>Why raised:</em> GRPO's dense-reward advantage should come from ranking within a group; with G=2 the advantage is a sign. <em>Fixable?</em> Only by P0-1. <em>Action taken:</em> stated explicitly in §6 as one of three candidate explanations and in §8 as a scope limit, with the sweep named as the direct follow-up. This is the objection most likely to decide the review.</li></ol>
+<ol><li><strong>"You're underpowered — absence of evidence isn't evidence of absence."</strong> <em>Why raised:</em> n=90, 3 seeds, MDE ~16 points. <em>Fixable?</em> Partially. <em>Action taken:</em> the MDE is stated up-front; the claim is phrased as "not detected"; the bootstrap upper bound (+2.6pp) converts the null into a bounded interval, which is the strongest available answer. P1-1 would improve it.</li></ol>
+<ol><li>**"Your dense reward components are bad heuristics — you disproved <em>your</em> reward, not reward decomposition."** <em>Why raised:</em> <code>hypothesis_quality</code> counts words, symbols and digits; it is not a reasoning judge. <em>Fixable?</em> Not within this study. <em>Action taken:</em> the components are printed in full in §3.4, the heuristic nature is stated in §3.4 and §6, and the title and abstract scope the claim to <em>reasoning-targeted decomposition of this kind</em> rather than to all dense rewards. R2's exact tie with R1 also shows the null is not carried by the two reasoning terms alone — the format/similarity/efficiency terms add nothing either, which makes the "bad heuristic" story less able to explain the whole result.</li></ol>
+<ol><li><strong>"Synthetic single-mutation MBPP bugs are a toy; this says nothing about debugging."</strong> <em>Why raised:</em> real bugs are not one AST edit inside one function. <em>Fixable?</em> Partially by P1-3 (QuixBugs). <em>Action taken:</em> stated as the first limitation; the paper claims a result about <em>reward design under GRPO</em>, not about debugging capability, and the difficulty gate (Llama-70B at 67.8%) shows the task is at least non-trivial.</li></ol>
+<ol><li><strong>"How do we know the evaluation harness isn't producing this result too?"</strong> <em>Why raised:</em> the paper itself reports an 85-point artifact from a one-line harness bug. <em>Fixable?</em> Yes, and answering it well is an asset. <em>Action taken:</em> every statistic recomputed from committed per-bug records; extraction-failure and truncation rates reported per arm (0.0% and 0/90); leakage verified programmatically; the artifact is reported rather than buried. Adding P0-2's analysis script closes this fully.</li></ol>
+<p><strong>Revisions made in response to this pass</strong> (relative to the first draft): the title was scoped from "reward decomposition" to "reasoning-targeted reward decomposition"; §4.1 (deviations from pre-registration) was added rather than silently dropping H1/H3; the group-size explanation was promoted into §6 instead of only appearing in limitations; the bootstrap upper bound was moved into the abstract so the null is bounded at first read; and the tier-label finding was reframed from a curriculum caveat into a substantive analysis result.</p>
+</body></html>
