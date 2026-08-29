@@ -7,6 +7,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-08-29
+
+Controlled empirical study of reward decomposition for GRPO program repair.
+
+### Added
+
+- **180-bug dataset with disjoint train/held-out split** (`data/v2/`): 90 training bugs and 90 held-out evaluation bugs stratified into Easy, Medium, and Hard tiers, resolving the single-split precondition of the pre-registration.
+- **Nine primary RL training runs** across three reward configurations on `Qwen2.5-Coder-3B-Instruct`:
+  - `E1` (R0 Full Dense): seeds 42, 123, 456
+  - `E3` (R1 Graded Outcome): seeds 42, 123, 456
+  - `E4` (R2 Dense No Reasoning): seeds 42, 123, 456
+  Saved with full per-bug evaluation records in [`results/primary/`](results/primary/).
+- **Paired statistical analysis suite** (`analysis/bootstrap.py`): 10,000 paired bootstrap iterations over bugs with fixed RNG seed (204), exact McNemar sensitivity tests, and Holm--Bonferroni corrections.
+- **Adapted QuixBugs benchmark** (`data/quixbugs/`): 27 single-function Python programs adapted for out-of-distribution evaluation.
+- **Scientific manuscript** (`docs/paper.pdf`, `docs/paper_anonymous.pdf`, `docs/paper_preprint.pdf`) with official NeurIPS 2026 formatting and full paper checklist.
+
+### Changed
+
+- Updated `README.md` to reflect empirical findings: dense reward shaping substantially reduces GRPO group degeneracy (16.2% vs 61.9%) but does not produce a detectable improvement in held-out solve rate (45.6% vs 48.5%).
+- Relocated historical pre-split prototype run to `results/historical/`.
+
+### Known limitations
+
+- Evaluated on `Qwen2.5-Coder-3B-Instruct` with group size $G=2$ and single-turn single-function repair.
+- With $N=90$ held-out bugs, the study is powered to detect large effects ($\ge 16$ pp paired); small effects of a few percentage points cannot be ruled out.
+- QuixBugs external evaluation currently lacks a zero-shot base model run, making its performance figures descriptive.
+
 ## [0.1.0] - 2026-07-14
 
 First public release. `0.1.0` is the initial released version: the package
@@ -73,10 +100,9 @@ was ever tagged or published, so the public history starts here.
 - The `hard` task's grader detects the race empirically, by stress testing under
   a reduced GIL switch interval. It can demonstrate a lost update, never prove
   thread safety.
-- The hypotheses in [docs/research_plan.md](docs/research_plan.md) are stated but
-  **not yet tested**: the ablations that would isolate the contribution of the
-  structured format, the reward decomposition and the curriculum have not been
-  run.
+- The hypotheses in [docs/research_plan.md](docs/research_plan.md) were stated but
+  not yet tested in v0.1.0 *(resolved in v0.2.0 for the reward decomposition study)*.
 
-[Unreleased]: https://github.com/PulipatiPranav/AgentDebuggerEnv/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/PulipatiPranav/AgentDebuggerEnv/releases/tag/v0.1.0
+[Unreleased]: https://github.com/shasshaank/AgentDebuggerEnv/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/shasshaank/AgentDebuggerEnv/compare/v0.1.0...v0.2.0
+[0.1.0]: https://github.com/shasshaank/AgentDebuggerEnv/releases/tag/v0.1.0

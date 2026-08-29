@@ -178,21 +178,23 @@ Both `ruff check` and `pytest` run in [CI](.github/workflows/ci.yml) on every pu
 
 ## Training and results
 
-The published run trains `Qwen2.5-Coder-3B-Instruct` with GRPO and LoRA over the curriculum. See [docs/report.md](docs/report.md) for the method, the reward design, and the reward curves; per-bug results are in [results/](results/).
+## Training and Evaluation
+
+The repository contains the complete training and evaluation pipeline for `Qwen2.5-Coder-3B-Instruct` using GRPO and LoRA:
 
 ```bash
 pip install -e '.[train]'
 agentdebugger train --max-steps 500
-agentdebugger evaluate-curriculum --adapter <your-hf-repo>
+agentdebugger evaluate-curriculum --adapter <your-hf-repo> --split heldout
 ```
 
-The trainer scales batch geometry to the detected GPU (T4 through H100) and swaps the bug pool at each curriculum boundary. It needs a CUDA GPU; everything else in this repository runs on CPU.
+The trainer scales batch geometry to the detected GPU (T4 through H100) and swaps the bug pool at each curriculum boundary. Primary per-bug evaluation outputs for all nine runs (E1, E3, E4 across seeds 42, 123, 456) are committed in [`results/primary/`](results/primary/).
 
-## Research plan
+## Research plan & Controlled Study
 
-The three ideas this environment is built on — that structured Observation → Hypothesis → Action reasoning helps, that decomposing the reward helps, and that the curriculum prevents collapse — are **claims, not results**. [docs/research_plan.md](docs/research_plan.md) states each one as a falsifiable hypothesis with a null, a metric and an acceptance criterion, and specifies the smallest experiment matrix that could test them.
+The environment was evaluated under a pre-registered ablation study documented in [docs/research_plan.md](docs/research_plan.md). As specified in §4.4 of the plan, the initial single-split dataset was expanded to 180 verified mutation bugs (`data/v2/`) with a strict 90 train / 90 held-out partition before running the matrix. 
 
-Read it before citing anything in [results/](results/): the initial implementation had no split; this was identified as a precondition in the preregistration and subsequently corrected before the reported experiments. The reported runs use the committed 90/90 split.
+The empirical findings are detailed in our paper ([docs/paper.pdf](docs/paper.pdf)): dense reward shaping substantially reduces GRPO group degeneracy (from 61.9% to 16.2%), but does not produce a detectable improvement in held-out debugging solve rate (45.6% vs 48.5%, 95% CI [-8.5, +2.6] pp).
 
 ## Contributing
 

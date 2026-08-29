@@ -9,13 +9,33 @@ Nothing in this document reports a result. Every number below is either a
 property of the shipped code (linked to its source) or a design parameter derived
 from a stated assumption. Assumptions are marked **[A]**.
 
+> ### Pre-registration Status & Execution Addendum (August 2026)
+> 
+> **Status:** Pre-registration authored July 2026; experimental campaign executed August 2026.
+> 
+> **1. Resolution of Preconditions (§4.4):** As mandated in §4.4, the initial 90-bug prototype lacked a train/held-out split. Prior to executing the experimental matrix, the dataset was expanded from 90 to 180 validated mutation bugs (`data/v2/`), creating a clean 90-bug training set (`data/v2/train.jsonl`) and a strictly disjoint 90-bug held-out evaluation set (`data/v2/held_out.jsonl`), stratified by tier. The historical note in §0 reflects the v0.1.0 codebase prior to this fix.
+> 
+> **2. Executed Experimental Matrix:** Due to compute constraints (75 GPU-hours on 24GB RTX 4090 hardware), the study executed the 3B model scale across the three core reward arms:
+> - **E1 (R0 Full Dense):** 3 seeds (42, 123, 456)
+> - **E3 (R1 Graded Outcome):** 3 seeds (42, 123, 456)
+> - **E4 (R2 Dense No Reasoning):** 3 seeds (42, 123, 456)
+> 
+> All 9 runs were trained for 500 steps and evaluated on the 90 held-out bugs. Per-run JSON evaluation artifacts are committed at [`results/primary/`](../results/primary/). The historical pre-split prototype run was archived in [`results/historical/`](../results/historical/).
+> 
+> **3. Preregistration Deviations:**
+> - *Scale:* Primary training executed at 3B scale rather than 7B due to hardware constraints.
+> - *Hypotheses:* H1 (format) and H3 (curriculum collapse) were omitted from confirmatory testing to maintain full statistical power and replication on the central question (H2: reward decomposition).
+> - *Calibration Baseline:* Local Llama-3.1-8B-Instruct gating was used instead of GPT-4o-mini API calls.
+> 
+> **4. Outcome Summary:** On the 90 held-out bugs, R0 achieved 45.6\% $\pm$ 2.9\%, R1 achieved 48.5\% $\pm$ 6.5\%, and R2 achieved 48.5\% $\pm$ 3.9\% solve rate. Paired bootstrap analysis (10,000 resamples, seed 204 in `analysis/bootstrap.py`) yielded a 95\% CI of [$-$8.5, $+$2.6] pp for R0 $-$ R1. The dense reward significantly reduced degenerate GRPO groups (16.2\% vs 61.9\%) but did not produce a detectable improvement in held-out solve rate. See the accompanying paper (`docs/paper.pdf`) for the full report.
+
 ---
 
-## 0. What the environment currently measures, and one thing it does not
+## 0. What the environment originally measured, and the split precondition
 
 Facts, from the code:
 
-- The dataset is **90 bugs**: 40 tier-1, 30 tier-2, 20 tier-3
+- The original dataset was **90 bugs**: 40 tier-1, 30 tier-2, 20 tier-3
   ([`dataset/bugs/`](../src/agentdebugger/dataset/bugs/)).
 - The reward decomposes into six earned components and one penalty term, summing
   to exactly `1.0` on a perfect first-turn solve and floored at `-0.5`
@@ -31,14 +51,14 @@ Facts, from the code:
   function, so a training curve and an eval number are commensurable
   (asserted in `tests/test_claims.py`).
 
-**And the thing it does not measure.** [`load_bugs()`](../src/agentdebugger/dataset/loader.py)
-returns every bug in the requested tiers, and both the trainer and
-`evaluate-curriculum` call it. **There is no train/held-out split**: the published
-run trains on the same 90 bugs it is evaluated on. Its solve rate therefore
-measures how well the policy *optimised the training set*, not whether it learned
-to debug. This is the single largest threat to every claim below, it is a
-property of the current code and not of any one experiment, and §4.5 makes fixing
-it a precondition for running anything.
+**The split precondition (resolved in v0.2.0).** In the initial v0.1.0 release,
+[`load_bugs()`](../src/agentdebugger/dataset/loader.py) returned every bug in the
+requested tiers without a split. This design document identified that
+**creating a train/held-out split was an absolute precondition** before running
+any hypothesis test (§4.4). As documented in the addendum above, this was resolved
+prior to running the matrix by expanding to 180 bugs in `data/v2/` and partitioning
+into 90 train and 90 held-out bugs. The legacy un-split run was archived to
+`results/historical/` and superseded by `results/primary/`.
 
 ---
 
@@ -527,6 +547,4 @@ Ordered by how badly each would damage the conclusions.
   single functions (see the limitations in [report.md](report.md)).
 - It does not claim GRPO beats PPO here. That comparison is on the roadmap and is
   not tested by this matrix.
-- It does not claim any effect size in advance, and no experiment here has been
-  run. The published run in [`results/`](../results/) predates this design, has no
-  held-out split, and must not be cited as evidence for any hypothesis above.
+- It does not claim any effect size in advance. Note on provenance: the historical prototype run in [`results/historical/`](../results/historical/) predates the train/held-out split and must not be cited as evidence for any hypothesis; all formal claims are evaluated on the 90 held-out bugs in [`results/primary/`](../results/primary/).
