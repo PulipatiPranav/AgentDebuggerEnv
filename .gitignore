@@ -41,3 +41,7 @@ wandb/
 # Private planning / strategy documents (do not publish)
 markdown-preview.pdf
 calibration_run.ipynb
+# LaTeX build artifacts
+*.aux
+*.out
+scratch/

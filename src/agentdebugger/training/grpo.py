@@ -397,9 +397,52 @@ def train(config: TrainingConfig) -> None:
 
     print(f"VRAM {vram_gb:.0f}GB -> {profile}, dtype={dtype}", flush=True)
     print(
-        f"reward config {config.reward_config}, format '{config.format}', "
-        f"training on split '{config.split}', reward_workers={config.reward_workers}",
+        "\n".join(
+            [
+                "=== AgentDebuggerEnv Training Configuration ===",
+                f"model={config.model}",
+                f"reward_config={config.reward_config}",
+                f"format={config.format}",
+                f"seed={config.seed}",
+                f"max_steps={config.max_steps}",
+                f"learning_rate={config.learning_rate}",
+                f"warmup_steps={config.warmup_steps}",
+                f"temperature={config.temperature}",
+                f"batch_size={profile.batch_size}",
+                f"gradient_accumulation_steps={profile.gradient_accumulation_steps}",
+                f"num_generations={profile.num_generations}",
+                f"max_completion_length={_completion_length_for(profile, config.format)}",
+                f"lora_rank={profile.lora_rank}",
+                f"lora_alpha={profile.lora_rank * 2}",
+                f"reward_workers={config.reward_workers}",
+                f"split={config.split}",
+            ]
+        ),
         flush=True,
+    )
+
+    out_root = Path(config.output_dir)
+    out_root.mkdir(parents=True, exist_ok=True)
+    effective_config = {
+        "model": config.model,
+        "reward_config": config.reward_config,
+        "format": config.format,
+        "seed": config.seed,
+        "max_steps": config.max_steps,
+        "learning_rate": config.learning_rate,
+        "warmup_steps": config.warmup_steps,
+        "temperature": config.temperature,
+        "batch_size": profile.batch_size,
+        "gradient_accumulation_steps": profile.gradient_accumulation_steps,
+        "num_generations": profile.num_generations,
+        "max_completion_length": _completion_length_for(profile, config.format),
+        "lora_rank": profile.lora_rank,
+        "lora_alpha": profile.lora_rank * 2,
+        "reward_workers": config.reward_workers,
+        "split": config.split,
+    }
+    (out_root / "effective_config.json").write_text(
+        json.dumps(effective_config, indent=2), encoding="utf-8"
     )
 
     tokenizer = AutoTokenizer.from_pretrained(config.model)
