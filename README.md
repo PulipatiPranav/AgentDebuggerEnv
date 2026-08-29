@@ -20,15 +20,15 @@
 
 Ask a language model to fix a bug and it will usually produce something plausible. Watch it on a *subtle* bug and the failure mode is consistent: it pattern-matches a fix, states it with confidence, and never checks whether the fix addresses the actual cause. That is an incentive problem, not an intelligence one — models are trained to complete text, not to reason under a test harness that pushes back.
 
-AgentDebuggerEnv changes the incentive. The reward is dense and structured: it pays for stating a specific hypothesis, for localising the bug, for a fix that passes the tests, and it charges for breaking tests that used to pass or for submitting a fix with no reasoning at all. A model trained here learns that the reasoning step is what pays.
+AgentDebuggerEnv changes the incentive. The environment supports dense, structured reward that can pay for explicit diagnostic behavior such as hypotheses and localization. Whether these additional signals improve debugging performance is an empirical question; the controlled study reported with this release does not find a detectable improvement over the simpler executable-outcome reward.
 
 ## Key features
 
 - **A hardened execution sandbox.** Model-generated code runs in a short-lived subprocess with static import/builtin analysis, kernel-enforced CPU/memory/file-size limits, and a wall-clock deadline that kills the whole process group. Escapes an LLM actually tries — `import os`, `open('/etc/passwd')`, `eval`, `().__class__.__subclasses__()` — are refused *before* execution; legitimate fixes that need `hashlib`, `threading` or `super()` run fine.
 - **Three tasks, three failure modes.** An off-by-one you solve by reading the error; a red herring where the error points at the wrong function; and a race condition that **passes every sequential test** and only a concurrency stress test reveals.
 - **A dense, itemised reward** with a defended range of `[-0.5, 1.0]`, decomposed into format, hypothesis quality, localization, fix correctness, similarity, efficiency and penalties — so a weak policy still gets a gradient to climb.
-- **A tiered curriculum** (180 validated mutation bugs, split into 90 training and 90 held-out bugs. 90 held-out bugs used for every reported evaluation) that unlocks harder bugs only once the easy ones stabilise, avoiding the early policy collapse a flat distribution causes.
-- **GRPO training** on `Qwen2.5-Coder-3B-Instruct` with LoRA, scored by the *same* function the evaluator uses — so a reward curve and an eval number mean the same thing.
+- **A tiered curriculum** (180 validated mutation bugs, split into 90 training and 90 held-out bugs) that exposes increasingly difficult validated mutation bugs during training.
+- **GRPO training** on `Qwen2.5-Coder-3B-Instruct` with LoRA, scored by the *same* function the evaluator uses — so training rewards and evaluation outcomes are computed from the same underlying scoring path, while remaining distinct metrics.
 - **Runs offline.** The core package is pure standard library. An oracle agent lets anyone watch a full episode — sandbox, grader and all — with no GPU and no API key.
 
 ## Architecture

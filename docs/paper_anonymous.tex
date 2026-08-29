@@ -1,5 +1,5 @@
 \documentclass{article}
-\usepackage[preprint]{neurips_2026}
+\usepackage[submission]{neurips_2026}
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage{graphicx}
@@ -12,14 +12,14 @@
 \usetikzlibrary{positioning,arrows.meta}
 
 \title{When More Reward Signal Does Not Help: A Controlled Study of Reward Decomposition for GRPO Debugging}
-\author{Shashaank Jain \and Pranav Pulipati}
+\author{Anonymous Authors}
 
 \begin{document}
 
 \maketitle
 
 \begin{center}
-\textit{Code, dataset, per-bug results, and pre-registration: \url{https://github.com/shasshaank/AgentDebuggerEnv}}
+\textit{Code, dataset, per-bug results, and pre-registration: see anonymized supplementary material.}
 \end{center}
 
 \vspace{0.3cm}
@@ -360,7 +360,7 @@ The reward configurations produce substantially different GRPO training signals.
 However, this difference does not translate into higher held-out solve rate. R1 also exhibits greater across-seed variance (std dev $\pm 6.5$ vs $\pm 2.9$), consistent with---but insufficient to establish---the hypothesis that increased reward degeneracy produces noisier, less stable optimization. Three seeds are insufficient for a formal variance comparison. This establishes an association between reward configuration and group degeneracy, not a causal relationship between degeneracy and final performance.
 
 \subsection{Training vs Held-out (Confirmatory)}
-The nine RL runs have a pooled mean held-out solve rate 9.7 percentage points [1.0, 18.5] above the zero-shot structured baseline (37.8\%). This pooled comparison is descriptive and should not be interpreted as a single-model estimate of the effect of RL. The effect is not individually significant for E1 under the same bootstrap analysis. The train--held-out gap is approximately 6 percentage points. This gap is descriptively modest, although the experiment is not designed to distinguish generalization from other sources of train--held-out differences.
+Pooling the nine RL runs gives a mean held-out solve rate of 47.5\%, 9.7 percentage points above B0's 37.8\% (bootstrap 95\% CI [1.0, 18.5]). This pooled comparison is descriptive and should not be interpreted as a single-model estimate of the effect of RL. The effect is not individually significant for E1 under the same bootstrap analysis. The train--held-out gap is approximately 6 percentage points. This gap is descriptively modest, although the experiment is not designed to distinguish generalization from other sources of train--held-out differences.
 
 \subsection{External-Source Transfer (Exploratory)}
 We observe nontrivial transfer to a 27-program external evaluation set adapted from QuixBugs. E1, E3, and E4 achieve 39.5\%, 43.2\%, and 44.4\%, respectively. This provides evidence that the trained policies retain nontrivial performance outside the MBPP-derived mutation distribution. However, because the transfer set is small and lacks a zero-shot B0 baseline, these results should be interpreted as evidence of transfer rather than evidence of robust generalization or an RL-specific generalization gain.
