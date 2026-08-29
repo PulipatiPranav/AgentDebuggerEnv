@@ -23,8 +23,9 @@ log "Evaluating checkpoints on the TRAIN split to check for memorization..."
 for arm in "${ARMS[@]}"; do
   for seed in "${SEEDS[@]}"; do
     tag="${arm}_s${seed}"
-    # NOTE: Adjust the HuggingFace repository name if it differs!
-    adapter="${HF_NAMESPACE}/AgentDebugger-${tag}"
+    # Their repos use lowercase 'agentdebugger' and hyphens instead of underscores for the seed
+    adapter_name="agentdebugger-${arm}-s${seed}"
+    adapter="${HF_NAMESPACE}/${adapter_name}"
     
     out="$RESULTS_ROOT/${tag}_train_eval.json"
     
