@@ -16,7 +16,8 @@ from typing import Mapping, Sequence
 import numpy as np
 
 ROOT = Path(__file__).resolve().parents[1]
-RESULTS = ROOT / "results"
+RESULTS = ROOT / "results" / "primary"
+DATASET = ROOT / "src" / "agentdebugger" / "dataset" / "bugs"
 N_BOOT = 10_000
 SEED = 204
 SEEDS = (42, 123, 456)
@@ -57,6 +58,20 @@ def main() -> None:
     }
     bug_ids = list(b0)
     all_rl = arms["E1"] + arms["E3"] + arms["E4"]
+
+    assert len(b0) == 90, f"Expected 90 bugs, got {len(b0)}"
+    for arm_list in arms.values():
+        for run_dict in arm_list:
+            assert set(run_dict) == set(b0), "Mismatch in bug IDs between runs"
+    
+    # Verify train/heldout disjointness
+    import json
+    train_file = DATASET / "train.jsonl"
+    heldout_file = DATASET / "heldout.jsonl"
+    if train_file.exists() and heldout_file.exists():
+        train_ids = {json.loads(line)["id"] for line in train_file.read_text().splitlines() if line.strip()}
+        heldout_ids = {json.loads(line)["id"] for line in heldout_file.read_text().splitlines() if line.strip()}
+        assert train_ids.isdisjoint(heldout_ids), "Train and heldout bug IDs overlap!"
 
     comparisons = (
         ("E1-E3", arms["E1"], arms["E3"]),

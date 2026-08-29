@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Runs the full Publication-Strategy §0 experiment matrix: B0, B1, then the 12 RL
-# runs (E1-E4 x seeds {42,123,456}), training then evaluating each on the
+# Runs the full Publication-Strategy §0 experiment matrix: B0, B1, then the 9 RL
+# runs (E1, E3, E4 x seeds {42,123,456}), training then evaluating each on the
 # held-out split. Safe to re-run after an interruption (spot/preemptible GPU) --
 # anything already finished (checkpoint or report present) is skipped.
 #
@@ -23,7 +23,7 @@ BASE_MODEL="${BASE_MODEL:-Qwen/Qwen2.5-Coder-3B-Instruct}"
 MAX_STEPS="${MAX_STEPS:-500}"
 REWARD_WORKERS="${REWARD_WORKERS:-1}"
 SEEDS="${SEEDS:-42 123 456}"
-ONLY_ARMS="${ONLY_ARMS:-B0 B1 E1 E2 E3 E4}"
+ONLY_ARMS="${ONLY_ARMS:-B0 B1 E1 E3 E4}"
 PY="${PY:-./.venv/bin/python}"
 
 mkdir -p "$RESULTS_ROOT"
