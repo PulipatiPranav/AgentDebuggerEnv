@@ -67,7 +67,23 @@ The problem setting is single-function, single-turn Python debugging. We generat
 Because executing model-generated code poses security risks, we utilize a multi-layered sandbox (AST restrictions, resource limits, and subprocess timeouts) to securely evaluate proposed code against unit tests, emitting fine-grained test outcomes and tracking regressions.
 
 \subsection{Response Format}
-Models are prompted to return a specific XML format containing \texttt{<hypothesis>}, \texttt{<location>}, \texttt{<code\_fix>}, and \texttt{<explanation>} tags. This enforces structured generation, enabling deterministic extraction of the reasoning traces and the final code payload.
+Models are prompted to return a fixed five-field structured response:
+
+\begin{verbatim}
+OBSERVATION: ...
+HYPOTHESIS: ...
+CONFIDENCE: [low | medium | high]
+ACTION: [inspect_lines | run_tests | propose_fix |
+         request_context | give_up]
+DETAIL: ...
+\end{verbatim}
+
+For a proposed fix, the \texttt{DETAIL} field contains the complete corrected
+function. The parser tolerates whitespace and capitalization but requires all
+five fields and a valid action/confidence value. This format exposes explicit
+diagnostic claims while keeping the final code payload deterministically
+extractable. The same prompt and response schema are used during training and
+evaluation.
 
 \subsection{Reward Configurations}
 The experimental intervention is the reward configuration. The total reward is clipped to $R \in [-0.5, 1.0]$. The full dense reward (R0) decomposes this into seven terms:
@@ -75,7 +91,9 @@ The experimental intervention is the reward configuration. The total reward is c
 R_0 = R_{\text{format}} + R_{\text{hypothesis}} + R_{\text{localization}} + R_{\text{fix}} + R_{\text{similarity}} + R_{\text{efficiency}} + R_{\text{penalties}}
 \end{equation}
 
-We classify hypothesis and localization as reasoning-targeted because they reward explicit intermediate diagnostic claims rather than executable properties of the proposed patch. The efficiency component is inherited from the multi-turn environment and awards $0.02$ per remaining turn. Because GRPO training evaluates each response as turn 0 in the single-turn curriculum environment, this component contributes a constant $+0.10$ offset to R0 and does not provide within-group discrimination. We retain it in the implementation for consistency with the general reward definition, but it should not be interpreted as an active source of learning signal in the reported GRPO experiment.
+We classify hypothesis and localization as reasoning-targeted because they reward explicit intermediate diagnostic claims rather than executable properties of the proposed patch. The hypothesis component also contains a small confidence-calibration term: high-confidence hypotheses receive positive credit when the resulting fix passes and a penalty when it fails. Thus, the component is reasoning-targeted but is not independent of the executable outcome.
+
+The efficiency component is inherited from the multi-turn environment and awards $0.02$ per remaining turn. Because GRPO training evaluates each response as turn 0 in the single-turn curriculum environment, this component contributes a constant $+0.10$ offset to R0 and R2 and does not provide within-group discrimination. We retain it in the implementation for consistency with the general reward definition, but it should not be interpreted as an active source of learning signal in the reported GRPO experiment.
 
 We test two ablations: R2 removes reasoning heuristics:
 \begin{equation}
@@ -138,7 +156,7 @@ where $R_1$ zeroes every shaping component and rescales the fix-outcome term to 
 \toprule
 \textbf{Component} & \textbf{R0} & \textbf{R1} & \textbf{R2} & \textbf{Maximum} & \textbf{Purpose} \\
 \midrule
-Format & \checkmark & --- & \checkmark & 0.10 & Required XML fields \\
+Format & \checkmark & --- & \checkmark & 0.10 & Five required response fields \\
 Hypothesis & \checkmark & --- & --- & 0.20 & Grounded diagnosis \\
 Localization & \checkmark & --- & --- & 0.15 & Function/line ID \\
 Fix quality & \checkmark & \checkmark & \checkmark & 0.35 / 1.0 & Tests passed \\
@@ -257,6 +275,9 @@ The reward configurations produce substantially different GRPO training signals.
         \draw[thick] (1.9, 45.6 - 2.9) -- (1.9, 45.6 + 2.9);
         \draw[thick] (1.75, 45.6 - 2.9) -- (2.05, 45.6 - 2.9);
         \draw[thick] (1.75, 45.6 + 2.9) -- (2.05, 45.6 + 2.9);
+        \fill[blue!90!black] (1.9, 43.3) circle (1.3pt);
+        \fill[blue!90!black] (1.9, 45.6) circle (1.3pt);
+        \fill[blue!90!black] (1.9, 47.8) circle (1.3pt);
         \node[font=\scriptsize, anchor=south] at (1.9, 49.0) {45.6};
         \node[font=\small, anchor=north] at (1.9, -2) {R0};
         
@@ -265,6 +286,9 @@ The reward configurations produce substantially different GRPO training signals.
         \draw[thick] (3.0, 48.5 - 6.5) -- (3.0, 48.5 + 6.5);
         \draw[thick] (2.85, 48.5 - 6.5) -- (3.15, 48.5 - 6.5);
         \draw[thick] (2.85, 48.5 + 6.5) -- (3.15, 48.5 + 6.5);
+        \fill[blue!90!black] (3.0, 41.1) circle (1.3pt);
+        \fill[blue!90!black] (3.0, 51.1) circle (1.3pt);
+        \fill[blue!90!black] (3.0, 53.3) circle (1.3pt);
         \node[font=\scriptsize, anchor=south] at (3.0, 55.5) {48.5};
         \node[font=\small, anchor=north] at (3.0, -2) {R1};
         
@@ -273,6 +297,9 @@ The reward configurations produce substantially different GRPO training signals.
         \draw[thick] (4.1, 48.5 - 3.9) -- (4.1, 48.5 + 3.9);
         \draw[thick] (3.95, 48.5 - 3.9) -- (4.25, 48.5 - 3.9);
         \draw[thick] (3.95, 48.5 + 3.9) -- (4.25, 48.5 + 3.9);
+        \fill[blue!90!black] (4.1, 44.4) circle (1.3pt);
+        \fill[blue!90!black] (4.1, 50.0) circle (1.3pt);
+        \fill[blue!90!black] (4.1, 51.1) circle (1.3pt);
         \node[font=\scriptsize, anchor=south] at (4.1, 52.9) {48.5};
         \node[font=\small, anchor=north] at (4.1, -2) {R2};
         
@@ -294,6 +321,9 @@ The reward configurations produce substantially different GRPO training signals.
         \draw[thick] (0.8, 16.2 - 2.2) -- (0.8, 16.2 + 2.2);
         \draw[thick] (0.65, 16.2 - 2.2) -- (0.95, 16.2 - 2.2);
         \draw[thick] (0.65, 16.2 + 2.2) -- (0.95, 16.2 + 2.2);
+        \fill[red!90!black] (0.8, 14.4) circle (1.3pt);
+        \fill[red!90!black] (0.8, 15.6) circle (1.3pt);
+        \fill[red!90!black] (0.8, 18.6) circle (1.3pt);
         \node[font=\scriptsize, anchor=south] at (0.8, 18.9) {16.2};
         \node[font=\small, anchor=north] at (0.8, -2) {R0};
         
@@ -302,6 +332,9 @@ The reward configurations produce substantially different GRPO training signals.
         \draw[thick] (1.9, 61.9 - 4.2) -- (1.9, 61.9 + 4.2);
         \draw[thick] (1.75, 61.9 - 4.2) -- (2.05, 61.9 - 4.2);
         \draw[thick] (1.75, 61.9 + 4.2) -- (2.05, 61.9 + 4.2);
+        \fill[red!90!black] (1.9, 57.5) circle (1.3pt);
+        \fill[red!90!black] (1.9, 62.3) circle (1.3pt);
+        \fill[red!90!black] (1.9, 65.9) circle (1.3pt);
         \node[font=\scriptsize, anchor=south] at (1.9, 66.6) {61.9};
         \node[font=\small, anchor=north] at (1.9, -2) {R1};
         
@@ -310,13 +343,16 @@ The reward configurations produce substantially different GRPO training signals.
         \draw[thick] (3.0, 34.7 - 3.9) -- (3.0, 34.7 + 3.9);
         \draw[thick] (2.85, 34.7 - 3.9) -- (3.15, 34.7 - 3.9);
         \draw[thick] (2.85, 34.7 + 3.9) -- (3.15, 34.7 + 3.9);
+        \fill[red!90!black] (3.0, 30.5) circle (1.3pt);
+        \fill[red!90!black] (3.0, 35.3) circle (1.3pt);
+        \fill[red!90!black] (3.0, 38.3) circle (1.3pt);
         \node[font=\scriptsize, anchor=south] at (3.0, 39.1) {34.7};
         \node[font=\small, anchor=north] at (3.0, -2) {R2};
         
         \node[font=\small\bfseries, anchor=south] at (1.9, 73) {Panel B: Degenerate groups};
     \end{scope}
 \end{tikzpicture}
-\caption{Held-out solve rate and GRPO reward degeneracy. Error bars on solve rate show standard deviation across the three training seeds. Degeneracy values show the mean fraction of degenerate sampled groups across the three seeds, with error bars showing the standard deviation across seed-level means. The dense reward substantially changes the training signal while producing no detectable improvement in held-out solve rate.}
+\caption{Held-out solve rate and GRPO reward degeneracy. Bars show mean values across three seeds; error bars indicate standard deviation across seeds, with filled dots displaying individual seed runs. Degeneracy values show the mean fraction of degenerate sampled groups across the three seeds, with error bars showing the standard deviation across seed-level means. The dense reward substantially changes the training signal while producing no detectable improvement in held-out solve rate.}
 \label{fig:main_results}
 \end{figure*}
 
@@ -373,7 +409,7 @@ Importantly, these explanations are not distinguished by the present experiment:
 Dense reward shaping never helps; Outcome reward is universally sufficient; Reasoning rewards are useless; GRPO is superior to other RL algorithms; 3B debugging results transfer to frontier models; Single-turn debugging results apply to agentic repository-level debugging; QuixBugs establishes robust generalization.
 
 \section{Conclusion}
-The most informative result is not simply that the dense reward failed to improve solve rate. It is that it changed the optimization signal substantially: R0 produced far fewer degenerate GRPO groups than R1, yet this advantage did not translate into higher held-out performance. This suggests that, in a regime where the base model already obtains meaningful executable feedback and the action is a complete single-turn fix, additional heuristic reward signal may improve reward resolution without improving the learned policy. Furthermore, a separate evaluation-harness error reduced the observed free-form solve rate from 45.6\% to 1.1\%, creating a 44.5-point apparent performance difference that dwarfed the reward effects studied here.
+The most informative result is not simply that the dense reward failed to improve solve rate. It is that it changed the optimization signal substantially: R0 produced far fewer degenerate GRPO groups than R1, yet this advantage did not translate into higher held-out performance. This suggests that, in a regime where the base model already obtains meaningful executable feedback and the action is a complete single-turn fix, additional heuristic reward signal may improve reward resolution without improving the learned policy. The result therefore separates two quantities that are often implicitly conflated: reward resolution within a GRPO group and the usefulness of the resulting optimization direction. Furthermore, a separate evaluation-harness error reduced the observed free-form solve rate from 45.6\% to 1.1\%, creating a 44.5-point apparent performance difference that dwarfed the reward effects studied here.
 
 \textbf{Practical takeaway.} If a code-RL system already obtains meaningful executable feedback from a moderately capable base model, first establish that the outcome reward is insufficient before introducing additional heuristic reasoning rewards. Such shaping may reduce reward degeneracy, but our results show that this optimization benefit need not translate into better final repair accuracy.
 
@@ -447,6 +483,13 @@ Stage 2 & 350--499 & Tiers 1--3 (Easy, Medium, Hard) \\
 \label{tab:curriculum}
 \end{table}
 
+\paragraph{Curriculum-stage optimization.}
+Training is implemented as three sequential GRPO trainers, one per curriculum
+stage. The LoRA adapter is carried across stages, while each stage initializes
+a fresh optimizer and scheduler. Only the first stage uses the 30-step warmup;
+later stages restart the cosine schedule at the configured learning rate
+without warmup. This implementation detail is shared across R0, R1, and R2.
+
 \section{Statistical Analysis Details}
 \label{app:stats}
 
@@ -458,7 +501,7 @@ For each bug $i \in \{1, \dots, 90\}$, the solve indicator is averaged across th
 We resample the $N=90$ bugs with replacement 10,000 times (fixed RNG seed 204) to generate the empirical distribution of paired differences $\Delta = \frac{1}{N}\sum_{i=1}^{N}(\bar{s}_{i,\text{arm}_A} - \bar{s}_{i,\text{arm}_B})$. Percentile endpoints at 2.5\% and 97.5\% define the 95\% confidence intervals.
 
 \subsection{Secondary McNemar Sensitivity Analysis}
-To evaluate sensitivity, we apply exact paired binomial McNemar tests to discordant pairs. Across all three methods of constructing pairs, no contrast approaches significance after Holm--Bonferroni correction ($p=1.0000$).
+To evaluate sensitivity, we apply exact paired binomial McNemar tests to discordant pairs. For the majority-vote analysis, all three Holm-adjusted $p$-values are 1.0000. The per-seed sensitivity analyses likewise yield no statistically significant contrast after Holm correction; the smallest adjusted $p$-value is 0.2780.
 
 \begin{table}[h]
 \centering
@@ -562,5 +605,19 @@ QuixBugs adaptation script & \texttt{scripts/build\_quixbugs.py} \\
 During preliminary zero-shot evaluation, free-form completions were evaluated with a generation limit of 300 tokens. Free-form responses typically emitted thorough analytical prose before outputting the code fix block. Consequently, completions routinely exhausted the 300-token limit before reaching the closing code fence, resulting in an 86.7\% extraction failure rate and an apparent solve rate of only 1.1\%. 
 
 Increasing the token limit to 700 tokens allowed models to complete both their analytical reasoning and the final code block, dropping extraction failures below 5\% and restoring the solve rate to 45.6\% (a 44.5 percentage point increase). This finding emphasizes that benchmark evaluation harnesses can introduce massive confounding effects that completely overshadow the algorithmic interventions under study.
+
+\section{NeurIPS Paper Checklist}
+\label{app:checklist}
+
+\begin{enumerate}
+\item \textbf{Claims:} All theoretical and empirical claims in the paper are matched by experimental evidence and bounded by explicit statistical uncertainty intervals.
+\item \textbf{Limitations:} Section 7 explicitly details limitations regarding model scale (3B), group size ($G=2$), single-turn structure, benchmark scope, and number of training seeds.
+\item \textbf{Theory Assumptions:} N/A (the paper is an empirical study of reward decomposition; no mathematical proofs are claimed).
+\item \textbf{Experimental Design:} Pre-registration, hardware environment, optimizer schedule, seeds (42, 123, 456), and paired bootstrap / McNemar protocols are described in Section 4 and Appendices~\ref{app:hyperparams} and~\ref{app:stats}.
+\item \textbf{Reproducibility:} Complete source code, environment specifications, raw evaluation logs, and configuration audit dumps are provided in the released repository (Appendix~\ref{app:artifact}).
+\item \textbf{Open Source \& Licenses:} MBPP (CC BY 4.0) and QuixBugs (MIT) are used in compliance with their open-source licenses.
+\item \textbf{Compute Resources:} Total GPU hours (approx. 75 hours on RTX 4090 24\,GB across calibration, pilot runs, and the 9 matrix runs) are documented.
+\item \textbf{Safety \& Ethics:} All model-generated code is strictly evaluated in an isolated AST-restricted, process-capped sandbox with zero network access and automatic timeouts to prevent denial-of-service or arbitrary code execution risks.
+\end{enumerate}
 
 \end{document}
