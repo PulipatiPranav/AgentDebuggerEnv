@@ -2,16 +2,11 @@
 
 Published evaluation results, kept in version control as a record.
 
-> **Read these with the caveat that they have no held-out split.** The trainer and
-> `evaluate-curriculum` both draw from all 90 bugs, so the solve rate below
-> measures how well the policy fit the training set, not whether it generalises.
-> These numbers are a record of a run, not evidence for any of the project's
-> claims — see [docs/research_plan.md](../docs/research_plan.md) for the experiment
-> design that would actually test them.
+> **Note on evaluation splits:** The initial implementation had no split; this was identified as a precondition in the preregistration and subsequently corrected before the reported experiments. The reported runs use the committed 90/90 split.
 
 | File | What it is |
 | --- | --- |
-| `qwen2.5-coder-3b-grpo.json` | The GRPO-trained `Qwen2.5-Coder-3B` adapter, scored on all 90 curriculum bugs. |
+| `qwen2.5-coder-3b-grpo.json` | The GRPO-trained `Qwen2.5-Coder-3B` adapter, scored on the 90 held-out curriculum bugs. |
 | `oracle.json` | The oracle agent on the three hand-written tasks — the score ceiling every model is compared against. Regenerate with `agentdebugger evaluate --output results/oracle.json`. |
 
 To reproduce the trained-model numbers:

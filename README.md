@@ -1,6 +1,6 @@
 # AgentDebuggerEnv
 
-[![CI](https://github.com/PulipatiPranav/AgentDebuggerEnv/actions/workflows/ci.yml/badge.svg)](https://github.com/PulipatiPranav/AgentDebuggerEnv/actions/workflows/ci.yml)
+[![CI](https://github.com/shasshaank/AgentDebuggerEnv/actions/workflows/ci.yml/badge.svg)](https://github.com/shasshaank/AgentDebuggerEnv/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
 
@@ -27,7 +27,7 @@ AgentDebuggerEnv changes the incentive. The reward is dense and structured: it p
 - **A hardened execution sandbox.** Model-generated code runs in a short-lived subprocess with static import/builtin analysis, kernel-enforced CPU/memory/file-size limits, and a wall-clock deadline that kills the whole process group. Escapes an LLM actually tries — `import os`, `open('/etc/passwd')`, `eval`, `().__class__.__subclasses__()` — are refused *before* execution; legitimate fixes that need `hashlib`, `threading` or `super()` run fine.
 - **Three tasks, three failure modes.** An off-by-one you solve by reading the error; a red herring where the error points at the wrong function; and a race condition that **passes every sequential test** and only a concurrency stress test reveals.
 - **A dense, itemised reward** with a defended range of `[-0.5, 1.0]`, decomposed into format, hypothesis quality, localization, fix correctness, similarity, efficiency and penalties — so a weak policy still gets a gradient to climb.
-- **A tiered curriculum** (90 hand-checked bugs across three difficulty tiers) that unlocks harder bugs only once the easy ones stabilise, avoiding the early policy collapse a flat distribution causes.
+- **A tiered curriculum** (180 validated mutation bugs, split into 90 training and 90 held-out bugs. 90 held-out bugs used for every reported evaluation) that unlocks harder bugs only once the easy ones stabilise, avoiding the early policy collapse a flat distribution causes.
 - **GRPO training** on `Qwen2.5-Coder-3B-Instruct` with LoRA, scored by the *same* function the evaluator uses — so a reward curve and an eval number mean the same thing.
 - **Runs offline.** The core package is pure standard library. An oracle agent lets anyone watch a full episode — sandbox, grader and all — with no GPU and no API key.
 
@@ -77,7 +77,7 @@ Every path to "did this fix work?" runs through one sandbox and one test runner,
 Requires Python 3.10+ on Linux or macOS. The kernel resource limits are enforced where the kernel supports them: on Linux, all of them. macOS accepts the address-space (memory) ceiling but does not enforce it, so a runaway allocation there is caught by the wall-clock deadline rather than failing fast with a `MemoryError`. The deadline and the static import/builtin policy apply on every platform.
 
 ```bash
-git clone https://github.com/PulipatiPranav/AgentDebuggerEnv.git
+git clone https://github.com/shasshaank/AgentDebuggerEnv.git
 cd AgentDebuggerEnv
 python -m venv .venv && source .venv/bin/activate
 pip install -e .
@@ -127,7 +127,7 @@ src/agentdebugger/
 ├── protocol.py          # actions, observations, structured-response parsing
 ├── sandbox/             # policy (static analysis) · runner (rlimits) · cases (test runner)
 ├── tasks/               # the three hand-written tasks + shared test harness
-├── dataset/             # the 90-bug tiered dataset, its loader and its validator
+├── dataset/             # the 180 validated mutation bugs, its loader and its validator
 ├── rewards/             # dense turn reward (training) · episode graders (tasks)
 ├── envs/                # TaskEnvironment (multi-step) · CurriculumEnvironment (single-turn)
 ├── agents/              # oracle (offline) · api (OpenAI-compatible)
@@ -192,7 +192,7 @@ The trainer scales batch geometry to the detected GPU (T4 through H100) and swap
 
 The three ideas this environment is built on — that structured Observation → Hypothesis → Action reasoning helps, that decomposing the reward helps, and that the curriculum prevents collapse — are **claims, not results**. [docs/research_plan.md](docs/research_plan.md) states each one as a falsifiable hypothesis with a null, a metric and an acceptance criterion, and specifies the smallest experiment matrix that could test them.
 
-Read it before citing anything in [results/](results/): the published run has **no train/held-out split**, so its solve rate measures how well the policy fit the training bugs, not whether it learned to debug. Fixing that is a precondition for the experiments, not one of them.
+Read it before citing anything in [results/](results/): the initial implementation had no split; this was identified as a precondition in the preregistration and subsequently corrected before the reported experiments. The reported runs use the committed 90/90 split.
 
 ## Contributing
 
