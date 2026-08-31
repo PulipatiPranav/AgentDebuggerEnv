@@ -27,7 +27,7 @@ from a stated assumption. Assumptions are marked **[A]**.
 > - *Hypotheses:* H1 (format) and H3 (curriculum collapse) were omitted from confirmatory testing to maintain full statistical power and replication on the central question (H2: reward decomposition).
 > - *Calibration Baseline:* Local Llama-3.1-8B-Instruct gating was used instead of GPT-4o-mini API calls.
 > 
-> **4. Outcome Summary:** On the 90 held-out bugs, R0 achieved 45.6\% $\pm$ 2.9\%, R1 achieved 48.5\% $\pm$ 6.5\%, and R2 achieved 48.5\% $\pm$ 3.9\% solve rate. Paired bootstrap analysis (10,000 resamples, seed 204 in `analysis/bootstrap.py`) yielded a 95\% CI of [$-$8.5, $+$2.6] pp for R0 $-$ R1. The dense reward significantly reduced degenerate GRPO groups (16.2\% vs 61.9\%) but did not produce a detectable improvement in held-out solve rate. See the accompanying paper (`docs/paper.pdf`) for the full report.
+> **4. Outcome Summary:** On the 90 held-out bugs, R0 achieved 45.6\% $\pm$ 2.9\%, R1 achieved 48.5\% $\pm$ 6.5\%, and R2 achieved 48.5\% $\pm$ 3.9\% solve rate. Paired bootstrap analysis (10,000 resamples, seed 204 in `analysis/bootstrap.py`) yielded a 95\% CI of [$-$8.5, $+$2.6] pp for R0 $-$ R1. The dense reward significantly reduced degenerate GRPO groups (16.2\% vs 61.9\%) but did not produce a detectable improvement in held-out solve rate. See the formal deviations in [docs/research_plan_amendment.md](research_plan_amendment.md) and the accompanying paper (`docs/paper_preprint.pdf`) for the full report.
 
 ---
 

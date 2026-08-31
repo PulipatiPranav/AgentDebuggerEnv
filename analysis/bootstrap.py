@@ -51,7 +51,7 @@ def bootstrap_ci(diff: np.ndarray, rng: np.random.Generator) -> tuple[float, flo
 
 def main() -> None:
     b0 = load(RESULTS / "B0.json")
-    b1 = load(RESULTS / "B1_retry_700tok.json")
+    b1 = load(RESULTS / "B1_700tok.json")
     arms = {
         arm: [load(RESULTS / f"{arm}_s{seed}.json") for seed in SEEDS]
         for arm in ("E1", "E3", "E4")
@@ -64,14 +64,16 @@ def main() -> None:
         for run_dict in arm_list:
             assert set(run_dict) == set(b0), "Mismatch in bug IDs between runs"
     
-    # Verify train/heldout disjointness
-    import json
-    train_file = DATASET / "train.jsonl"
-    heldout_file = DATASET / "heldout.jsonl"
-    if train_file.exists() and heldout_file.exists():
-        train_ids = {json.loads(line)["id"] for line in train_file.read_text().splitlines() if line.strip()}
-        heldout_ids = {json.loads(line)["id"] for line in heldout_file.read_text().splitlines() if line.strip()}
-        assert train_ids.isdisjoint(heldout_ids), "Train and heldout bug IDs overlap!"
+    # Verify train/heldout disjointness and exact split counts
+    split_file = DATASET / "split.json"
+    assert split_file.exists(), f"Missing split file: {split_file}"
+    split_data = json.loads(split_file.read_text(encoding="utf-8"))
+    train_ids = set(split_data["train"])
+    heldout_ids = set(split_data["heldout"])
+    assert train_ids.isdisjoint(heldout_ids), "Train and heldout bug IDs overlap!"
+    assert len(train_ids) == 90, f"Expected 90 train bugs, got {len(train_ids)}"
+    assert len(heldout_ids) == 90, f"Expected 90 held-out bugs, got {len(heldout_ids)}"
+    assert set(b0) == heldout_ids, "Evaluation bug IDs do not match the held-out split!"
 
     comparisons = (
         ("E1-E3", arms["E1"], arms["E3"]),

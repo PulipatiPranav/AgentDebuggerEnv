@@ -13,7 +13,7 @@ Controlled empirical study of reward decomposition for GRPO program repair.
 
 ### Added
 
-- **180-bug dataset with disjoint train/held-out split** (`data/v2/`): 90 training bugs and 90 held-out evaluation bugs stratified into Easy, Medium, and Hard tiers, resolving the single-split precondition of the pre-registration.
+- **180-bug dataset with disjoint train/held-out split** (`src/agentdebugger/dataset/bugs/`): 90 training bugs and 90 held-out evaluation bugs stratified into Easy, Medium, and Hard tiers, resolving the single-split precondition of the pre-registration.
 - **Nine primary RL training runs** across three reward configurations on `Qwen2.5-Coder-3B-Instruct`:
   - `E1` (R0 Full Dense): seeds 42, 123, 456
   - `E3` (R1 Graded Outcome): seeds 42, 123, 456
@@ -21,7 +21,7 @@ Controlled empirical study of reward decomposition for GRPO program repair.
   Saved with full per-bug evaluation records in [`results/primary/`](results/primary/).
 - **Paired statistical analysis suite** (`analysis/bootstrap.py`): 10,000 paired bootstrap iterations over bugs with fixed RNG seed (204), exact McNemar sensitivity tests, and Holm--Bonferroni corrections.
 - **Adapted QuixBugs benchmark** (`data/quixbugs/`): 27 single-function Python programs adapted for out-of-distribution evaluation.
-- **Scientific manuscript** (`docs/paper.pdf`, `docs/paper_anonymous.pdf`, `docs/paper_preprint.pdf`) with official NeurIPS 2026 formatting and full paper checklist.
+- **Scientific manuscript** (`docs/paper_preprint.pdf`) with official NeurIPS 2026 formatting and full reproducibility bounds.
 
 ### Changed
 

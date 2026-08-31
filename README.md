@@ -4,7 +4,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
 
-**A reinforcement-learning environment designed to evaluate structured diagnostic behavior in language-model debugging — observe, hypothesise, then fix.** An agent is shown broken Python and real test output, must state a hypothesis before it is allowed to run a fix, and every submission executes in a resource-limited sandbox that scores what it actually did.
+**A reinforcement-learning environment for training and evaluating language models on executable Python debugging tasks.** The environment supports structured diagnostic behavior and dense reward shaping; our controlled study finds that the richer reward does not improve held-out repair accuracy over executable outcome reward. An agent is shown broken Python and real test output, states a hypothesis before running a fix, and every submission executes in a resource-limited sandbox that scores what it actually did.
 
 <p align="center">
   <img src="docs/images/demo.gif" alt="An agent debugging a race condition in the terminal" width="720">
@@ -190,11 +190,11 @@ agentdebugger evaluate-curriculum --adapter <your-hf-repo> --split heldout
 
 The trainer scales batch geometry to the detected GPU (T4 through H100) and swaps the bug pool at each curriculum boundary. Primary per-bug evaluation outputs for all nine runs (E1, E3, E4 across seeds 42, 123, 456) are committed in [`results/primary/`](results/primary/).
 
-## Research plan & Controlled Study
+## Research Plan & Controlled Study
 
-The environment was evaluated under a pre-registered ablation study documented in [docs/research_plan.md](docs/research_plan.md). As specified in §4.4 of the plan, the initial single-split dataset was expanded to 180 verified mutation bugs (`data/v2/`) with a strict 90 train / 90 held-out partition before running the matrix. 
+The environment was evaluated under a pre-registered ablation study documented in [docs/research_plan.md](docs/research_plan.md), with documented protocol amendments in [docs/research_plan_amendment.md](docs/research_plan_amendment.md). As specified in §4.4 of the plan, the initial single-split dataset was expanded to 180 verified mutation bugs (`src/agentdebugger/dataset/bugs/`) with a strict 90 train / 90 held-out partition before running the matrix. 
 
-The empirical findings are detailed in our paper ([docs/paper.pdf](docs/paper.pdf)): dense reward shaping substantially reduces GRPO group degeneracy (from 61.9% to 16.2%), but does not produce a detectable improvement in held-out debugging solve rate (45.6% vs 48.5%, 95% CI [-8.5, +2.6] pp).
+The empirical findings are detailed in our paper ([docs/paper_preprint.pdf](docs/paper_preprint.pdf)): dense reward shaping substantially reduces GRPO group degeneracy (from 61.9% to 16.2%), but does not produce a detectable improvement in held-out debugging solve rate (45.6% vs 48.5%, 95% CI [-8.5, +2.6] pp).
 
 ## Contributing
 

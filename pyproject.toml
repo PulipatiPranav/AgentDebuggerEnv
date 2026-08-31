@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "agentdebugger"
-version = "0.1.0"
+version = "0.2.0"
 description = "A reinforcement learning environment where LLM agents debug Python code in a sandbox"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -55,11 +55,11 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/PulipatiPranav/AgentDebuggerEnv"
-Repository = "https://github.com/PulipatiPranav/AgentDebuggerEnv"
-Report = "https://github.com/PulipatiPranav/AgentDebuggerEnv/blob/main/docs/report.md"
-Changelog = "https://github.com/PulipatiPranav/AgentDebuggerEnv/blob/main/CHANGELOG.md"
-Issues = "https://github.com/PulipatiPranav/AgentDebuggerEnv/issues"
+Homepage = "https://github.com/shasshaank/AgentDebuggerEnv"
+Repository = "https://github.com/shasshaank/AgentDebuggerEnv"
+Report = "https://github.com/shasshaank/AgentDebuggerEnv/blob/main/docs/paper_preprint.pdf"
+Changelog = "https://github.com/shasshaank/AgentDebuggerEnv/blob/main/CHANGELOG.md"
+Issues = "https://github.com/shasshaank/AgentDebuggerEnv/issues"
 
 [project.scripts]
 agentdebugger = "agentdebugger.cli:main"
@@ -68,7 +68,7 @@ agentdebugger = "agentdebugger.cli:main"
 where = ["src"]
 
 [tool.setuptools.package-data]
-"agentdebugger.dataset" = ["bugs/*.jsonl", "bugs/*.json"]
+"agentdebugger.dataset" = ["bugs/*.jsonl", "bugs/*.json", "bugs/*.md"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

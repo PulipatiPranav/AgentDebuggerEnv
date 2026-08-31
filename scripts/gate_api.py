@@ -260,7 +260,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--bugs-dir",
         default=None,
-        help="score a v2 dataset directory (e.g. data/v2) instead of the packaged v1 set",
+        help="score an external dataset directory instead of the packaged dataset",
     )
     parser.add_argument(
         "--split",

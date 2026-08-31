@@ -17,7 +17,7 @@ flowchart TB
 
     subgraph envs["Environments"]
         task["TaskEnvironment<br/>multi-step, 3 tasks"]
-        curric["CurriculumEnvironment<br/>single-turn, 90 bugs"]
+        curric["CurriculumEnvironment<br/>single-turn, 180 bugs (90 train / 90 held-out)"]
     end
 
     subgraph rewards["Rewards"]
@@ -63,7 +63,7 @@ flowchart TB
 | `protocol` | Actions, observations, structured-response parsing | — |
 | `sandbox` | Static policy, resource-limited runner, test-case runner | `config` |
 | `tasks` | The three hand-written tasks and their test harness | `config`, `sandbox` |
-| `dataset` | The 90-bug tiered dataset, loader, and execution validator | `config`, `sandbox` |
+| `dataset` | The 180-bug tiered dataset (90 train / 90 held-out), loader, and execution validator | `config`, `sandbox` |
 | `rewards` | Dense turn reward (training) and episode graders (tasks) | `protocol`, `sandbox`, `tasks` |
 | `envs` | `TaskEnvironment` and `CurriculumEnvironment` | `protocol`, `rewards`, `sandbox`, `tasks`, `dataset` |
 | `agents` | Oracle (offline) and API (OpenAI-compatible) agents | `protocol`, `tasks` |

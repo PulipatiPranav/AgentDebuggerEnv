@@ -4,8 +4,8 @@
 # held-out split. Safe to re-run after an interruption (spot/preemptible GPU) --
 # anything already finished (checkpoint or report present) is skipped.
 #
-# Run the calibration run FIRST and separately (see docs/CONTEXT.md "Quick
-# reference"); this script is for the real matrix only, after you've picked
+# Run the calibration run FIRST and separately (see REPRODUCIBILITY.md);
+# this script is for the real matrix only, after you've picked
 # --reward-workers based on what the calibration run showed.
 #
 # Usage:

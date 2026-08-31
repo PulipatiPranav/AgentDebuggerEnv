@@ -22,7 +22,8 @@ wandb==0.18.0
 
 For exact reproducibility, we used:
 - **Base Model:** `Qwen/Qwen2.5-Coder-3B-Instruct`
-- **Dataset:** The built-in 180-bug dataset at commit `ab17937` (split exactly into 90 training and 90 held-out bugs).
+- **Dataset:** The packaged 180-bug dataset in `src/agentdebugger/dataset/bugs/` (split exactly into 90 training and 90 held-out bugs).
+- **Preregistration & Protocol Amendments:** The study design is preregistered in [`docs/research_plan.md`](docs/research_plan.md) with documented pre-execution amendments in [`docs/research_plan_amendment.md`](docs/research_plan_amendment.md).
 
 ## 1. Evaluating the Baselines (Zero-Shot)
 

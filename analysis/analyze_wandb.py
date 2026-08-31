@@ -4,16 +4,9 @@ The trainer creates a fresh GRPOTrainer at each curriculum boundary, so
 ``train/global_step`` resets at 150 and 350. This script reconstructs a
 cumulative step axis [0, 500) using those committed boundaries.
 """
-from __future__ import annotations
-
-import glob
 from pathlib import Path
 
 import pandas as pd
-
-ROOT = Path(__file__).resolve().parents[1]
-CSV_GLOB = str(ROOT.parent / "files" / "*_history.csv")
-# When run from a checkout, pass CSV_DIR explicitly if the files live elsewhere.
 
 
 def add_cumulative_step(df: pd.DataFrame) -> pd.DataFrame:
@@ -65,7 +58,11 @@ def main(csv_dir: str | None = None) -> None:
 if __name__ == "__main__":
     import argparse
 
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--csv-dir", default=".")
+    parser = argparse.ArgumentParser(description="Summarise W&B run histories for GRPO reward arms.")
+    parser.add_argument(
+        "--csv-dir",
+        default=".",
+        help="Directory containing exported W&B history CSVs (e.g., E1_s42_history.csv, ..., E4_s456_history.csv)",
+    )
     args = parser.parse_args()
     main(args.csv_dir)
