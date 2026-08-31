@@ -27,7 +27,7 @@
 \vspace{0.3cm}
 
 \begin{abstract}
-Hand-crafted reward decompositions are often used in reinforcement learning for language models to provide intermediate learning signals before a policy reliably achieves verifiable outcomes. We test whether such reasoning-targeted shaping improves GRPO training for program debugging. We train Qwen2.5-Coder-3B-Instruct with GRPO and LoRA on 90 single-function Python bugs under three pre-registered reward configurations: a seven-component dense reward (R0), a graded executable outcome reward with regression penalties (R1), and a dense reward with the two reasoning-targeted components removed (R2). All three RL configurations share the same model, data, prompts, optimizer, curriculum, and evaluation procedure. On 90 held-out bugs, R0 achieves a 45.6\% solve rate, compared with 48.5\% for R1 and 48.5\% for R2. Paired bootstrap analysis gives a 95\% interval of [$-$8.5, $+$2.6] percentage points for R0$-$R1, bounding any advantage for the dense reward below 2.6 pp and confirming statistical equivalence within an 8.5 pp margin. The nine RL runs achieve a pooled mean held-out solve rate of 47.5\%, which is 9.7 percentage points above the structured zero-shot baseline (37.8\%), but only 1.9 percentage points above the unconstrained free-form zero-shot baseline (45.6\%). This indicates that GRPO primarily accomplished format elicitation—recovering performance lost to rigid schema constraints—rather than a substantial increase in underlying repair capability. Crucially, under group size $G=2$, advantage standardization erases reward magnitude, converting any reward delta into sign-only advantages ($\pm 1$). Consequently, the 45.7 percentage point reduction in degenerate groups observed under R0 represents gradient updates driven by non-executable heuristic tie-breakers on identical test failures, rather than finer optimization toward functional correctness. An external evaluation on 27 adapted QuixBugs programs yields solve rates between 39.5\% and 44.4\%, showing that the policies do not collapse on out-of-distribution code; however, without an external zero-shot baseline, these measurements remain descriptive. The results demonstrate that hand-crafted reasoning-targeted reward engineering is not only unnecessary when executable outcome supervision is available, but under small group sizes can misallocate gradient updates to non-executable heuristics.
+Hand-crafted reward decompositions are often used in reinforcement learning for language models to provide intermediate learning signals before a policy reliably achieves verifiable outcomes. We test whether such reasoning-targeted shaping improves GRPO training for program debugging. We train Qwen2.5-Coder-3B-Instruct with GRPO and LoRA on 90 single-function Python bugs under three pre-registered reward configurations: a seven-component dense reward (R0), a graded executable outcome reward with regression penalties (R1), and a dense reward with the two reasoning-targeted components removed (R2). All three RL configurations share the same model, data, prompts, optimizer, curriculum, and evaluation procedure. On 90 held-out bugs, R0 achieves a 45.6\% solve rate, compared with 48.5\% for R1 and 48.5\% for R2. Paired bootstrap analysis gives a 95\% interval of [$-$8.5, $+$2.6] percentage points for R0$-$R1, ruling out an advantage for the dense reward larger than 2.6 percentage points at the reported confidence level. The nine RL runs achieve a pooled mean held-out solve rate of 47.5\%, which is 9.7 percentage points above the structured zero-shot baseline (37.8\%), but only 1.9 percentage points above the unconstrained free-form zero-shot baseline (45.6\%). This pattern is consistent with GRPO primarily recovering performance lost to the structured-response constraint rather than producing a large increase in underlying repair capability. Crucially, under group size $G=2$, sample standard deviation normalization eliminates the magnitude of reward differences, scaling any non-zero reward delta to the same absolute advantage magnitude ($\pm 1/\sqrt{2}$, ignoring the numerical stabilizer). Consequently, the 45.7 percentage point reduction in degenerate groups observed under R0 represents gradient updates driven by non-executable heuristic tie-breakers on identical test failures, rather than finer optimization toward functional correctness. An external evaluation on 27 adapted QuixBugs programs yields solve rates between 39.5\% and 44.4\%, showing that the policies do not collapse on out-of-distribution code; however, without an external zero-shot baseline, these measurements remain descriptive. The results demonstrate that hand-crafted reasoning-targeted reward engineering is not only unnecessary when executable outcome supervision is available, but under small group sizes can misallocate gradient updates to non-executable heuristics.
 \end{abstract}
 
 \section{Introduction}
@@ -35,17 +35,17 @@ Reinforcement learning from verifiable rewards has become an increasingly common
 
 The question is not whether dense rewards can increase the numerical reward assigned to intermediate behavior. They obviously can. The question is whether these additional signals improve the policy's eventual ability to produce test-passing fixes when the executable outcome remains available. We therefore hold the model, prompts, data, optimizer, curriculum, and evaluation fixed and vary only the reward decomposition. 
 
-Two structural characteristics of our setting govern how reward signals propagate. First, our setting is single-turn (the model produces the entire proposed fix in one completion), so intermediate reasoning is not an environment transition; dense components shape the scalar reward assigned to a complete response rather than providing temporal credit assignment across steps. Second, under group size $G=2$, GRPO advantage normalization scales every non-zero reward difference to unit magnitude ($\pm 1$). Reward magnitude is destroyed: any reward difference, however minor, yields a maximal gradient step. Dense shaping in this regime does not provide finer gradient scaling—it acts strictly as a tie-breaker.
+Two structural characteristics of our setting govern how reward signals propagate. First, our setting is single-turn (the model produces the entire proposed fix in one completion), so intermediate reasoning is not an environment transition; dense components shape the scalar reward assigned to a complete response rather than providing temporal credit assignment across steps. Second, under group size $G=2$, GRPO sample standard deviation normalization scales every non-zero reward difference to the same absolute advantage magnitude ($\pm 1/\sqrt{2}$, ignoring the numerical stabilizer). Reward magnitude is eliminated: any reward difference, however minor, yields the same gradient weight. Dense shaping in this regime does not provide finer gradient scaling—it acts strictly as a tie-breaker whenever it alters the relative ordering of two completions.
 
 We test this claim directly in a setting small enough to control completely. We built a debugging environment in which every candidate fix executes in a hardened sandbox against the bug's test cases, and a seven-component dense reward (R0) is implemented as a set of component ceilings on a single scoring class. An ablation is therefore a configuration, not a fork: R1 zeroes every shaping component and rescales the test-outcome term to the same range; R2 zeroes exactly the two reasoning-targeted components and keeps the rest. The three configurations were pre-registered, together with the hypotheses, statistical tests, and threats to validity, before any experiment ran.
 
-On 90 held-out bugs, we find no statistically detectable difference between the reward configurations. The graded outcome reward matches or slightly exceeds the full dense reward (48.5\% vs 45.6\%). Furthermore, while RL achieves a 9.7 percentage point gain over the structured zero-shot baseline (37.8\%), the unconstrained free-form zero-shot baseline reaches 45.6\% on the exact same held-out split. The actual gain of RL over the base model's unconstrained capability is only +1.9 pp (within seed noise), showing that RL primarily taught the model schema compliance.
+On 90 held-out bugs, we find no statistically detectable difference between the reward configurations. The graded outcome reward matches or slightly exceeds the full dense reward (48.5\% vs 45.6\%). Furthermore, while RL achieves a 9.7 percentage point gain over the structured zero-shot baseline (37.8\%), the unconstrained free-form zero-shot baseline reaches 45.6\% on the exact same held-out split. The actual gain of RL over the base model's unconstrained capability is only +1.9 pp (small relative to the across-seed variation observed among the RL arms), consistent with the policy primarily recovering performance lost to the structured-format constraint.
 
 Our contributions are:
 \begin{itemize}
 \item A controlled three-arm experiment isolating the effect of reasoning-targeted reward decomposition in GRPO program repair.
-\item An analysis showing that at $G=2$, dense shaping substantially reduces degenerate GRPO groups (from 61.9\% to 16.2\%) by converting identical test failures into heuristic tie-breakers, which fails to improve held-out repair.
-\item An empirical demonstration that RL's apparent +9.7 pp gain over structured zero-shot represents format elicitation rather than general repair improvement over the unrestricted free-form baseline (45.6\%).
+\item An analysis showing that at $G=2$, sample standard deviation normalization eliminates reward magnitude, so dense shaping reduces degenerate GRPO groups (from 61.9\% to 16.2\%) by converting identical test failures into same-magnitude heuristic tie-breakers, which fails to improve held-out repair.
+\item An empirical demonstration that RL's apparent +9.7 pp gain over structured zero-shot is consistent with recovering format-induced performance loss rather than general repair improvement over the unrestricted free-form baseline (45.6\%).
 \item A methodological case study on generation budget sensitivity and prompt-format penalties in code-RL evaluation.
 \end{itemize}
 
@@ -174,7 +174,7 @@ Penalties & \checkmark & \checkmark & \checkmark & $-0.55$ & Invalid/regression 
 \end{table}
 
 \subsection{Training}
-We train Qwen2.5-Coder-3B-Instruct using GRPO with LoRA on the 90 training bugs for 500 optimizer steps. For the 24\,GB GPU profile used in the reported runs, LoRA uses rank 8 and $\alpha=16$, with batch size 2, gradient accumulation of 4, group size $G=2$, and a maximum completion length of 192 tokens for structured responses (Appendix~\ref{app:hyperparams}). By contrast, final greedy evaluations use 300 tokens for structured responses and 700 tokens for free-form responses. This completion budget disparity introduces an asymmetric truncation dynamic during training: when a completion is truncated before emitting the code block in \texttt{DETAIL}, R1 awards zero credit (or penalties) because no executable patch exists. However, R0 still awards up to $+0.45$ for prefix fields (\texttt{OBSERVATION}, \texttt{HYPOTHESIS}, and \texttt{LOCALIZATION}) that precede the code block. Consequently, R0 actively reinforced truncated non-solutions with positive reward during training, while R1 treated them as total failures. We use AdamW with learning rate $2\times10^{-5}$, cosine scheduling, 30 warmup steps in the first curriculum stage, and sampling temperature 0.7. The curriculum exposes tier 1 for steps 0--149, tiers 1--2 for steps 150--349, and all three tiers for steps 350--499. All three RL configurations use the same training configuration and differ only in reward definition. Full hyperparameters are provided in Appendix~\ref{app:hyperparams}.
+We train Qwen2.5-Coder-3B-Instruct using GRPO with LoRA on the 90 training bugs for 500 optimizer steps. For the 24\,GB GPU profile used in the reported runs, LoRA uses rank 8 and $\alpha=16$, with batch size 2, gradient accumulation of 4, group size $G=2$, and a maximum completion length of 192 tokens for structured responses (Appendix~\ref{app:hyperparams}). By contrast, final greedy evaluations use 300 tokens for structured responses and 700 tokens for free-form responses. This completion budget disparity introduces an asymmetric truncation dynamic during training: when a completion is truncated before emitting the code block in \texttt{DETAIL}, R1 awards zero credit (or penalties) because no executable patch exists. However, R0 still awards up to $+0.45$ for prefix fields (\texttt{OBSERVATION}, \texttt{HYPOTHESIS}, and \texttt{LOCALIZATION}) that precede the code block. Consequently, R0 actively reinforced truncated non-solutions with positive reward during training, while R1 treated them as total failures. The reward intervention is therefore partially coupled to completion truncation: under the 192-token training budget, R0 can assign positive diagnostic credit to truncated responses whereas R1 cannot. We treat this as part of the tested reward configuration rather than an implementation artifact, but it limits interpretation of the result as a pure comparison of reward density. We use AdamW with learning rate $2\times10^{-5}$, cosine scheduling, 30 warmup steps in the first curriculum stage, and sampling temperature 0.7. The curriculum exposes tier 1 for steps 0--149, tiers 1--2 for steps 150--349, and all three tiers for steps 350--499. All three RL configurations use the same training configuration and differ only in reward definition. Full hyperparameters are provided in Appendix~\ref{app:hyperparams}.
 
 \section{Experimental Design}
 
@@ -195,7 +195,7 @@ Final evaluations use greedy decoding (temperature 0.0) on the 90 held-out bugs.
 \subsection{Statistical Analysis}
 Our primary analysis uses bug-level paired bootstrap intervals, averaging solve indicators across the three seeds before resampling bugs. For each bug $i$, we compute the seed-averaged solve indicator $\bar{s}_{i,\text{arm}} = \frac{1}{3}\sum_{k=1}^{3}s_{i,\text{arm},k}$. We bootstrap the $N=90$ bugs to compute the difference $\Delta = \frac{1}{N}\sum_i (\bar{s}_{i,\text{arm}_A}-\bar{s}_{i,\text{arm}_B})$. The primary bootstrap resamples evaluation bugs and therefore quantifies uncertainty over the evaluation-bug population conditional on the three observed training seeds. 
 
-With $N=90$ paired bugs and 3 training seeds, a standard power analysis ($\alpha=0.05$, two-tailed, power $1-\beta=0.80$) reveals that the minimum detectable effect (MDE) is approximately 16 percentage points for paired differences. The experiment is therefore powered primarily for large shifts in policy capability; subtle differences of a few percentage points cannot be detected. To provide a rigorous interpretation of the null result, we evaluate equivalence using a Two One-Sided Tests (TOST) framework: the 95\% bootstrap confidence interval for R0$-$R1 of [$-$8.5, $+$2.6] pp allows us to reject benefits of R0 over R1 greater than $+2.6$ pp, confirming that R0 and R1 are statistically equivalent within an 8.5 pp equivalence band. As a secondary sensitivity check, we apply exact McNemar tests~\cite{McNemar1947} to binary paired outcomes defined by majority vote across seeds (a bug is solved if $\ge 2/3$ seeds solve it), as well as per-seed paired evaluations (Appendix~\ref{app:stats}); across all comparisons, no contrast approaches statistical significance.
+With $N=90$ paired bugs and 3 training seeds, a standard power analysis ($\alpha=0.05$, two-tailed, power $1-\beta=0.80$) reveals that the minimum detectable effect (MDE) is approximately 16 percentage points for paired differences. The experiment is therefore powered primarily for large shifts in policy capability; subtle differences of a few percentage points cannot be detected. The 95\% bootstrap confidence interval for R0$-$R1 of [$-$8.5, $+$2.6] pp rules out a dense-reward advantage larger than 2.6 percentage points at the reported confidence level, while being consistent with small negative or near-zero differences. As a secondary sensitivity check, we apply exact McNemar tests~\cite{McNemar1947} to binary paired outcomes defined by majority vote across seeds (a bug is solved if $\ge 2/3$ seeds solve it), as well as per-seed paired evaluations (Appendix~\ref{app:stats}); across all comparisons, no contrast approaches statistical significance.
 
 \paragraph{Deviations from Preregistration.}
 The final study differs from the pre-registration specification in four material ways, all established prior to final matrix analysis:
@@ -249,7 +249,7 @@ E4 (R2 No Reasoning)      & 51.5\% $\pm$ 3.6 & 48.5\% $\pm$ 3.9 & 44.4\% $\pm$ 3
 \end{table}
 
 \subsection{Main Reward Comparison (Confirmatory)}
-\textbf{Main result.} The full dense reward does not improve held-out debugging success relative to either ablated configuration. R0 solves 45.6\% of held-out bugs, versus 48.5\% for both R1 and R2. The point estimate therefore favors the simpler configurations, but the paired bootstrap interval for R0$-$R1, [$-$8.5, $+$2.6] percentage points, includes zero. Under our TOST equivalence framework, this interval rejects advantages for R0 greater than $+2.6$ pp and confirms equivalence within an 8.5 pp margin. We note that the value 45.6\% appears in three places in our data: (1) E1's held-out mean across three seeds (123/270 = 45.56\%), (2) the corrected free-form zero-shot baseline B1 (41/90 = 45.56\%), and (3) the recovered solve rate in the evaluation-harness analysis (§\ref{sec:harness}). All three refer to exact evaluations on the same 90 held-out bugs and reflect identical arithmetic proportions rather than a data-entry artifact.
+\textbf{Main result.} The full dense reward does not improve held-out debugging success relative to either ablated configuration. R0 solves 45.6\% of held-out bugs, versus 48.5\% for both R1 and R2. The point estimate therefore favors the simpler configurations, but the paired bootstrap interval for R0$-$R1, [$-$8.5, $+$2.6] percentage points, includes zero. This interval rules out a dense-reward advantage larger than 2.6 percentage points at the reported 95\% confidence level. We note that the value 45.6\% appears in three places in our data: (1) E1's held-out mean across three seeds (123/270 = 45.56\%), (2) the corrected free-form zero-shot baseline B1 (41/90 = 45.56\%), and (3) the recovered solve rate in the evaluation-harness analysis (§\ref{sec:harness}). All three refer to exact evaluations on the same 90 held-out bugs and reflect identical arithmetic proportions rather than a data-entry artifact.
 
 \begin{table}[h]
 \centering
@@ -272,13 +272,13 @@ All three pairwise comparisons yield no statistically detectable difference afte
 \subsection{Reward Degeneracy and the G=2 Mechanism (Exploratory)}
 The reward configurations produce substantially different GRPO training signals. Across logged training calls, the mean fraction of degenerate sampled groups (where all samples in a group receive rewards within the configured degeneracy tolerance $\Delta R < 10^{-6}$, resulting in zero relative advantage) was 16.2\% $\pm$ 2.2\% for R0 (individual seed means: 14.4\%, 15.6\%, 18.6\%), 61.9\% $\pm$ 4.2\% for R1 (seed means: 62.3\%, 65.9\%, 57.5\%), and 34.7\% $\pm$ 3.9\% for R2 (seed means: 38.3\%, 30.5\%, 35.3\%). The dense reward substantially reduces the frequency of groups in which sampled completions receive indistinguishable outcomes ($R0 - R1 = -45.7$ pp).
 
-However, analyzing the advantage normalization mechanism under group size $G=2$ explains why this large reduction in degeneracy failed to improve held-out repair. For group size $G=2$, GRPO standardizes advantages using the sample mean $\mu = (R_1 + R_2)/2$ and standard deviation $\sigma = |R_1 - R_2|/2$. Whenever $R_1 \ne R_2$, the normalized advantage for the first sample simplifies to:
+However, analyzing the advantage normalization mechanism under group size $G=2$ explains why this large reduction in degeneracy failed to improve held-out repair. For group size $G=2$, the standard deviation normalization removes the magnitude of the reward difference. With sampled rewards $R_1$ and $R_2$, the group mean is $\mu=(R_1+R_2)/2$ and the sample standard deviation used by our TRL implementation is $\sigma=|R_1-R_2|/\sqrt{2}$. Ignoring the small numerical stabilizer ($10^{-4}$), the normalized advantages are therefore:
 \begin{equation}
-A_1 = \frac{R_1 - \mu}{\sigma} = \frac{R_1 - R_2}{|R_1 - R_2|} = \operatorname{sign}(R_1 - R_2) \in \{+1, -1\}
+A_1 = \frac{R_1-\mu}{\sigma} = \frac{(R_1-R_2)/2}{|R_1-R_2|/\sqrt{2}} = \frac{1}{\sqrt{2}}\operatorname{sign}(R_1-R_2), \qquad A_2 = -A_1
 \end{equation}
-Under $G=2$, advantage standardization completely eliminates reward magnitude. Whether one patch is better than another by 0.001 or 1.0, the gradient receives the same unit weight. In R1 (outcome-only), when both sampled completions fail all test cases, $R_1 = R_2 = 0$, producing a degenerate group with zero advantage and no parameter update. In R0 (dense reward), even when both completions fail all tests, heuristic shaping components (such as minor variations in hypothesis phrasing, keyword presence, or reference token similarity) routinely produce unequal scalar rewards ($R_1 \ne R_2$). Under $G=2$, this assigns full-magnitude $\pm 1$ advantage steps to one completion over the other. 
+Thus, the key structural property is not the exact numerical magnitude of the advantage ($\pm 1/\sqrt{2}$), but that its magnitude is completely independent of the size of the reward difference. A reward gap of $0.001$ and a gap of $0.5$ produce the exact same absolute advantage magnitude. Under $G=2$, dense shaping therefore acts primarily as a tie-breaker whenever it alters the relative ordering of the two completions.
 
-The 45.7 pp reduction in degenerate groups observed under R0 thus represents gradient steps taken along non-test heuristic directions when both candidate solutions completely failed to repair the bug. R0 converted degenerate ties into sign-only signals driven by heuristics rather than code correctness.
+In R1 (outcome-only), when both sampled completions fail all test cases, $R_1 = R_2 = 0$, producing a degenerate group with zero advantage and no parameter update. In R0 (dense reward), even when both completions fail all tests, heuristic shaping components (such as minor variations in hypothesis phrasing, keyword presence, or reference token similarity) routinely produce unequal scalar rewards ($R_1 \ne R_2$). Under $G=2$, this assigns full-magnitude ($\pm 1/\sqrt{2}$) advantage steps to one completion over the other. The 45.7 pp reduction in degenerate groups observed under R0 thus represents gradient steps taken along non-test heuristic directions when both candidate solutions completely failed to repair the bug. R0 converted degenerate ties into same-magnitude heuristic signals rather than true progress toward code correctness.
 
 \begin{figure*}[t]
 \centering
@@ -386,10 +386,10 @@ The 45.7 pp reduction in degenerate groups observed under R0 thus represents gra
 
 However, this difference does not translate into higher held-out solve rate. R1 also exhibits greater across-seed variance (std dev $\pm 6.5$ vs $\pm 2.9$), consistent with---but insufficient to establish---the hypothesis that increased reward degeneracy produces noisier, less stable optimization. Three seeds are insufficient for a formal variance comparison. This establishes an association between reward configuration and group degeneracy, not a causal relationship between degeneracy and final performance.
 
-\subsection{Baseline Comparison and Generalization (Confirmatory)}
-Comparing the nine RL runs against zero-shot baselines illuminates the source of the observed performance change. Against the structured zero-shot baseline B0 (37.8\%), the pooled RL runs (mean 47.5\%) show an apparent gain of +9.7 percentage points (bootstrap 95\% CI [1.0, 18.5]). However, the free-form zero-shot baseline with adequate generation budget (B1 corrected) achieves 45.6\% on the exact same 90 held-out bugs. Relative to this unconstrained zero-shot baseline, the best RL configuration (48.5\%) provides an increase of only +2.9 percentage points, and the pooled RL gain is only +1.9 percentage points—both well within seed noise. 
+\subsection{Zero-Shot Baselines and Format Analysis (Exploratory)}
+Comparing the nine RL runs against zero-shot baselines illuminates the source of the observed performance change. Against the structured zero-shot baseline B0 (37.8\%), the pooled RL runs (mean 47.5\%) show an apparent gain of +9.7 percentage points (bootstrap 95\% CI [1.0, 18.5]). However, the free-form zero-shot baseline with adequate generation budget (B1 corrected) achieves 45.6\% on the exact same 90 held-out bugs. Relative to this unconstrained zero-shot baseline, the best RL configuration (48.5\%) provides an increase of only +2.9 percentage points, and the pooled RL gain is only +1.9 percentage points—small relative to the across-seed variation observed among the RL arms (e.g., standard deviation of $\pm 6.5$ pp in R1).
 
-This comparison reveals that imposing the rigid five-field structured format initially penalized the pre-trained base model, dropping its solve rate from 45.6\% to 37.8\% (a 7.8 pp penalty). RL training on the structured prompt largely served to elicit format compliance—teaching the model to produce valid code within the schema constraints and recovering the lost performance—rather than significantly elevating underlying program repair capability over unconstrained generation. The train--held-out gap across the nine RL runs is approximately 6 percentage points (52.6\% vs 47.5\%), showing modest in-distribution overfitting.
+This comparison reveals that imposing the rigid five-field structured format initially penalized the pre-trained base model, dropping its solve rate from 45.6\% to 37.8\% (a 7.8 pp penalty). This pattern is consistent with GRPO primarily recovering performance lost to the structured-response constraint rather than producing a large increase in underlying repair capability over unconstrained generation. The train--held-out gap across the nine RL runs is approximately 6 percentage points (52.6\% vs 47.5\%), showing modest in-distribution overfitting.
 
 \subsection{External-Source Transfer (Exploratory)}
 We evaluate the trained policies on a 27-program external set adapted from QuixBugs. E1, E3, and E4 achieve 39.5\% $\pm$ 2.1\%, 43.2\% $\pm$ 5.7\%, and 44.4\% $\pm$ 3.7\%, respectively. These numbers establish that the policies maintain basic repair capability outside the synthetic MBPP mutation distribution. However, because we did not evaluate an untrained zero-shot B0 baseline on this external set, these measurements cannot distinguish whether this performance reflects transfer acquired through RL training or simply the base model's pre-existing code generation competence. We therefore report them strictly as descriptive out-of-distribution observations rather than evidence of an RL transfer advantage.
@@ -422,17 +422,17 @@ The seven-component reward introduces hundreds of lines of heuristic scoring log
 \subsection{Why Did Dense Reward Fail to Improve Solve Rate?}
 Three complementary mechanisms explain this result:
 \begin{enumerate}
-\item \textbf{Sign-only gradients under $G=2$:} As shown in Equation 4, GRPO advantage normalization at $G=2$ completely eliminates reward magnitude ($A = \pm 1$). In groups where both completions fail all tests, R1 yields zero gradient, whereas R0 assigns full-scale gradient updates driven by heuristic tie-breakers (format compliance, keyword matching, reference similarity). R0 thus allocated substantial gradient mass to directions orthogonal to bug fixing.
-\item \textbf{Asymmetric truncation during training:} With training completions capped at 192 tokens on 24\,GB hardware, cut-off completions that failed to emit code received zero reward under R1, but collected up to $+0.45$ under R0 for prefix diagnostic fields. R0 actively reinforced truncated non-solutions.
-\item \textbf{Reward-agnostic elicitation in pre-trained models:} Consistent with the findings of Shao et al.~\cite{Shao2025Spurious}, RLVR on open reasoning models often functions as format elicitation and latent knowledge activation rather than reward-guided search. This is reinforced by our baseline comparison: RL gained only +1.9 pp over the model's natural free-form baseline (45.6\%), indicating that training primarily taught the model to comply with the five-field schema rather than discovering new repair heuristics.
+\item \textbf{Equal-magnitude advantages under $G=2$:} As derived in Equation 4, sample standard deviation normalization at $G=2$ eliminates the magnitude of reward differences ($|A| = 1/\sqrt{2}$). In groups where both completions fail all tests, R1 yields zero gradient, whereas R0 assigns equal-magnitude gradient updates driven by heuristic tie-breakers (format compliance, keyword matching, reference similarity). R0 thus allocated substantial gradient mass to directions orthogonal to bug fixing.
+\item \textbf{Asymmetric truncation during training:} With training completions capped at 192 tokens on 24\,GB hardware, cut-off completions that failed to emit code received zero reward under R1, but collected up to $+0.45$ under R0 for prefix diagnostic fields. The reward intervention is therefore partially coupled to completion truncation: under the 192-token training budget, R0 can assign positive diagnostic credit to truncated responses whereas R1 cannot. We treat this as part of the tested reward configuration rather than an implementation artifact, but it limits interpretation of the result as a pure comparison of reward density.
+\item \textbf{Reward-agnostic elicitation in pre-trained models:} Consistent with the findings of Shao et al.~\cite{Shao2025Spurious}, RLVR on open reasoning models often functions as format elicitation and latent knowledge activation rather than reward-guided search. This is reinforced by our baseline comparison: RL gained only +1.9 pp over the model's natural free-form baseline (45.6\%), consistent with the interpretation that training primarily elicited schema compliance rather than discovering fundamentally new repair heuristics.
 \end{enumerate}
 
 \section{Limitations and Scope}
 \begin{itemize}
 \item \textbf{Model scale:} Only Qwen2.5-Coder-3B.
 \item \textbf{Algorithm:} Only GRPO.
-\item \textbf{Group size $G=2$:} Normalizing advantages at $G=2$ converts all non-zero reward differences into sign-only advantages ($\pm 1$), preventing dense shaping from providing proportional gradient scaling.
-\item \textbf{Completion budget disparity:} Training used a 192-token completion cap, asymmetrically rewarding truncated non-solutions under R0 (+0.45 for prefix fields) while penalizing them under R1. Evaluation used 300 tokens for structured and 700 for free-form.
+\item \textbf{Group size $G=2$:} Sample standard deviation normalization at $G=2$ eliminates reward magnitude, scaling all non-zero reward differences to the same absolute advantage ($\pm 1/\sqrt{2}$). This prevents dense shaping from providing proportional gradient scaling and reduces its role to a tie-breaker.
+\item \textbf{Completion budget disparity and truncation coupling:} Training used a 192-token completion cap, asymmetrically rewarding truncated non-solutions under R0 (+0.45 for prefix fields) while awarding zero under R1. Evaluation used 300 tokens for structured and 700 for free-form.
 \item \textbf{Task structure:} Single-function, single-turn. Multi-step debugging may present a different regime in which intermediate rewards could be substantially more valuable.
 \item \textbf{Bug distribution:} Mutation-generated MBPP bugs.
 \item \textbf{Transfer set:} Only 27 adapted QuixBugs programs evaluated without a zero-shot baseline, rendering external numbers descriptive.
@@ -639,93 +639,5 @@ QuixBugs adaptation script & \texttt{scripts/build\_quixbugs.py} \\
 During preliminary zero-shot evaluation, free-form completions were evaluated with a generation limit of 300 tokens. Free-form responses typically emitted thorough analytical prose before outputting the code fix block. Consequently, completions routinely exhausted the 300-token limit before reaching the closing code fence, resulting in an 86.7\% extraction failure rate and an apparent solve rate of only 1.1\%. 
 
 Increasing the token limit to 700 tokens allowed models to complete both their analytical reasoning and the final code block, dropping extraction failures below 5\% and restoring the solve rate to 45.6\% (a 44.5 percentage point increase). This finding emphasizes that benchmark evaluation harnesses can introduce massive confounding effects that completely overshadow the algorithmic interventions under study.
-
-\clearpage
-\section{NeurIPS Paper Checklist}
-\label{app:checklist}
-
-\begin{enumerate}
-
-\item[] \textbf{1. Claims} \hfill \textbf{[Yes]}
-\item[] \textit{Question:} Do the main claims made in the abstract and introduction accurately reflect the paper's contributions and scope?
-\item[] \textit{Answer:} \textbf{Yes.}
-\item[] \textit{Justification:} The main claims in the abstract and introduction explicitly match the empirical findings, state the negative results, and provide paired bootstrap confidence intervals. See Sections 1 and 5.
-
-\item[] \textbf{2. Limitations} \hfill \textbf{[Yes]}
-\item[] \textit{Question:} Have the authors discussed the limitations of their work?
-\item[] \textit{Answer:} \textbf{Yes.}
-\item[] \textit{Justification:} Section 7 is dedicated to limitations and scope, detailing model scale (3B), group size ($G=2$), single-turn structure, benchmark distribution, and seed counts.
-
-\item[] \textbf{3. Theory, Assumptions and Proofs} \hfill \textbf{[NA]}
-\item[] \textit{Question:} If you are including theoretical results, did you state the full set of assumptions and include complete proofs?
-\item[] \textit{Answer:} \textbf{NA.}
-\item[] \textit{Justification:} This is an empirical study evaluating reinforcement learning reward decomposition; no formal mathematical proofs or theorems are claimed.
-
-\item[] \textbf{4. Experimental Result Reproducibility} \hfill \textbf{[Yes]}
-\item[] \textit{Question:} If the contribution is a dataset or model, what steps did you take to make your results reproducible or verifiable?
-\item[] \textit{Answer:} \textbf{Yes.}
-\item[] \textit{Justification:} Complete environment specifications, hyperparameters, random seeds, and reproduction steps are provided in Section 4 and Appendices~\ref{app:hyperparams} and~\ref{app:artifact}.
-
-\item[] \textbf{5. Open Access to Data and Code} \hfill \textbf{[Yes]}
-\item[] \textit{Question:} Did you include the code, data, and instructions needed to reproduce the main experimental results?
-\item[] \textit{Answer:} \textbf{Yes.}
-\item[] \textit{Justification:} All code, dataset splits, reward implementations, and evaluation scripts are released in the accompanying artifact repository (Appendix~\ref{app:artifact}).
-
-\item[] \textbf{6. Experimental Setting / Details} \hfill \textbf{[Yes]}
-\item[] \textit{Question:} Did you specify all the training details (e.g., data splits, hyperparameters, how they were chosen)?
-\item[] \textit{Answer:} \textbf{Yes.}
-\item[] \textit{Justification:} Hardware profiles, LoRA ranks, optimizer settings, batch geometry, and curriculum stages are detailed in Section 3.5 and Appendix~\ref{app:hyperparams}.
-
-\item[] \textbf{7. Experiment Statistical Significance} \hfill \textbf{[Yes]}
-\item[] \textit{Question:} Does the paper report error bars suitably and correctly defined or other appropriate information about the statistical significance of the experiments?
-\item[] \textit{Answer:} \textbf{Yes.}
-\item[] \textit{Justification:} We report bug-level paired bootstrap 95\% confidence intervals (10,000 resamples), exact McNemar tests with Holm--Bonferroni correction, and across-seed standard deviations in Section 5 and Appendix~\ref{app:stats}.
-
-\item[] \textbf{8. Experiments Compute Resource} \hfill \textbf{[Yes]}
-\item[] \textit{Question:} For each experiment, does the paper provide sufficient information on the computer resources needed to reproduce the experiments?
-\item[] \textit{Answer:} \textbf{Yes.}
-\item[] \textit{Justification:} Compute resources (24\,GB RTX 4090 GPUs, approx. 75 total GPU hours across calibration, pilots, and the 9 matrix runs) are documented in Section 3.5 and Appendix~\ref{app:hyperparams}.
-
-\item[] \textbf{9. Code of Ethics} \hfill \textbf{[Yes]}
-\item[] \textit{Question:} Have you read the NeurIPS Code of Ethics and ensured that your research conforms to it?
-\item[] \textit{Answer:} \textbf{Yes.}
-\item[] \textit{Justification:} We have read the NeurIPS Code of Ethics and confirmed our research conforms to it.
-
-\item[] \textbf{10. Broader Impacts} \hfill \textbf{[Yes]}
-\item[] \textit{Question:} If appropriate for the scope and focus of your paper, did you discuss potential negative societal impacts of your work?
-\item[] \textit{Answer:} \textbf{Yes.}
-\item[] \textit{Justification:} We study automated code repair in sandboxed environments. While autonomous code modification could theoretically introduce defects if deployed without human oversight, all code execution in this work occurs in an isolated, resource-capped sandbox (Section 3.2).
-
-\item[] \textbf{11. Safeguards} \hfill \textbf{[NA]}
-\item[] \textit{Question:} Do you have safeguards in place for responsible release of models with a high risk for misuse?
-\item[] \textit{Answer:} \textbf{NA.}
-\item[] \textit{Justification:} The released models are small-scale (3B parameter) LoRA adapters fine-tuned solely on single-function Python bug fixes, posing no high risk of misuse or dual-use.
-
-\item[] \textbf{12. Licenses} \hfill \textbf{[Yes]}
-\item[] \textit{Question:} If you are using existing assets, did you cite the creators and respect the license and terms of use?
-\item[] \textit{Answer:} \textbf{Yes.}
-\item[] \textit{Justification:} All existing assets used—MBPP (CC BY 4.0) and QuixBugs (MIT)—are cited and used in compliance with their licenses. Our repository is released under the MIT license.
-
-\item[] \textbf{13. Assets} \hfill \textbf{[Yes]}
-\item[] \textit{Question:} If you are releasing new assets, did you document them and provide these details alongside the assets?
-\item[] \textit{Answer:} \textbf{Yes.}
-\item[] \textit{Justification:} Details of the mutated MBPP dataset (180 bugs) and adapted QuixBugs benchmark (27 programs) are documented with structured data cards and schemas in Appendix~\ref{app:quixbugs} and \texttt{data/quixbugs/DATACARD.md}.
-
-\item[] \textbf{14. Crowdsourcing and Research with Human Subjects} \hfill \textbf{[NA]}
-\item[] \textit{Question:} If you used crowdsourcing or conducted research with human subjects, did you include full instructions and compensation details?
-\item[] \textit{Answer:} \textbf{NA.}
-\item[] \textit{Justification:} This research does not involve human subjects or crowdsourcing.
-
-\item[] \textbf{15. IRB Approvals} \hfill \textbf{[NA]}
-\item[] \textit{Question:} Did you describe potential participant risks and obtain Institutional Review Board (IRB) approvals?
-\item[] \textit{Answer:} \textbf{NA.}
-\item[] \textit{Justification:} No human subjects or sensitive personal data were involved in this work.
-
-\item[] \textbf{16. Declaration of LLM usage} \hfill \textbf{[NA]}
-\item[] \textit{Question:} Does the paper describe the usage of LLMs if it is an important, original, or non-standard component of the core methods?
-\item[] \textit{Answer:} \textbf{NA.}
-\item[] \textit{Justification:} Language models are the object of empirical study in our research, rather than a component used to write, edit, or generate the core findings of the paper.
-
-\end{enumerate}
 
 \end{document}
