@@ -1,0 +1,141 @@
+% neurips_2026.sty - NeurIPS 2026 LaTeX style file
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{neurips_2026}[2026/01/01 NeurIPS 2026 submission/preprint style]
+
+\newif\if@neuripsfinal\@neuripsfinalfalse
+\newif\if@neuripssubmission\@neuripssubmissionfalse
+\newif\if@neuripspreprint\@neuripspreprintfalse
+
+\DeclareOption{final}{\@neuripsfinaltrue}
+\DeclareOption{submission}{\@neuripssubmissiontrue}
+\DeclareOption{preprint}{\@neuripspreprinttrue}
+\ProcessOptions\relax
+
+% Default to submission mode if neither final nor preprint is specified
+\if@neuripsfinal
+\else
+  \if@neuripspreprint
+  \else
+    \@neuripssubmissiontrue
+  \fi
+\fi
+
+\RequirePackage{geometry}
+\geometry{
+  letterpaper,
+  textwidth=5.5in,
+  textheight=9.0in,
+  top=1.0in,
+  headheight=12pt,
+  headsep=25pt,
+  footskip=30pt
+}
+
+\renewcommand{\rmdefault}{ptm}
+
+\if@neuripssubmission
+  \RequirePackage{lineno}
+  \renewcommand\linenumberfont{\normalfont\tiny\rmfamily}
+  \linenumbers
+\fi
+
+% Running headers
+\RequirePackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+\fancyhead[C]{\if@neuripsfinal
+  \small 40th Conference on Neural Information Processing Systems (NeurIPS 2026).%
+\else\if@neuripspreprint
+  \small Preprint.%
+\else
+  \small Submitted to 40th Conference on Neural Information Processing Systems (NeurIPS 2026). Do not distribute.%
+\fi\fi}
+\fancyfoot[C]{\thepage}
+
+% Title and Author
+\def\maketitle{%
+  \par
+  \begingroup
+    \renewcommand\thefootnote{\@fnsymbol\c@footnote}%
+    \def\@makefnmark{\rlap{\@textsuperscript{\normalfont\@thefnmark}}}%
+    \long\def\@makefntext##1{\parindent 1em\noindent
+            \hb@xt@1.8em{%
+                \hss\@textsuperscript{\normalfont\@thefnmark}}##1}%
+    \newpage
+    \global\@topnum\z@
+    \@maketitle
+    \@thanks
+  \endgroup
+  \setcounter{footnote}{0}%
+  \let\thanks\relax
+  \let\maketitle\relax
+  \let\@maketitle\relax
+  \let\title\relax
+  \let\author\relax
+  \let\date\relax
+  \let\and\relax
+}
+
+\def\@maketitle{%
+  \vbox to 2.5in{%
+    \hsize\textwidth
+    \linewidth\hsize
+    \vfil
+    \centering
+    {\LARGE\bf \@title \par}
+    \vskip 0.2in
+    \if@neuripssubmission
+      {\large\bf Anonymous Authors}\\[0.5ex]
+      {\small Anonymous Institution(s)}\par
+    \else
+      {\def\and{\unskip\enspace{\rm and}\enspace}%
+       \def\And{\end{tabular}\hss \egroup \hskip 1in plus 2fil 
+                \hbox to 0pt\bgroup\hss \begin{tabular}[t]{c}\bf}%
+       \def\AND{\end{tabular}\hss\egroup \hfil\hfil\egroup
+                \vskip 0.2in
+                \hbox to \linewidth\bgroup\hfil\hfil
+                \hbox to 0pt\bgroup\hss \begin{tabular}[t]{c}\bf}
+       \hbox to \linewidth\bgroup\hfil\hfil
+       \hbox to 0pt\bgroup\hss \begin{tabular}[t]{c}\bf\@author 
+       \end{tabular}\hss\egroup
+       \hfil\hfil\egroup}
+    \fi
+    \vfil
+  }%
+}
+
+% Abstract environment
+\renewenvironment{abstract}%
+{%
+  \vskip 0.075in%
+  \centerline%
+  {\large\bf Abstract}%
+  \vspace{0.5ex}%
+  \begin{quote}%
+}%
+{
+  \par%
+  \end{quote}%
+  \vskip 1ex%
+}
+
+% Section headings
+\renewcommand\section{\@startsection {section}{1}{\z@}%
+                                   {-2.5ex \@plus -1ex \@minus -.2ex}%
+                                   {1.3ex \@plus.2ex}%
+                                   {\normalfont\large\bfseries}}
+\renewcommand\subsection{\@startsection{subsection}{2}{\z@}%
+                                     {-2.0ex\@plus -1ex \@minus -.2ex}%
+                                     {0.8ex \@plus .2ex}%
+                                     {\normalfont\normalsize\bfseries}}
+\renewcommand\subsubsection{\@startsection{subsubsection}{3}{\z@}%
+                                     {-1.5ex\@plus -1ex \@minus -.2ex}%
+                                     {0.5ex \@plus .2ex}%
+                                     {\normalfont\normalsize\bfseries}}
+\renewcommand\paragraph{\@startsection{paragraph}{4}{\z@}%
+                                    {1.2ex \@plus.5ex \@minus.2ex}%
+                                    {-1em}%
+                                    {\normalfont\normalsize\bfseries}}
+
+\endinput

@@ -74,7 +74,7 @@ cat <<EOF
 Setup done. Next steps:
 
   1. Authenticate W&B so training curves get logged (optional but strongly
-     recommended -- see docs/CONTEXT.md for what gets logged):
+     recommended -- see REPRODUCIBILITY.md for details):
        export WANDB_API_KEY=...
        export WANDB_PROJECT=agentdebugger
 

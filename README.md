@@ -1,10 +1,10 @@
 # AgentDebuggerEnv
 
-[![CI](https://github.com/PulipatiPranav/AgentDebuggerEnv/actions/workflows/ci.yml/badge.svg)](https://github.com/PulipatiPranav/AgentDebuggerEnv/actions/workflows/ci.yml)
+[![CI](https://github.com/shasshaank/AgentDebuggerEnv/actions/workflows/ci.yml/badge.svg)](https://github.com/shasshaank/AgentDebuggerEnv/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
 
-**A reinforcement-learning environment that teaches language models to debug the way engineers do — observe, hypothesise, then fix — instead of guessing.** An agent is shown broken Python and real test output, must state a hypothesis before it is allowed to run a fix, and every submission executes in a resource-limited sandbox that scores what it actually did.
+**A reinforcement-learning environment for training and evaluating language models on executable Python debugging tasks.** The environment supports structured diagnostic behavior and dense reward shaping; our controlled study finds that the richer reward does not improve held-out repair accuracy over executable outcome reward. An agent is shown broken Python and real test output, states a hypothesis before running a fix, and every submission executes in a resource-limited sandbox that scores what it actually did.
 
 <p align="center">
   <img src="docs/images/demo.gif" alt="An agent debugging a race condition in the terminal" width="720">
@@ -20,15 +20,15 @@
 
 Ask a language model to fix a bug and it will usually produce something plausible. Watch it on a *subtle* bug and the failure mode is consistent: it pattern-matches a fix, states it with confidence, and never checks whether the fix addresses the actual cause. That is an incentive problem, not an intelligence one — models are trained to complete text, not to reason under a test harness that pushes back.
 
-AgentDebuggerEnv changes the incentive. The reward is dense and structured: it pays for stating a specific hypothesis, for localising the bug, for a fix that passes the tests, and it charges for breaking tests that used to pass or for submitting a fix with no reasoning at all. A model trained here learns that the reasoning step is what pays.
+AgentDebuggerEnv supports dense, structured reward that can pay for explicit diagnostic behavior such as hypotheses and localization. Whether these additional signals improve debugging performance is an empirical question. In the controlled GRPO study accompanying this release, the richer reward reduced reward degeneracy but did not improve held-out solve rate relative to the simpler executable-outcome reward.
 
 ## Key features
 
 - **A hardened execution sandbox.** Model-generated code runs in a short-lived subprocess with static import/builtin analysis, kernel-enforced CPU/memory/file-size limits, and a wall-clock deadline that kills the whole process group. Escapes an LLM actually tries — `import os`, `open('/etc/passwd')`, `eval`, `().__class__.__subclasses__()` — are refused *before* execution; legitimate fixes that need `hashlib`, `threading` or `super()` run fine.
 - **Three tasks, three failure modes.** An off-by-one you solve by reading the error; a red herring where the error points at the wrong function; and a race condition that **passes every sequential test** and only a concurrency stress test reveals.
-- **A dense, itemised reward** with a defended range of `[-0.5, 1.0]`, decomposed into format, hypothesis quality, localization, fix correctness, similarity, efficiency and penalties — so a weak policy still gets a gradient to climb.
-- **A tiered curriculum** (90 hand-checked bugs across three difficulty tiers) that unlocks harder bugs only once the easy ones stabilise, avoiding the early policy collapse a flat distribution causes.
-- **GRPO training** on `Qwen2.5-Coder-3B-Instruct` with LoRA, scored by the *same* function the evaluator uses — so a reward curve and an eval number mean the same thing.
+- **A dense, itemised reward** with a defended range of `[-0.5, 1.0]`, decomposed into format, hypothesis quality, localization, fix correctness, similarity, efficiency and penalties — so intermediate behavior can be scored and tracked.
+- **A tiered curriculum** (180 validated mutation bugs, split into 90 training and 90 held-out bugs) that exposes increasingly difficult validated mutation bugs during training.
+- **GRPO training** on `Qwen2.5-Coder-3B-Instruct` with LoRA, scored by the *same* function the evaluator uses — so training rewards and evaluation outcomes are computed from the same underlying scoring path, while remaining distinct metrics.
 - **Runs offline.** The core package is pure standard library. An oracle agent lets anyone watch a full episode — sandbox, grader and all — with no GPU and no API key.
 
 ## Architecture
@@ -77,7 +77,7 @@ Every path to "did this fix work?" runs through one sandbox and one test runner,
 Requires Python 3.10+ on Linux or macOS. The kernel resource limits are enforced where the kernel supports them: on Linux, all of them. macOS accepts the address-space (memory) ceiling but does not enforce it, so a runaway allocation there is caught by the wall-clock deadline rather than failing fast with a `MemoryError`. The deadline and the static import/builtin policy apply on every platform.
 
 ```bash
-git clone https://github.com/PulipatiPranav/AgentDebuggerEnv.git
+git clone https://github.com/shasshaank/AgentDebuggerEnv.git
 cd AgentDebuggerEnv
 python -m venv .venv && source .venv/bin/activate
 pip install -e .
@@ -127,7 +127,7 @@ src/agentdebugger/
 ├── protocol.py          # actions, observations, structured-response parsing
 ├── sandbox/             # policy (static analysis) · runner (rlimits) · cases (test runner)
 ├── tasks/               # the three hand-written tasks + shared test harness
-├── dataset/             # the 90-bug tiered dataset, its loader and its validator
+├── dataset/             # the 180 validated mutation bugs, its loader and its validator
 ├── rewards/             # dense turn reward (training) · episode graders (tasks)
 ├── envs/                # TaskEnvironment (multi-step) · CurriculumEnvironment (single-turn)
 ├── agents/              # oracle (offline) · api (OpenAI-compatible)
@@ -178,21 +178,23 @@ Both `ruff check` and `pytest` run in [CI](.github/workflows/ci.yml) on every pu
 
 ## Training and results
 
-The published run trains `Qwen2.5-Coder-3B-Instruct` with GRPO and LoRA over the curriculum. See [docs/report.md](docs/report.md) for the method, the reward design, and the reward curves; per-bug results are in [results/](results/).
+## Training and Evaluation
+
+The repository contains the complete training and evaluation pipeline for `Qwen2.5-Coder-3B-Instruct` using GRPO and LoRA:
 
 ```bash
 pip install -e '.[train]'
 agentdebugger train --max-steps 500
-agentdebugger evaluate-curriculum --adapter <your-hf-repo>
+agentdebugger evaluate-curriculum --adapter <your-hf-repo> --split heldout
 ```
 
-The trainer scales batch geometry to the detected GPU (T4 through H100) and swaps the bug pool at each curriculum boundary. It needs a CUDA GPU; everything else in this repository runs on CPU.
+The trainer scales batch geometry to the detected GPU (T4 through H100) and swaps the bug pool at each curriculum boundary. Primary per-bug evaluation outputs for all nine runs (E1, E3, E4 across seeds 42, 123, 456) are committed in [`results/primary/`](results/primary/).
 
-## Research plan
+## Research Plan & Controlled Study
 
-The three ideas this environment is built on — that structured Observation → Hypothesis → Action reasoning helps, that decomposing the reward helps, and that the curriculum prevents collapse — are **claims, not results**. [docs/research_plan.md](docs/research_plan.md) states each one as a falsifiable hypothesis with a null, a metric and an acceptance criterion, and specifies the smallest experiment matrix that could test them.
+The environment was evaluated under a pre-registered ablation study documented in [docs/research_plan.md](docs/research_plan.md), with documented protocol amendments in [docs/research_plan_amendment.md](docs/research_plan_amendment.md). As specified in §4.4 of the plan, the initial single-split dataset was expanded to 180 verified mutation bugs (`src/agentdebugger/dataset/bugs/`) with a strict 90 train / 90 held-out partition before running the matrix. 
 
-Read it before citing anything in [results/](results/): the published run has **no train/held-out split**, so its solve rate measures how well the policy fit the training bugs, not whether it learned to debug. Fixing that is a precondition for the experiments, not one of them.
+The empirical findings are detailed in our paper ([docs/paper_preprint.pdf](docs/paper_preprint.pdf)): dense reward shaping substantially reduces GRPO group degeneracy (from 61.9% to 16.2%), but does not produce a detectable improvement in held-out debugging solve rate (45.6% vs 48.5%, 95% CI [-8.5, +2.6] pp).
 
 ## Contributing
 

@@ -1,0 +1,444 @@
+{
+  "model": "shashaank0707/agentdebugger-E1-s123",
+  "format": "structured",
+  "overall": {
+    "total": 27,
+    "solved": 11,
+    "solve_rate": 0.4074074074074074,
+    "extraction_failure_rate": 0.0
+  },
+  "bugs": [
+    {
+      "id": "quixbugs_bitcount",
+      "completion": "OBSERVATION: The function `bitcount` is intended to count the number of set bits in the binary representation of `n`. However, the current implementation does not correctly count the bits.\nHYPOTHESIS: The line `n ^= n - 1` is intended to flip the least significant set bit of `n` to zero. However, it seems to be flipping all set bits instead. This is because `n - 1` flips all bits after the least significant set bit, and `n ^ (n - 1)` then flips the least significant set bit back to one, effectively counting each set bit twice.\nCONFIDENCE: Medium\nACTION: propose_fix\nDETAIL: ```python\ndef bitcount(n):\n    count = 0\n    while n:\n        n &= n - 1\n        count += 1\n    return count\n```",
+      "solved": true,
+      "extraction_ok": true,
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.2,
+        "localization": 0.08,
+        "fix_quality": 0.35,
+        "semantic_similarity": 0.1,
+        "efficiency_potential": 0.1,
+        "penalties": 0.0,
+        "total": 0.93
+      }
+    },
+    {
+      "id": "quixbugs_bucketsort",
+      "completion": "OBSERVATION: The function `bucketsort` does not correctly sort the array. The test case fails because the output `[1, 2, 3, 5, 9, 11]` is not sorted as expected.\n\nHYPOTHESIS: The function is not using the bucket size `k` to determine the range of each bucket. Instead, it is treating each element as a bucket index, which leads to incorrect sorting.\n\nCONFIDENCE: Medium\n\nACTION: propose_fix\n\nDETAIL: ```python\ndef bucketsort(arr, k):\n    if not arr:\n        return []\n\n    # Determine the range of each bucket\n    min_val = min(arr)\n    max_val = max(arr)\n    bucket_range = (max_val - min_val) // k + 1\n\n    # Create buckets\n    buckets = [[] for _ in range(k)]\n\n    # Distribute elements into buckets\n    for x in arr:\n        bucket_index = (x - min_val) // bucket_range\n        buckets[bucket_index].append(x)\n\n    # Sort each bucket and concatenate the results\n    sorted_arr = []\n    for bucket in buckets:\n        sorted_arr.extend(sorted(bucket))\n\n    return sorted_arr\n```",
+      "solved": true,
+      "extraction_ok": true,
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.15,
+        "localization": 0.08,
+        "fix_quality": 0.35,
+        "semantic_similarity": 0.0,
+        "efficiency_potential": 0.1,
+        "penalties": 0.0,
+        "total": 0.78
+      }
+    },
+    {
+      "id": "quixbugs_find_first_in_sorted",
+      "completion": "OBSERVATION: The function `find_first_in_sorted` does not correctly handle the case where the first occurrence of `x` is at index 0. The condition `(mid == 0 or x != arr[mid - 1])` is incorrect because it checks if `mid` is 0 or if `x` is not equal to the previous element, which is not necessary for finding the first occurrence.\nHYPOTHESIS: The condition should be simply `mid == 0` to ensure that the first occurrence is returned when `mid` is 0.\nCONFIDENCE: Medium\nACTION: propose_fix\nDETAIL: ```python\ndef find_first_in_sorted(arr, x):\n    lo = 0\n    hi = len(arr)\n\n    while lo <= hi:\n        mid = (lo + hi) // 2\n\n        if x == arr[mid]:\n            if mid == 0 or arr[mid - 1] != x:\n                return mid\n            else:\n                hi = mid - 1\n\n        elif x <= arr[mid]:\n            hi = mid\n\n        else:\n            lo = mid + 1\n\n    return -1\n```",
+      "solved": false,
+      "extraction_ok": true,
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.2,
+        "localization": 0.08,
+        "fix_quality": 0.0,
+        "semantic_similarity": 0.05,
+        "efficiency_potential": 0.1,
+        "penalties": 0.0,
+        "total": 0.53
+      }
+    },
+    {
+      "id": "quixbugs_find_in_sorted",
+      "completion": "OBSERVATION: The function `find_in_sorted` is intended to perform a binary search on a sorted array to find the index of a given element `x`. However, it does not correctly handle the case when `x` is not found in the array.\nHYPOTHESIS: The function is returning `-1` when `x` is not found, which is correct according to the problem statement. The issue arises from the recursive call in the `binsearch` function. The condition `if x < arr[mid]` should be `if x <= arr[mid]` to include the case where `x` equals `arr[mid]`.\nCONFIDENCE: Medium\nACTION: propose_fix\nDETAIL: ```python\ndef find_in_sorted(arr, x):\n    def binsearch(start, end):\n        if start == end:\n            return -1\n        mid = start + (end - start) // 2\n        if x <= arr[mid]:  # Include the case where x equals arr[mid]\n            return binsearch(start, mid)\n        else:\n            return binsearch(mid + 1, end)\n\n    return binsearch(0, len(arr))\n```",
+      "solved": false,
+      "extraction_ok": true,
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.2,
+        "localization": 0.08,
+        "fix_quality": 0.05,
+        "semantic_similarity": 0.05,
+        "efficiency_potential": 0.1,
+        "penalties": -0.2,
+        "total": 0.38
+      }
+    },
+    {
+      "id": "quixbugs_gcd",
+      "completion": "OBSERVATION: The function `gcd` does not correctly handle the case when `b` is zero. The base case should return `a` when `b` is zero.\nHYPOTHESIS: The function incorrectly returns `b` when `b` is zero, which leads to incorrect results for cases where `a` is greater than `b`.\nCONFIDENCE: Medium\nACTION: propose_fix\nDETAIL: ```python\ndef gcd(a, b):\n    if b == 0:\n        return a\n    else:\n        return gcd(b % a, a)\n```",
+      "solved": false,
+      "extraction_ok": true,
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.15,
+        "localization": 0.08,
+        "fix_quality": 0.05,
+        "semantic_similarity": 0.1,
+        "efficiency_potential": 0.1,
+        "penalties": 0.0,
+        "total": 0.58
+      }
+    },
+    {
+      "id": "quixbugs_get_factors",
+      "completion": "OBSERVATION: The function `get_factors` does not handle the case where `n` is a perfect square correctly. Specifically, when `n` is a perfect square, the loop does not find any factors other than the square root itself, which is added twice to the result list.\nHYPOTHESIS: The function is missing a check to add the square root of `n` only once if `n` is a perfect square.\nCONFIDENCE: Medium\nACTION: propose_fix\nDETAIL: ```python\ndef get_factors(n):\n    if n == 1:\n        return []\n\n    factors = []\n    for i in range(2, int(n ** 0.5) + 1):\n        if n % i == 0:\n            factors.append(i)\n            factors.append(n // i)\n\n    # Check if n is a perfect square\n    if n == factors[-1] ** 2:\n        factors.pop()\n\n    return factors\n```",
+      "solved": false,
+      "extraction_ok": true,
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.15,
+        "localization": 0.08,
+        "fix_quality": 0.05,
+        "semantic_similarity": 0.02,
+        "efficiency_potential": 0.1,
+        "penalties": 0.0,
+        "total": 0.5
+      }
+    },
+    {
+      "id": "quixbugs_is_valid_parenthesization",
+      "completion": "OBSERVATION: The function `is_valid_parenthesization` does not correctly handle nested parentheses. The current implementation only checks for balanced parentheses without considering nesting.\nHYPOTHESIS: The function is not properly tracking the depth of nested parentheses. It should increment the depth when encountering an opening parenthesis and decrement it when encountering a closing parenthesis. If the depth goes negative at any point, the function should return False.\nCONFIDENCE: Medium\nACTION: propose_fix\nDETAIL: ```python\ndef is_valid_parenthesization(parens):\n    depth = 0\n    for paren in parens:\n        if paren == '(':\n            depth += 1\n        elif paren == ')':\n            depth -= 1\n            if depth < 0:\n                return False\n\n    return depth == 0\n```",
+      "solved": true,
+      "extraction_ok": true,
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.1,
+        "localization": 0.08,
+        "fix_quality": 0.35,
+        "semantic_similarity": 0.1,
+        "efficiency_potential": 0.1,
+        "penalties": 0.0,
+        "total": 0.83
+      }
+    },
+    {
+      "id": "quixbugs_knapsack",
+      "completion": "OBSERVATION: The function `knapsack` does not correctly calculate the maximum value that can be obtained with the given capacity and items. The test case fails because the expected output is 30, but the function returns a different value.\n\nHYPOTHESIS: The function is not correctly updating the `memo` dictionary. The condition `if weight < j:` is not being met, which means the value is not being updated when it should be.\n\nCONFIDENCE: Medium\n\nACTION: propose_fix\n\nDETAIL: ```python\ndef knapsack(capacity, items):\n    from collections import defaultdict\n    memo = defaultdict(int)\n\n    for i in range(1, len(items) + 1):\n        weight, value = items[i - 1]\n\n        for j in range(1, capacity + 1):\n            memo[i, j] = memo[i - 1, j]\n\n            if weight <= j:  # Corrected condition to include the item\n                memo[i, j] = max(\n                    memo[i, j],\n                    value + memo[i - 1, j - weight]\n                )\n\n    return memo[len(items), capacity]\n```",
+      "solved": true,
+      "extraction_ok": true,
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.15,
+        "localization": 0.08,
+        "fix_quality": 0.35,
+        "semantic_similarity": 0.1,
+        "efficiency_potential": 0.1,
+        "penalties": 0.0,
+        "total": 0.88
+      }
+    },
+    {
+      "id": "quixbugs_kth",
+      "completion": "OBSERVATION: The function `kth` does not correctly handle the case when `k` is equal to `num_less`. The condition `if k >= num_lessoreq` should be `elif k == num_less`.\nHYPOTHESIS: The function incorrectly returns the pivot when `k` is equal to `num_less`, which is not the intended behavior. The correct behavior is to recursively call `kth` on the appropriate sublist based on the value of `k`.\nCONFIDENCE: Medium\nACTION: propose_fix\nDETAIL: ```python\ndef kth(arr, k):\n    pivot = arr[0]\n    below = [x for x in arr if x < pivot]\n    above = [x for x in arr if x > pivot]\n\n    num_less = len(below)\n    num_lessoreq = len(arr) - len(above)\n\n    if k < num_less:\n        return kth(below, k)\n    elif k == num_less:\n        return pivot\n    elif k >= num_lessoreq:\n        return kth(above, k)\n    else:\n        raise ValueError(\"Invalid k value\")\n```",
+      "solved": false,
+      "extraction_ok": true,
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.15,
+        "localization": 0.08,
+        "fix_quality": 0.05,
+        "semantic_similarity": 0.05,
+        "efficiency_potential": 0.1,
+        "penalties": -0.2,
+        "total": 0.33
+      }
+    },
+    {
+      "id": "quixbugs_lcs_length",
+      "completion": "OBSERVATION: The function `lcs_length` does not correctly compute the length of the longest common subsequence (LCS) between two strings. The current implementation uses a `Counter` to store the lengths of LCSs, but it does not update the values correctly when characters match.\n\nHYPOTHESIS: The function is not updating the `dp` dictionary correctly when characters match. The `dp[i, j] = dp[i - 1, j] + 1` line should be inside the `if s[i] == t[j]` block to ensure that the LCS length is updated only when characters match.\n\nCONFIDENCE: Medium\n\nACTION: propose_fix\n\nDETAIL: ```python\ndef lcs_length(s, t):\n    from collections import Counter\n\n    dp = Counter()\n\n    for i in range(len(s)):\n        for j in range(len(t)):\n            if s[i] == t[j]:\n                dp[i, j] = dp.get((i - 1, j), 0) + 1\n            else:\n                dp[i, j] = max(dp.get((i - 1, j), 0), dp.get((i, j - 1), 0))\n\n    return max(dp.values()) if dp else 0\n```",
+      "solved": false,
+      "extraction_ok": true,
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.2,
+        "localization": 0.08,
+        "fix_quality": 0.12,
+        "semantic_similarity": 0.0,
+        "efficiency_potential": 0.1,
+        "penalties": 0.0,
+        "total": 0.6
+      }
+    },
+    {
+      "id": "quixbugs_levenshtein",
+      "completion": "OBSERVATION: The function `levenshtein` does not correctly calculate the Levenshtein distance between the strings 'electron' and 'neutron'. The current implementation does not account for the cost of inserting or deleting characters, which is necessary to compute the correct distance.\nHYPOTHESIS: The function is missing the cost of insertion and deletion operations. The Levenshtein distance should be calculated as the minimum number of single-character edits (insertions, deletions, or substitutions) required to change one string into the other.\nCONFIDENCE: Medium\nACTION: propose_fix\nDETAIL: ```python\ndef levenshtein(source, target):\n    if source == '' or target == '':\n        return len(source) + len(target)\n\n    elif source[0] == target[0]:\n        return levenshtein(source[1:], target[1:])\n\n    else:\n        insert_cost = 1 + levenshtein(source, target[1:])\n        delete_cost = 1 + levenshtein(source[1:], target)\n        substitute_cost = 1 + levenshtein(source[1:], target[1:])\n        return min(insert_cost, delete_cost, substitute_cost)\n```",
+      "solved": true,
+      "extraction_ok": true,
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.15,
+        "localization": 0.08,
+        "fix_quality": 0.35,
+        "semantic_similarity": 0.0,
+        "efficiency_potential": 0.1,
+        "penalties": 0.0,
+        "total": 0.78
+      }
+    },
+    {
+      "id": "quixbugs_lis",
+      "completion": "OBSERVATION: The function `lis` is supposed to return the length of the longest increasing subsequence (LIS) in the given array. However, it fails on the test case `[4, 1, 5, 3, 7, 6, 2]`, which should return 3 but returns 4.\nHYPOTHESIS: The function is not correctly identifying the longest increasing subsequence. It might be incorrectly updating the `ends` dictionary or calculating the `length` variable.\nCONFIDENCE: Medium\nACTION: propose_fix\nDETAIL: ```python\ndef lis(arr):\n    ends = {}\n    longest = 0\n\n    for i, val in enumerate(arr):\n\n        prefix_lengths = [j for j in range(1, longest + 1) if arr[ends[j]] < val]\n\n        length = max(prefix_lengths) if prefix_lengths else 0\n\n        if length == longest or val > arr[ends[length + 1]]:\n            ends[length + 1] = i\n            longest = length + 1\n\n    return longest\n```",
+      "solved": false,
+      "extraction_ok": true,
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.15,
+        "localization": 0.08,
+        "fix_quality": 0.2,
+        "semantic_similarity": 0.1,
+        "efficiency_potential": 0.1,
+        "penalties": -0.2,
+        "total": 0.53
+      }
+    },
+    {
+      "id": "quixbugs_longest_common_subsequence",
+      "completion": "OBSERVATION: The function `longest_common_subsequence` does not correctly handle overlapping substrings. It only considers the first occurrence of each character.\nHYPOTHESIS: The current implementation does not account for overlapping subsequences, leading to incorrect results when characters are repeated in both strings.\nCONFIDENCE: Medium\nACTION: propose_fix\nDETAIL: ```python\ndef longest_common_subsequence(a, b):\n    if not a or not b:\n        return ''\n\n    elif a[0] == b[0]:\n        return a[0] + longest_common_subsequence(a[1:], b[1:])\n\n    else:\n        return max(\n            longest_common_subsequence(a, b[1:]),\n            longest_common_subsequence(a[1:], b),\n            key=len\n        )\n```",
+      "solved": true,
+      "extraction_ok": true,
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.1,
+        "localization": 0.08,
+        "fix_quality": 0.35,
+        "semantic_similarity": 0.1,
+        "efficiency_potential": 0.1,
+        "penalties": 0.0,
+        "total": 0.83
+      }
+    },
+    {
+      "id": "quixbugs_max_sublist_sum",
+      "completion": "OBSERVATION: The function `max_sublist_sum` is intended to find the maximum sum of any contiguous subarray within the given list. However, it does not correctly handle negative numbers and does not account for the possibility of a single element being the maximum sum.\nHYPOTHESIS: The current implementation does not initialize `max_ending_here` to a value that can be compared with `max_so_far`. This leads to incorrect results when the first element of the array is negative.\nCONFIDENCE: Medium\nACTION: propose_fix\nDETAIL: ```python\ndef max_sublist_sum(arr):\n    if not arr:\n        return 0\n\n    max_ending_here = arr[0]\n    max_so_far = arr[0]\n\n    for x in arr[1:]:\n        max_ending_here = max(x, max_ending_here + x)\n        max_so_far = max(max_so_far, max_ending_here)\n\n    return max_so_far\n```",
+      "solved": false,
+      "extraction_ok": true,
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.15,
+        "localization": 0.08,
+        "fix_quality": 0.2,
+        "semantic_similarity": 0.0,
+        "efficiency_potential": 0.1,
+        "penalties": -0.2,
+        "total": 0.43
+      }
+    },
+    {
+      "id": "quixbugs_mergesort",
+      "completion": "OBSERVATION: The `merge` function does not correctly handle the case where one of the lists is empty. Specifically, when `left` is empty and `right` is not, the `result.extend(left[i:] or right[j:])` line results in `result.extend(right[j:])`, which is incorrect.\nHYPOTHESIS: The `extend` method should be used with `left[i:]` to ensure that all elements from `left` are added to `result`. If `left` is empty, `left[i:]` should be an empty list, which will not affect the result.\nCONFIDENCE: Medium\nACTION: propose_fix\nDETAIL: ```python\ndef mergesort(arr):\n    def merge(left, right):\n        result = []\n        i = 0\n        j = 0\n        while i < len(left) and j < len(right):\n            if left[i] <= right[j]:\n                result.append(left[i])\n                i += 1\n            else:\n                result.append(right[j])\n                j += 1\n        result.extend(left[i:])  # Corrected line\n        result.extend(right[j:])  # Corrected line\n        return result\n\n    if len(arr) == 0:\n        return arr\n    else:\n        middle = len(arr) // 2\n        left = mergesort(arr[:middle])\n        right = mergesort(arr[middle:])\n        return merge(left, right)\n```",
+      "solved": false,
+      "extraction_ok": true,
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.15,
+        "localization": 0.08,
+        "fix_quality": 0.05,
+        "semantic_similarity": 0.1,
+        "efficiency_potential": 0.1,
+        "penalties": 0.0,
+        "total": 0.58
+      }
+    },
+    {
+      "id": "quixbugs_next_palindrome",
+      "completion": "OBSERVATION: The function `next_palindrome` does not correctly handle the case when all digits are 9. It incorrectly sets both middle digits to 0 and then returns the result.\nHYPOTHESIS: The function fails to increment the middle digits correctly when they are 9. It should only set the middle digits to 0 if they are 9, and then increment them by 1.\nCONFIDENCE: Medium\nACTION: propose_fix\nDETAIL: ```python\ndef next_palindrome(digit_list):\n    high_mid = len(digit_list) // 2\n    low_mid = (len(digit_list) - 1) // 2\n    while high_mid < len(digit_list) and low_mid >= 0:\n        if digit_list[high_mid] == 9:\n            digit_list[high_mid] = 0\n            digit_list[low_mid] = 0\n            high_mid += 1\n            low_mid -= 1\n        else:\n            digit_list[high_mid] += 1\n            if low_mid != high_mid:\n                digit_list[low_mid] = digit_list[high_mid]\n            return digit_list\n    return [1] + (len(digit_list)) * [0] + [1]\n```",
+      "solved": false,
+      "extraction_ok": true,
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.15,
+        "localization": 0.08,
+        "fix_quality": 0.2,
+        "semantic_similarity": 0.1,
+        "efficiency_potential": 0.1,
+        "penalties": 0.0,
+        "total": 0.73
+      }
+    },
+    {
+      "id": "quixbugs_next_permutation",
+      "completion": "OBSERVATION: The function `next_permutation` does not correctly find the next permutation of the input list `[3, 2, 4, 1]`. The expected output is `[3, 4, 1, 2]`, but the function returns `[3, 4, 2, 1]`.\nHYPOTHESIS: The function is not finding the correct pivot point to swap with the next greater element. The current implementation does not correctly identify the first element from the end that is smaller than the element immediately after it.\nCONFIDENCE: Medium\nACTION: propose_fix\nDETAIL: ```python\ndef next_permutation(perm):\n    for i in range(len(perm) - 2, -1, -1):\n        if perm[i] < perm[i + 1]:\n            for j in range(len(perm) - 1, i, -1):\n                if perm[j] > perm[i]:  # Change '<' to '>' to find the next greater element\n                    next_perm = list(perm)\n                    next_perm[i], next_perm[j] = perm[j], perm[i]\n                    next_perm[i + 1:] = reversed(next_perm[i + 1:])\n                    return next_perm\n    return perm[::-1]  # If no such pair is found, reverse the entire list\n```",
+      "solved": true,
+      "extraction_ok": true,
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.1,
+        "localization": 0.08,
+        "fix_quality": 0.35,
+        "semantic_similarity": 0.02,
+        "efficiency_potential": 0.1,
+        "penalties": 0.0,
+        "total": 0.75
+      }
+    },
+    {
+      "id": "quixbugs_pascal",
+      "completion": "OBSERVATION: The function `pascal` does not correctly generate the second row of Pascal's triangle. The second row should be `[1, 1]`, but the function returns `[1, 0]`.\nHYPOTHESIS: The issue arises from the condition `if c > 0` and `if c < r`. These conditions are incorrect because they do not account for the edge cases where `c` is 0 or `r` is 1.\nCONFIDENCE: Medium\nACTION: propose_fix\nDETAIL: ```python\ndef pascal(n):\n    rows = [[1]]\n    for r in range(1, n):\n        row = []\n        for c in range(r + 1):  # Corrected to include c = 0\n            upleft = rows[r - 1][c - 1] if c > 0 else 0\n            upright = rows[r - 1][c] if c < r else 0\n            row.append(upleft + upright)\n        rows.append(row)\n\n    return rows\n```",
+      "solved": true,
+      "extraction_ok": true,
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.15,
+        "localization": 0.08,
+        "fix_quality": 0.35,
+        "semantic_similarity": 0.1,
+        "efficiency_potential": 0.1,
+        "penalties": 0.0,
+        "total": 0.88
+      }
+    },
+    {
+      "id": "quixbugs_possible_change",
+      "completion": "OBSERVATION: The function `possible_change` does not correctly calculate the number of ways to make change for a given total using the provided coins. It seems to be counting all combinations, including those that exceed the total.\nHYPOTHESIS: The function is not correctly implementing the recursive approach to count valid combinations. It should only consider combinations where the sum of the coins equals the total.\nCONFIDENCE: Medium\nACTION: propose_fix\nDETAIL: ```python\ndef possible_change(coins, total):\n    if total == 0:\n        return 1\n    if total < 0:\n        return 0\n\n    first, *rest = coins\n    return possible_change(rest, total) + (possible_change(coins, total - first) if total >= first else 0)\n```",
+      "solved": false,
+      "extraction_ok": true,
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.1,
+        "localization": 0.08,
+        "fix_quality": 0.05,
+        "semantic_similarity": 0.05,
+        "efficiency_potential": 0.1,
+        "penalties": 0.0,
+        "total": 0.48
+      }
+    },
+    {
+      "id": "quixbugs_powerset",
+      "completion": "OBSERVATION: The function `powerset` does not include the empty set `[]` in its output.\nHYPOTHESIS: The function is missing the step to add the empty set to the list of subsets.\nCONFIDENCE: Medium\nACTION: propose_fix\nDETAIL: ```python\ndef powerset(arr):\n    if arr:\n        first, *rest = arr\n        rest_subsets = powerset(rest)\n        return [[first] + subset for subset in rest_subsets] + [rest_subsets]\n    else:\n        return [[]]\n```",
+      "solved": false,
+      "extraction_ok": true,
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.05,
+        "localization": 0.08,
+        "fix_quality": 0.05,
+        "semantic_similarity": 0.1,
+        "efficiency_potential": 0.1,
+        "penalties": 0.0,
+        "total": 0.48
+      }
+    },
+    {
+      "id": "quixbugs_quicksort",
+      "completion": "OBSERVATION: The function `quicksort` does not correctly partition the array around the pivot. The condition `if x < pivot` is incorrect because it includes elements equal to the pivot, which should be placed in the middle.\nHYPOTHESIS: The condition `if x < pivot` should be `if x <= pivot` to include the pivot itself in the `lesser` list.\nCONFIDENCE: Medium\nACTION: propose_fix\nDETAIL: ```python\ndef quicksort(arr):\n    if not arr:\n        return []\n\n    pivot = arr[0]\n    lesser = quicksort([x for x in arr[1:] if x <= pivot])\n    greater = quicksort([x for x in arr[1:] if x > pivot])\n    return lesser + [pivot] + greater\n```",
+      "solved": true,
+      "extraction_ok": true,
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.15,
+        "localization": 0.08,
+        "fix_quality": 0.35,
+        "semantic_similarity": 0.1,
+        "efficiency_potential": 0.1,
+        "penalties": 0.0,
+        "total": 0.88
+      }
+    },
+    {
+      "id": "quixbugs_rpn_eval",
+      "completion": "OBSERVATION: The function `rpn_eval` fails with the test case `[3.0, 5.0, '+', 2.0, '/']`, expecting `4.0` but returning `1.5`.\nHYPOTHESIS: The division operation is not correctly implemented. The division operator `/` in Python performs floating-point division, which results in `1.5` for `3.0 / 2.0`. To achieve integer division, the `//` operator should be used.\nCONFIDENCE: Medium\nACTION: propose_fix\nDETAIL: ```python\ndef rpn_eval(tokens):\n    def op(symbol, a, b):\n        return {\n            '+': lambda a, b: a + b,\n            '-': lambda a, b: a - b,\n            '*': lambda a, b: a * b,\n            '/': lambda a, b: a // b  # Use integer division\n        }[symbol](a, b)\n\n    stack = []\n\n    for token in tokens:\n        if isinstance(token, float):\n            stack.append(token)\n        else:\n            a = stack.pop()\n            b = stack.pop()\n            stack.append(\n                op(token, a, b)\n            )\n\n    return stack.pop()\n```",
+      "solved": false,
+      "extraction_ok": true,
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.15,
+        "localization": 0.08,
+        "fix_quality": 0.12,
+        "semantic_similarity": 0.1,
+        "efficiency_potential": 0.1,
+        "penalties": 0.0,
+        "total": 0.65
+      }
+    },
+    {
+      "id": "quixbugs_shunting_yard",
+      "completion": "OBSERVATION: The function `shunting_yard` does not handle subtraction correctly. It pops from the stack when the precedence of the current token is less than or equal to the precedence of the top of the stack, which results in incorrect order of operations.\nHYPOTHESIS: The function should pop from the stack only when the precedence of the current token is strictly less than the precedence of the top of the stack. This ensures that operations with higher precedence are processed before those with lower precedence.\nCONFIDENCE: Medium\nACTION: propose_fix\nDETAIL: ```python\ndef shunting_yard(tokens):\n    precedence = {\n        '+': 1,\n        '-': 1,\n        '*': 2,\n        '/': 2\n    }\n\n    rpntokens = []\n    opstack = []\n    for token in tokens:\n        if isinstance(token, int):\n            rpntokens.append(token)\n        else:\n            while opstack and precedence[token] < precedence[opstack[-1]]:\n                rpntokens.append(opstack.pop())\n\n    while opstack:\n        rpntokens.append(opstack.pop())\n\n    return rpntokens\n```",
+      "solved": false,
+      "extraction_ok": true,
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.1,
+        "localization": 0.08,
+        "fix_quality": 0.05,
+        "semantic_similarity": 0.1,
+        "efficiency_potential": 0.1,
+        "penalties": 0.0,
+        "total": 0.53
+      }
+    },
+    {
+      "id": "quixbugs_sieve",
+      "completion": "OBSERVATION: The function `sieve` does not correctly identify 2 as a prime number. Line 4 checks if `n` is divisible by any prime in `primes`, which is incorrect for `n=2`.\nHYPOTHESIS: The condition `any(n % p > 0 for p in primes)` should be `all(n % p != 0 for p in primes)` to correctly identify primes. This change ensures that `n` is only considered prime if it is not divisible by any prime in `primes`.\nCONFIDENCE: medium\nACTION: propose_fix\nDETAIL: ```python\ndef sieve(max):\n    primes = []\n    for n in range(2, max + 1):\n        if all(n % p != 0 for p in primes):\n            primes.append(n)\n    return primes\n```",
+      "solved": true,
+      "extraction_ok": true,
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.2,
+        "localization": 0.08,
+        "fix_quality": 0.35,
+        "semantic_similarity": 0.1,
+        "efficiency_potential": 0.1,
+        "penalties": 0.0,
+        "total": 0.93
+      }
+    },
+    {
+      "id": "quixbugs_subsequences",
+      "completion": "OBSERVATION: The function `subsequences` does not correctly generate all subsequences of length `k` from the range `[a, b]`. The current implementation only generates subsequences starting from `a` and does not consider all possible starting points within the range.\nHYPOTHESIS: The function is missing a loop to iterate over all possible starting points `i` in the range `[a, b - k + 1]`. This ensures that all subsequences of length `k` are considered.\nCONFIDENCE: Medium\nACTION: propose_fix\nDETAIL: ```python\ndef subsequences(a, b, k):\n    if k == 0:\n        return []\n\n    ret = []\n    for i in range(a, b - k + 1):\n        ret.extend(\n            [i] + rest for rest in subsequences(i + 1, b, k - 1)\n        )\n\n    return ret\n```",
+      "solved": false,
+      "extraction_ok": true,
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.2,
+        "localization": 0.08,
+        "fix_quality": 0.05,
+        "semantic_similarity": 0.02,
+        "efficiency_potential": 0.1,
+        "penalties": 0.0,
+        "total": 0.55
+      }
+    },
+    {
+      "id": "quixbugs_to_base",
+      "completion": "OBSERVATION: The function `to_base` does not correctly convert the number 31 to base 16. The expected output is '1F', but the function returns '1f'.\nHYPOTHESIS: The function is converting the number to base 16 by using the modulo operation with the base, but it is not correctly mapping the remainder to the corresponding character in the alphabet. The modulo operation should be used to get the index of the character in the alphabet, and the division operation should be used to update the number.\nCONFIDENCE: Medium\nACTION: propose_fix\nDETAIL: ```python\nimport string\ndef to_base(num, b):\n    result = ''\n    alphabet = string.digits + string.ascii_uppercase\n    while num > 0:\n        i = num % b\n        num = num // b\n        result = alphabet[i] + result\n    return result\n```",
+      "solved": true,
+      "extraction_ok": true,
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.15,
+        "localization": 0.08,
+        "fix_quality": 0.35,
+        "semantic_similarity": 0.1,
+        "efficiency_potential": 0.1,
+        "penalties": 0.0,
+        "total": 0.88
+      }
+    },
+    {
+      "id": "quixbugs_wrap",
+      "completion": "OBSERVATION: The function `wrap` does not correctly handle the case where the last word is longer than the specified column width. It stops wrapping at the first space before the end of the line, which can result in words being split across lines.\nHYPOTHESIS: The function should find the last space before the end of the line and wrap there, rather than stopping at the first space before the end of the line.\nCONFIDENCE: Medium\nACTION: propose_fix\nDETAIL: ```python\ndef wrap(text, cols):\n    lines = []\n    while len(text) > cols:\n        end = text.rfind(' ', 0, cols + 1)\n        if end == -1:\n            end = cols\n        line, text = text[:end], text[end:]\n        lines.append(line)\n\n    # Add the remaining text to the last line\n    lines[-1] += text\n\n    return lines\n```",
+      "solved": false,
+      "extraction_ok": true,
+      "reward": {
+        "format_compliance": 0.1,
+        "hypothesis_quality": 0.1,
+        "localization": 0.08,
+        "fix_quality": 0.0,
+        "semantic_similarity": 0.05,
+        "efficiency_potential": 0.1,
+        "penalties": 0.0,
+        "total": 0.43
+      }
+    }
+  ]
+}

@@ -23,7 +23,7 @@ from pathlib import Path
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--dir", default="data/v2", help="dataset directory")
+    parser.add_argument("--dir", default="src/agentdebugger/dataset/bugs", help="dataset directory")
     parser.add_argument("--heldout-frac", type=float, default=0.5)
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--force", action="store_true", help="overwrite an existing split")

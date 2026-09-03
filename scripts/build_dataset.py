@@ -23,11 +23,11 @@ Method
    (reference passes all cases, buggy fails at least one), after a real JSON
    round-trip, so what is written is exactly what will later load.
 
-Output: ``data/v2/bugs_tier{1,2,3}.jsonl`` plus ``data/v2/DATACARD.md``.
+Output: ``src/agentdebugger/dataset/bugs/bugs_tier{1,2,3}.jsonl`` plus ``DATACARD.md``.
 
 Usage:
     python scripts/build_dataset.py --per-tier 60
-    python scripts/build_dataset.py --per-tier 60 --seed 7 --out data/v2
+    python scripts/build_dataset.py --per-tier 60 --seed 7 --out src/agentdebugger/dataset/bugs
 """
 
 from __future__ import annotations
@@ -436,7 +436,7 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--per-tier", type=int, default=60, help="target bugs per tier")
     parser.add_argument("--seed", type=int, default=0)
-    parser.add_argument("--out", default="data/v2", help="output directory")
+    parser.add_argument("--out", default="src/agentdebugger/dataset/bugs", help="output directory")
     args = parser.parse_args(argv)
 
     random.seed(args.seed)

@@ -13,11 +13,7 @@ New to the repository? Start with [CONTRIBUTING.md](../CONTRIBUTING.md), then ru
 
 **Difficulty:** easy · **Files:** `src/agentdebugger/dataset/bugs/bugs_tier3.jsonl`, `tests/test_dataset.py`
 
-The dataset is deliberately top-light: 40 tier-1 bugs, 30 tier-2, and only **20
-tier-3**. Tier 3 is the tier that discriminates between a model that reasons and
-one that pattern-matches, and it is the tier where a per-tier solve rate is
-computed over the fewest samples — so it is also the noisiest number the project
-reports.
+The dataset currently contains 180 validated bugs (80 tier-1, 60 tier-2, and 40 tier-3), split into 90 training and 90 held-out bugs. Tier 3 is the tier that discriminates between a model that reasons and one that pattern-matches, and it is the tier where per-tier solve rate has the widest confidence interval.
 
 Add 10–20 new tier-3 bugs: subtle logic errors, mutable-default arguments,
 incorrect boundary handling in recursion, silent integer/float coercion, state
